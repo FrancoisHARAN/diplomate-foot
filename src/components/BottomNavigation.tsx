@@ -7,13 +7,12 @@ const BottomNavigation = () => {
   const navItems = [
     { to: '/', label: 'Accueil' },
     { to: '/matchs', label: 'Matchs' },
-    { to: '/classement', label: 'Classement' },
-    { to: '/mes-pronos', label: 'Pronos' },
+    { to: '/mes-pronos', label: 'Pronostics' },
     { to: player ? '/mon-compte' : '/connexion', label: 'Compte' },
   ];
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" aria-label="Navigation mobile">
       {navItems.map((item) => (
         <NavLink key={item.label} to={item.to} end={item.to === '/'} className={({ isActive }) => `bottom-link ${isActive ? 'active' : ''}`}>
           {item.label}
