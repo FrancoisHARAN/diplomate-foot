@@ -2,21 +2,40 @@ import type { Player } from '../types';
 
 interface AdminPanelProps {
   players: Player[];
+  isSupabaseConfigured: boolean;
+  modeLabel: string;
+  onCreateTestPlayer: () => void | Promise<void>;
+  onCreateTestMatches: () => void | Promise<void>;
 }
 
-const nextStepAlert = () => alert('Fonction prévue dans la prochaine étape');
-
-const AdminPanel = ({ players }: AdminPanelProps) => (
+const AdminPanel = ({
+  players,
+  isSupabaseConfigured,
+  modeLabel,
+  onCreateTestPlayer,
+  onCreateTestMatches,
+}: AdminPanelProps) => (
   <section className="card">
     <h2>Admin</h2>
-    <p>Zone admin — sera sécurisée dans l’étape Supabase.</p>
+    <p>Zone admin — sécurité renforcée prévue dans l’étape suivante.</p>
+
+    <h3>Statut Supabase</h3>
+    <p>Supabase configuré : <strong>{isSupabaseConfigured ? 'oui' : 'non'}</strong></p>
+    <p>Mode actuel : <strong>{modeLabel}</strong></p>
+
     <div className="actions">
-      <button type="button" className="btn" onClick={nextStepAlert}>Créer un joueur</button>
-      <button type="button" className="btn" onClick={nextStepAlert}>Importer les matchs</button>
-      <button type="button" className="btn" onClick={nextStepAlert}>Mettre à jour les scores</button>
-      <button type="button" className="btn" onClick={nextStepAlert}>Recalculer le classement</button>
+      <button type="button" className="btn" onClick={() => void onCreateTestPlayer()}>
+        Créer un joueur de test
+      </button>
+      <button type="button" className="btn" onClick={() => void onCreateTestMatches()}>
+        Créer des matchs de test
+      </button>
+      <button type="button" className="btn" disabled>
+        Vider données test (à venir)
+      </button>
     </div>
-    <h3>Joueurs fictifs</h3>
+
+    <h3>Joueurs</h3>
     <ul>
       {players.map((player) => (
         <li key={player.id}>{player.nickname}</li>
