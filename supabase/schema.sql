@@ -115,7 +115,7 @@ order by total_points desc, prediction_count desc;
 grant usage on schema public to anon;
 
 grant select, insert on public.players to anon;
-grant select, insert on public.matches to anon;
+grant select, insert, update on public.matches to anon;
 grant select, insert, update on public.predictions to anon;
 
 grant select on public.standings_view to anon;
