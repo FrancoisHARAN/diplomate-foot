@@ -10,9 +10,11 @@ import PlayerSpacePage from './pages/PlayerSpacePage';
 
 const NotFoundPage = () => (
   <section className="card">
-    <h2>Page introuvable — retour à l'accueil</h2>
-    <p>La page demandée n'existe pas ou a changé d'adresse.</p>
-    <Link className="btn" to="/">Retour à l'accueil</Link>
+    <h2>Page introuvable</h2>
+    <p>Page introuvable — retour à l’accueil.</p>
+    <Link className="btn" to="/">
+      Retour à l’accueil
+    </Link>
   </section>
 );
 

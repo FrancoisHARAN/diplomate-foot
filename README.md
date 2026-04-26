@@ -58,6 +58,10 @@ Dans **Settings > Pages** du dépôt :
 Push sur la branche `main`.
 Le workflow build + deploy publiera automatiquement le site.
 
+## Secours HTML en cas d’échec JavaScript
+
+`index.html` contient un contenu de secours visible dans `#root`. Si ce contenu reste visible, cela signifie que React ou les assets JavaScript ne se chargent pas correctement.
+
 ## Si GitHub Pages affiche une page blanche
 
 Causes possibles à vérifier :
