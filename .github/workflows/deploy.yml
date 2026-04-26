@@ -33,6 +33,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Debug dist
+        run: |
+          ls -la dist
+          cat dist/index.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
