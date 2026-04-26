@@ -5,7 +5,13 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import './styles/global.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Élément root introuvable');
+}
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ErrorBoundary>
       <HashRouter>
