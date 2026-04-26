@@ -15,7 +15,13 @@ const LeaderboardPage = () => {
     .sort((a, b) => b.points - a.points)
     .map((standing, index) => ({ ...standing, position: index + 1 }));
 
-  return <Leaderboard standings={standings} />;
+  return (
+    <section>
+      <h2>Classement du bar</h2>
+      <p className="card">🏆 Première place actuelle : <strong>{standings[0].nickname}</strong> avec {standings[0].points} points.</p>
+      <Leaderboard standings={standings} />
+    </section>
+  );
 };
 
 export default LeaderboardPage;

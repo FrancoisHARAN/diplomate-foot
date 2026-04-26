@@ -6,12 +6,15 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   return (
-    <LoginForm
-      onSubmit={(nickname, _secretCode) => {
-        playerService.login(nickname);
-        navigate('/espace-joueur');
-      }}
-    />
+    <section>
+      <p className="card">Entre ton pseudo et ton code secret pour accéder à la compétition.</p>
+      <LoginForm
+        onSubmit={(nickname, _secretCode) => {
+          playerService.login(nickname);
+          navigate('/espace-joueur');
+        }}
+      />
+    </section>
   );
 };
 

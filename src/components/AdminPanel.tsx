@@ -8,8 +8,8 @@ const nextStepAlert = () => alert('Fonction prévue dans la prochaine étape');
 
 const AdminPanel = ({ players }: AdminPanelProps) => (
   <section className="card">
-    <h2>Administration (fictive)</h2>
-    <p>Cette page devra être protégée (rôle admin) dans la prochaine étape.</p>
+    <h2>Admin</h2>
+    <p>Zone admin — sera sécurisée dans l’étape Supabase.</p>
     <div className="actions">
       <button type="button" className="btn" onClick={nextStepAlert}>Créer un joueur</button>
       <button type="button" className="btn" onClick={nextStepAlert}>Importer les matchs</button>

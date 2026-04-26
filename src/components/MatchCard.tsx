@@ -18,18 +18,15 @@ const MatchCard = ({ match, onPredict }: MatchCardProps) => {
       </div>
       <p>{formatKickoff(match.kickoff)}</p>
       <p className="status">Statut : {getMatchStatusLabel(match.status)}</p>
+      <p className="status">Pronostic : {editable ? 'Ouvert' : 'Fermé'}</p>
       {match.status === 'finished' ? (
         <p className="score">Score final : {match.homeScore} - {match.awayScore}</p>
       ) : null}
 
-      {match.status === 'upcoming' ? (
-        editable ? (
-          <button type="button" className="btn" onClick={() => onPredict?.(match)}>
-            Pronostiquer
-          </button>
-        ) : (
-          <span className="locked">Pronostic fermé</span>
-        )
+      {match.status === 'upcoming' && editable ? (
+        <button type="button" className="btn" onClick={() => onPredict?.(match)}>
+          Pronostiquer
+        </button>
       ) : (
         <span className="locked">Pronostic fermé</span>
       )}

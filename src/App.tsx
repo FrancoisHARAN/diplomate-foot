@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 import AdminPage from './pages/AdminPage';
@@ -7,6 +7,14 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import LoginPage from './pages/LoginPage';
 import MatchesPage from './pages/MatchesPage';
 import PlayerSpacePage from './pages/PlayerSpacePage';
+
+const NotFoundPage = () => (
+  <section className="card">
+    <h2>Page introuvable — retour à l'accueil</h2>
+    <p>La page demandée n'existe pas ou a changé d'adresse.</p>
+    <Link className="btn" to="/">Retour à l'accueil</Link>
+  </section>
+);
 
 const App = () => (
   <div className="app-shell">
@@ -20,7 +28,7 @@ const App = () => (
         <Route path="/connexion" element={<LoginPage />} />
         <Route path="/espace-joueur" element={<PlayerSpacePage />} />
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </main>
   </div>
