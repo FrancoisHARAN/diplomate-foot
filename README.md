@@ -58,6 +58,15 @@ Dans **Settings > Pages** du dépôt :
 Push sur la branche `main`.
 Le workflow build + deploy publiera automatiquement le site.
 
+## Le contenu de secours reste affiché
+
+Si le message **« Chargement de l’application... »** reste affiché, cela veut dire que React ne démarre pas côté navigateur.
+
+Checklist rapide :
+- vérifier que GitHub Pages déploie bien le dossier `dist/` (et pas les fichiers source du dépôt),
+- vérifier **Actions > dernier déploiement** pour confirmer que le workflow build + deploy a réussi,
+- vérifier que `dist/index.html` contient bien les assets Vite générés (`/diplomate-foot/assets/...`) et non `src/main.tsx`.
+
 ## Secours HTML en cas d’échec JavaScript
 
 `index.html` contient un contenu de secours visible dans `#root`. Si ce contenu reste visible, cela signifie que React ou les assets JavaScript ne se chargent pas correctement.
