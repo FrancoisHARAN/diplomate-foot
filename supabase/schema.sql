@@ -110,3 +110,12 @@ left join public.predictions pr on pr.player_id = p.id
 where p.is_active = true
 group by p.id, p.nickname
 order by total_points desc, prediction_count desc;
+
+-- Grants MVP (clé publishable/anon)
+grant usage on schema public to anon;
+
+grant select, insert on public.players to anon;
+grant select, insert on public.matches to anon;
+grant select, insert, update on public.predictions to anon;
+
+grant select on public.standings_view to anon;
