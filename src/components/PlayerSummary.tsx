@@ -12,13 +12,25 @@ interface PlayerSummaryProps {
 const PlayerSummary = ({ nickname, points, predictions, matchesById, onLogout }: PlayerSummaryProps) => (
   <section className="card">
     <h2>Espace joueur</h2>
-    <p>Résumé joueur fictif : <strong>{nickname}</strong></p>
-    <p><strong>Points :</strong> {points}</p>
-    <h3>Pronostics fictifs</h3>
+    <p>
+      Résumé joueur : <strong>{nickname}</strong>
+    </p>
+    <p>
+      <strong>Points :</strong> {points}
+    </p>
+    <h3>Pronostics</h3>
     {predictions.length === 0 ? <p>Aucun pronostic pour le moment.</p> : null}
     <ul className="prediction-list">
       {predictions.map((prediction) => {
         const match = matchesById[prediction.matchId];
+        if (!match) {
+          return (
+            <li key={prediction.id}>
+              Match indisponible ({prediction.matchId}) · <em>à vérifier</em>
+            </li>
+          );
+        }
+
         const state = match.status === 'finished' ? 'terminé' : canEditPrediction(match) ? 'ouvert' : 'verrouillé';
 
         return (
@@ -28,7 +40,9 @@ const PlayerSummary = ({ nickname, points, predictions, matchesById, onLogout }:
         );
       })}
     </ul>
-    <button type="button" className="btn secondary" onClick={onLogout}>Déconnexion</button>
+    <button type="button" className="btn secondary" onClick={onLogout}>
+      Déconnexion
+    </button>
   </section>
 );
 

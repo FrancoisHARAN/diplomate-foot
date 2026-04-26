@@ -19,7 +19,7 @@ export interface Match {
 export interface Player {
   id: string;
   nickname: string;
-  secretCode: string;
+  secretCode?: string;
   points: number;
   exactScores: number;
   correctResults: number;
@@ -31,6 +31,7 @@ export interface Prediction {
   playerId: string;
   homeScore: number;
   awayScore: number;
+  points?: number;
   updatedAt: string;
 }
 
