@@ -31,8 +31,8 @@ const AppHeader = () => {
         <p className="brand">Le Diplomate</p>
         <p className="subtitle">Pronos 2026</p>
       </div>
-      <Link className="user-pill" to={player ? '/mon-compte' : '/connexion'}>
-        <span>👤</span>
+      <Link className="account-chip" to={player ? '/mon-compte' : '/connexion'}>
+        <span className="account-icon">👤</span>
         <span>{player ? `${player.nickname} · ${points} pts` : 'Connexion'}</span>
       </Link>
     </header>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import PageTitle from '../components/PageTitle';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { playerService } from '../services/playerService';
 
@@ -14,9 +13,13 @@ const LoginPage = () => {
 
   return (
     <div className="stack">
-      <PageTitle title="Connexion joueur" subtitle="Entre ton pseudo et ton code secret donné au bar." />
+      <section className="card stack-sm">
+        <h1>Connexion</h1>
+        <p>Entre ton pseudo et ton code secret.</p>
+      </section>
+
       <form
-        className="card stack"
+        className="card stack-sm"
         onSubmit={async (event) => {
           event.preventDefault();
           try {
@@ -31,10 +34,11 @@ const LoginPage = () => {
       >
         <label>Pseudo<input value={nickname} onChange={(event) => setNickname(event.target.value)} required /></label>
         <label>Code secret<input value={code} onChange={(event) => setCode(event.target.value)} required /></label>
-        <button className="btn" type="submit">Entrer dans la compétition</button>
+        <button className="btn" type="submit">Se connecter</button>
         {error ? <p>⚠️ {error}</p> : null}
       </form>
-      <section className="card">Pas encore inscrit ? Demande ton code au comptoir.</section>
+
+      <section className="card">Demande ton code au comptoir.</section>
     </div>
   );
 };

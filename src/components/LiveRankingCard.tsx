@@ -2,17 +2,19 @@ import { Link } from 'react-router-dom';
 import type { Standing } from '../types';
 
 const LiveRankingCard = ({ standings, userRank }: { standings: Standing[]; userRank?: Standing }) => (
-  <article className="card">
+  <article className="card stack-sm">
     <h2>Classement en direct</h2>
-    <ol className="stack">
+    <div className="top-three-grid">
       {standings.slice(0, 3).map((entry) => (
-        <li key={entry.playerId} className={entry.position === 1 ? 'top-rank' : ''}>
-          {entry.position}. {entry.nickname} — {entry.points} pts
-        </li>
+        <article key={entry.playerId} className={`mini-rank-card ${entry.position === 1 ? 'first' : ''}`}>
+          <p>#{entry.position}</p>
+          <strong>{entry.nickname}</strong>
+          <p>{entry.points} pts</p>
+        </article>
       ))}
-    </ol>
-    {userRank ? <p>Ton rang : {userRank.position}e · {userRank.points} pts</p> : null}
-    <Link className="btn secondary" to="/classement">Voir tout le classement</Link>
+    </div>
+    {userRank ? <p>Ton rang actuel : {userRank.position} · {userRank.points} pts</p> : null}
+    <Link className="btn secondary" to="/classement">Voir le classement</Link>
   </article>
 );
 

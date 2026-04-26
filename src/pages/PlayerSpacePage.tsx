@@ -1,7 +1,5 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import AccountCard from '../components/AccountCard';
-import UserStats from '../components/UserStats';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { matchService } from '../services/matchService';
 import { playerService } from '../services/playerService';
@@ -14,7 +12,6 @@ const PlayerSpacePage = () => {
   const { player, logout } = usePlayerSession();
   const [points, setPoints] = useState(0);
   const [rank, setRank] = useState<Standing | undefined>();
-  const [predictionCount, setPredictionCount] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -31,7 +28,6 @@ const PlayerSpacePage = () => {
         return match ? sum + predictionService.calculatePointsForPrediction(prediction, match) : sum;
       }, 0);
       setPoints(donePoints);
-      setPredictionCount(mine.length);
       setRank(getUserRank(standings, player.id));
     };
     void load();
@@ -41,19 +37,16 @@ const PlayerSpacePage = () => {
 
   return (
     <div className="stack">
-      <AccountCard nickname={player.nickname} points={points} rank={rank?.position} />
-      <UserStats
-        items={[
-          { label: 'Pronostics faits', value: predictionCount },
-          { label: 'Scores exacts', value: rank?.exactScores ?? 0 },
-          { label: 'Bons résultats', value: rank?.correctResults ?? 0 },
-        ]}
-      />
-      <Link className="btn" to="/mes-pronos">Voir mes pronos</Link>
-      <Link className="btn secondary" to="/classement">Voir le classement</Link>
-      <Link className="btn secondary" to="/reglement">Lire le règlement</Link>
+      <section className="card stack-sm">
+        <h1>Mon compte</h1>
+        <p>{player.nickname}</p>
+        <p>{points} pts</p>
+        <p>Rang : {rank?.position ?? '-'}</p>
+      </section>
+      <Link className="btn" to="/mes-pronos">Mes pronos</Link>
+      <Link className="btn secondary" to="/classement">Classement</Link>
       <button
-        className="btn"
+        className="btn secondary"
         onClick={() => {
           logout();
           navigate('/connexion');
