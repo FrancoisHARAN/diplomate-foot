@@ -42,13 +42,11 @@ Le workflow est dans `.github/workflows/deploy.yml`.
 
 ### 1) Vérifier `base` dans `vite.config.ts`
 
-Actuellement :
+Le dépôt GitHub s'appelle **diplomate-foot**, la base Vite correcte est :
 
 ```ts
-base: '/diplomate-pronos-2026/'
+base: '/diplomate-foot/'
 ```
-
-Si le dépôt a un autre nom, remplacer cette valeur.
 
 ### 2) Activer Pages dans GitHub
 
@@ -59,6 +57,15 @@ Dans **Settings > Pages** du dépôt :
 
 Push sur la branche `main`.
 Le workflow build + deploy publiera automatiquement le site.
+
+## Si GitHub Pages affiche une page blanche
+
+Causes possibles à vérifier :
+- mauvais `base` dans `vite.config.ts`
+- mauvais router React (préférer `HashRouter` pour GitHub Pages)
+- erreur JavaScript dans la console du navigateur
+- build non déployé
+- mauvais réglage **Settings > Pages**
 
 ## Structure du projet
 

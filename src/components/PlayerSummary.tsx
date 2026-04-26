@@ -12,8 +12,9 @@ interface PlayerSummaryProps {
 const PlayerSummary = ({ nickname, points, predictions, matchesById, onLogout }: PlayerSummaryProps) => (
   <section className="card">
     <h2>Espace joueur</h2>
-    <p><strong>{nickname}</strong> — {points} points</p>
-    <h3>Mes pronostics</h3>
+    <p>Résumé joueur fictif : <strong>{nickname}</strong></p>
+    <p><strong>Points :</strong> {points}</p>
+    <h3>Pronostics fictifs</h3>
     {predictions.length === 0 ? <p>Aucun pronostic pour le moment.</p> : null}
     <ul className="prediction-list">
       {predictions.map((prediction) => {

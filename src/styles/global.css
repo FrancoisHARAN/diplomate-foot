@@ -1,78 +1,99 @@
 :root {
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  color: #f4efe4;
-  background: #161616;
+  color: #fff;
+  background: linear-gradient(135deg, #b9a0ff 0%, #d6c8ff 48%, #a88cff 100%);
   line-height: 1.45;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; }
-
+body { margin: 0; min-height: 100vh; }
 a { color: inherit; text-decoration: none; }
 
 .app-shell {
-  max-width: 980px;
-  margin: 0 auto;
+  max-width: 1100px;
+  margin: 1rem auto;
   padding: 1rem;
+  background: #0c0c12;
+  border: 4px solid #000;
+  border-radius: 36px;
 }
 
-.app-header h1 { margin: 0.2rem 0 0.8rem; font-size: 1.4rem; }
-.brand { color: #d4af37; font-weight: 700; margin: 0; }
+.app-header h1 { margin: 0.2rem 0 0.8rem; font-size: 1.8rem; }
+.brand { color: #ffe065; font-weight: 800; margin: 0; letter-spacing: 0.08em; }
 
 .card {
-  background: #232323;
-  border: 1px solid #343434;
-  border-radius: 12px;
+  background: #17171f;
+  border: 3px solid #000;
+  border-radius: 26px;
   padding: 1rem;
   margin-bottom: 1rem;
 }
 
-.prize-banner { border-color: #d4af37; text-align: center; font-weight: 700; }
-
 .main-nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-.nav-link { padding: 0.55rem; border-radius: 8px; text-align: center; background: #2f2f2f; }
-.nav-link.active { background: #1f5f3d; }
+.nav-link { padding: 0.55rem; border-radius: 999px; text-align: center; background: #2f2f40; border: 2px solid #000; }
+.nav-link.active { background: #7d5eff; color: #fff; }
+
+.home-landing h2 { font-size: 2rem; margin-top: 0.2rem; }
+.landing-brand { font-weight: 900; letter-spacing: 0.12em; color: #fff; }
+.hero-words { display: grid; gap: 0.5rem; margin-bottom: 1rem; }
+.hero-words span { font-size: 2rem; font-weight: 900; }
+
+.landing-grid { display: grid; gap: 0.8rem; }
+.promo-card { border-radius: 24px; border: 3px solid #000; padding: 1rem; color: #101010; font-weight: 600; }
+.promo-card h3 { margin-top: 0; }
+.promo-yellow { background: #ffe35e; }
+.promo-purple { background: #c6a8ff; }
+.promo-blue { background: #81cbff; }
+.promo-green { background: #8ae3aa; }
+.promo-red { background: #ff8f7a; }
+.round-btn { display: inline-flex; width: 56px; height: 56px; border-radius: 999px; background: #0e0e17; color: #fff; align-items: center; justify-content: center; font-size: 1.8rem; border: 3px solid #000; }
 
 .cta-row { display: grid; gap: 0.7rem; }
 .btn {
-  border: none;
-  border-radius: 8px;
+  border: 3px solid #000;
+  border-radius: 999px;
   padding: 0.7rem 1rem;
   cursor: pointer;
-  background: #d4af37;
-  color: #1b1b1b;
-  font-weight: 600;
+  background: #ffe35e;
+  color: #111;
+  font-weight: 700;
   text-align: center;
 }
-.btn.secondary { background: #1f5f3d; color: #f2f2f2; }
+.btn.secondary { background: #7d5eff; color: #fff; }
 
 .grid { display: grid; gap: 1rem; }
 .match-card .match-teams { display: flex; gap: 0.5rem; align-items: center; }
-.status, .locked { color: #8ed1a9; }
+.status, .locked { color: #b9efc6; }
 .score { font-weight: 700; }
 
 input {
   width: 100%;
   padding: 0.6rem;
-  border-radius: 8px;
-  border: 1px solid #585858;
+  border-radius: 12px;
+  border: 2px solid #000;
   margin-top: 0.3rem;
-  background: #111;
-  color: #fff;
+  background: #fff;
+  color: #121212;
 }
 
 label { display: block; margin-bottom: 0.8rem; }
 
 .leaderboard { display: grid; gap: 0.7rem; }
-.leader { padding: 0.7rem; border-radius: 8px; background: #2d2d2d; }
-.leader.first { border: 1px solid #d4af37; background: #3b3216; }
+.leader { padding: 0.7rem; border-radius: 16px; background: #2d2d3a; border: 2px solid #000; }
+.leader.first { border: 3px solid #ffe35e; background: #3b3216; }
 
 .prediction-list { padding-left: 1.1rem; }
 .actions { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+.error-boundary { background: #ff8f7a; color: #101010; }
 
 @media (min-width: 768px) {
   .main-nav { grid-template-columns: repeat(6, 1fr); }
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cta-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .app-header h1 { font-size: 1.8rem; }
+  .landing-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .promo-yellow { grid-column: span 4; }
+  .promo-purple { grid-column: span 2; }
+  .promo-blue { grid-column: span 3; }
+  .promo-green { grid-column: span 3; }
+  .promo-red { grid-column: span 6; }
 }
