@@ -121,6 +121,13 @@ Fonction utilitaire : `src/utils/points.ts`
 
 Une démonstration est fournie dans `src/utils/points.demo.ts`.
 
+## Parcours joueur
+
+1. **Connexion pseudo + code** via la page `Connexion` (Supabase si configuré, fallback local sinon).
+2. **Joueur connecté visible en haut** : le header affiche `Connecté : [pseudo]`, plus `Mes pronos` et `Déconnexion`.
+3. **Page Mes pronos** (`/mes-pronos`) : consultation de tous les matchs, du prono actuel, des points et du statut.
+4. **Modification des pronostics** autorisée jusqu'à **1 heure avant le match**, puis verrouillage automatique.
+
 ## Commandes utiles
 
 ```bash

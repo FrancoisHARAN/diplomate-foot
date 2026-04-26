@@ -1,14 +1,14 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PlayerSummary from '../components/PlayerSummary';
+import { usePlayerSession } from '../context/PlayerSessionContext';
 import { matchService } from '../services/matchService';
-import { playerService } from '../services/playerService';
 import { predictionService } from '../services/predictionService';
 import type { Match, Prediction } from '../types';
 
 const PlayerSpacePage = () => {
   const navigate = useNavigate();
-  const auth = playerService.getCurrentPlayer();
+  const { player, logout } = usePlayerSession();
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [matchesById, setMatchesById] = useState<Record<string, Match>>({});
   const [points, setPoints] = useState(0);
@@ -17,14 +17,14 @@ const PlayerSpacePage = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!auth) return;
+      if (!player) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
         const [playerPredictions, matches] = await Promise.all([
-          predictionService.getPredictionsForPlayer(auth.id),
+          predictionService.getPredictionsForPlayer(player.id),
           matchService.getAll(),
         ]);
 
@@ -46,24 +46,24 @@ const PlayerSpacePage = () => {
     };
 
     void load();
-  }, [auth]);
+  }, [player]);
 
-  if (!auth) return <Navigate to="/connexion" replace />;
+  if (!player) return <Navigate to="/connexion" replace />;
 
   return (
     <>
       {isLoading ? <p className="card">Chargement de ton espace...</p> : null}
       {error ? <p className="card">⚠️ {error}</p> : null}
       <PlayerSummary
-        nickname={auth.nickname}
+        nickname={player.nickname}
         points={points}
-        predictions={predictions}
-        matchesById={matchesById}
+        predictionCount={predictions.length}
         onLogout={() => {
-          playerService.logout();
+          logout();
           navigate('/connexion');
         }}
       />
+      <p className="card">Matchs analysés : {Object.keys(matchesById).length}</p>
     </>
   );
 };
