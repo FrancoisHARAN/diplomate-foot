@@ -59,17 +59,20 @@ alter table public.predictions enable row level security;
 alter table public.admin_settings enable row level security;
 
 -- Lecture publique minimale pour MVP (frontend en mode lecture).
-create policy if not exists "players are readable"
+drop policy if exists "players are readable" on public.players;
+create policy "players are readable"
   on public.players
   for select
   using (is_active = true);
 
-create policy if not exists "matches are publicly readable"
+drop policy if exists "matches are publicly readable" on public.matches;
+create policy "matches are publicly readable"
   on public.matches
   for select
   using (true);
 
-create policy if not exists "predictions are readable for leaderboard"
+drop policy if exists "predictions are readable for leaderboard" on public.predictions;
+create policy "predictions are readable for leaderboard"
   on public.predictions
   for select
   using (true);
@@ -77,18 +80,21 @@ create policy if not exists "predictions are readable for leaderboard"
 -- Ecriture temporaire ouverte pour intégration MVP pseudo+code.
 -- TODO prochaine étape: remplacer ces policies par des appels RPC / Edge Functions
 -- qui valident l'identité joueur et verrouillent les modifications.
-create policy if not exists "mvp players insert"
+drop policy if exists "mvp players insert" on public.players;
+create policy "mvp players insert"
   on public.players
   for insert
   with check (true);
 
-create policy if not exists "mvp predictions upsert"
+drop policy if exists "mvp predictions upsert" on public.predictions;
+create policy "mvp predictions upsert"
   on public.predictions
   for all
   using (true)
   with check (true);
 
-create policy if not exists "mvp matches admin seed"
+drop policy if exists "mvp matches admin seed" on public.matches;
+create policy "mvp matches admin seed"
   on public.matches
   for insert
   with check (true);
