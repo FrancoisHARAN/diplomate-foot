@@ -59,10 +59,14 @@ export const playerService = {
     if (!isSupabaseConfigured || !supabase) return getFallbackPlayers();
 
     try {
-      const data = await supabase.select<PlayerRow>(
-        'players?select=id,nickname,code_hash,is_admin,is_active&is_active=eq.true&order=nickname.asc',
-      );
-      return data.map(mapSupabasePlayerToPlayer);
+      const { data, error } = await supabase
+        .from('players')
+        .select('id,nickname,code_hash,is_admin,is_active')
+        .eq('is_active', true)
+        .order('nickname', { ascending: true });
+
+      if (error) throw error;
+      return (data ?? []).map(mapSupabasePlayerToPlayer);
     } catch (error) {
       console.warn('Unable to read players from Supabase, fallback to local data.', error);
       return getFallbackPlayers();
@@ -90,13 +94,15 @@ export const playerService = {
     }
 
     const codeHash = await hashSecretCode(cleanSecret);
-    const rows = await supabase.insert<{ id: string; nickname: string }>(
-      'players?select=id,nickname',
-      { nickname: cleanNickname, code_hash: codeHash },
-      false,
-    );
+    const { data, error } = await supabase
+      .from('players')
+      .insert({ nickname: cleanNickname, code_hash: codeHash })
+      .select('id,nickname')
+      .single();
 
-    const created = rows[0];
+    if (error) throw error;
+
+    const created = data;
     if (!created) throw new Error('Impossible de créer le joueur.');
     return { id: created.id, nickname: created.nickname };
   },
@@ -114,12 +120,16 @@ export const playerService = {
       return authPlayer;
     }
 
-    const encodedNickname = encodeURIComponent(cleanNickname);
-    const rows = await supabase.select<PlayerRow>(
-      `players?select=id,nickname,code_hash,is_admin,is_active&nickname=eq.${encodedNickname}&is_active=eq.true&limit=1`,
-    );
+    const { data, error } = await supabase
+      .from('players')
+      .select('id,nickname,code_hash,is_admin,is_active')
+      .eq('nickname', cleanNickname)
+      .eq('is_active', true)
+      .limit(1);
 
-    const found = rows[0];
+    if (error) throw error;
+
+    const found = data?.[0];
     if (!found) throw new Error('Pseudo ou code secret invalide.');
 
     const incomingHash = await hashSecretCode(cleanSecret);

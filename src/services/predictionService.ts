@@ -49,10 +49,12 @@ const getAllPredictions = async (): Promise<Prediction[]> => {
   if (!isSupabaseConfigured || !supabase) return ensureSeeded();
 
   try {
-    const data = await supabase.select<PredictionRow>(
-      'predictions?select=id,match_id,player_id,home_score,away_score,points,updated_at',
-    );
-    return data.map(mapRowToPrediction);
+    const { data, error } = await supabase
+      .from('predictions')
+      .select('id,match_id,player_id,home_score,away_score,points,updated_at');
+
+    if (error) throw error;
+    return (data ?? []).map(mapRowToPrediction);
   } catch (error) {
     console.warn('Unable to read predictions from Supabase, fallback to local data.', error);
     return ensureSeeded();
@@ -88,19 +90,24 @@ export const predictionService = {
       return updated;
     }
 
-    const rows = await supabase.insert<PredictionRow>(
-      'predictions?on_conflict=player_id,match_id&select=id,match_id,player_id,home_score,away_score,points,updated_at',
-      {
-        player_id: playerId,
-        match_id: matchId,
-        home_score: homeScore,
-        away_score: awayScore,
-        locked_at: new Date().toISOString(),
-      },
-      true,
-    );
+    const { data, error } = await supabase
+      .from('predictions')
+      .upsert(
+        {
+          player_id: playerId,
+          match_id: matchId,
+          home_score: homeScore,
+          away_score: awayScore,
+          locked_at: new Date().toISOString(),
+        },
+        { onConflict: 'player_id,match_id' },
+      )
+      .select('id,match_id,player_id,home_score,away_score,points,updated_at')
+      .single();
 
-    const saved = rows[0];
+    if (error) throw error;
+
+    const saved = data;
     if (!saved) throw new Error("Impossible d'enregistrer le pronostic.");
     return mapRowToPrediction(saved);
   },
