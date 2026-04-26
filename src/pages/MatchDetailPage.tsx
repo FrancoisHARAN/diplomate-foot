@@ -36,42 +36,40 @@ const MatchDetailPage = () => {
 
   return (
     <div className="stack">
-      <Link className="back-link" to="/matchs">← Matchs</Link>
+      <Link className="back-link" to="/matchs">← Retour aux matchs</Link>
       <MatchCard match={match} prediction={prediction} />
 
       <section className="card stack-sm">
-        <h2>Ton pronostic</h2>
+        <h1>Pronostiquer maintenant</h1>
 
         {!player ? (
-          <>
-            <p>Connecte-toi pour pronostiquer.</p>
+          <div className="stack-sm">
+            <p>Connectez-vous pour enregistrer ce pronostic.</p>
             <button className="btn" onClick={() => navigate('/connexion', { state: { from: location.pathname } })}>
-              Connexion
+              Se connecter
             </button>
-          </>
+          </div>
         ) : null}
 
         {player && editable ? (
-          <>
-            <PredictionForm
-              match={match}
-              initial={prediction}
-              loading={saving}
-              onSubmit={async (homeScore, awayScore) => {
-                setSaving(true);
-                await predictionService.savePrediction(player.id, match.id, homeScore, awayScore);
-                const refreshed = await predictionService.getPredictionsForPlayer(player.id);
-                setPrediction(refreshed.find((item) => item.matchId === match.id));
-                setMessage('Pronostic enregistré ✅');
-                setSaving(false);
-              }}
-            />
-          </>
+          <PredictionForm
+            match={match}
+            initial={prediction}
+            loading={saving}
+            onSubmit={async (homeScore, awayScore) => {
+              setSaving(true);
+              await predictionService.savePrediction(player.id, match.id, homeScore, awayScore);
+              const refreshed = await predictionService.getPredictionsForPlayer(player.id);
+              setPrediction(refreshed.find((item) => item.matchId === match.id));
+              setMessage('Pronostic enregistré ✅ Vous pouvez le modifier avant la clôture.');
+              setSaving(false);
+            }}
+          />
         ) : null}
 
         {player && !editable && match.status !== 'finished' ? (
           <>
-            <p>Pronostics fermés.</p>
+            <p>Les pronostics sont clôturés pour ce match.</p>
             {prediction ? <p>Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
           </>
         ) : null}

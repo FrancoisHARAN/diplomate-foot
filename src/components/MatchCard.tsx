@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Match, Prediction } from '../types';
-import { formatKickoff } from '../utils/date';
-import { getPredictionUiStatus } from '../utils/appState';
+import { canEditPrediction, formatKickoff, getMatchStatusLabel } from '../utils/date';
 import { predictionService } from '../services/predictionService';
 
 interface Props {
@@ -10,25 +9,17 @@ interface Props {
 }
 
 const MatchCard = ({ match, prediction }: Props) => {
-  const predictionStatus = getPredictionUiStatus(match, prediction);
-
-  const statusLabel =
-    match.status === 'finished'
-      ? 'Terminé'
-      : prediction
-        ? 'Déjà pronostiqué'
-        : predictionStatus === 'closed'
-          ? 'Fermé'
-          : 'Prono ouvert';
+  const navigate = useNavigate();
+  const editable = canEditPrediction(match);
 
   const actionLabel =
     match.status === 'finished'
-      ? 'Voir'
+      ? 'Voir le détail'
       : prediction
-        ? 'Modifier'
-        : predictionStatus === 'closed'
-          ? 'Voir'
-          : 'Pronostiquer';
+        ? 'Voir mon pronostic'
+        : editable
+          ? 'Pronostiquer'
+          : 'Pronostic clôturé';
 
   const points =
     match.status === 'finished' && prediction
@@ -36,28 +27,39 @@ const MatchCard = ({ match, prediction }: Props) => {
       : undefined;
 
   return (
-    <Link to={`/matchs/${match.id}`} className="match-card card">
-      <p className="match-time">{match.status === 'finished' ? 'Terminé' : formatKickoff(match.kickoff)}</p>
+    <article className="match-card card">
+      <Link to={`/matchs/${match.id}`} className="match-card-main">
+        <p className="match-time">{formatKickoff(match.kickoff)}</p>
+        <p className="match-note">Statut : {getMatchStatusLabel(match.status)}</p>
 
-      <div className="teams-row">
-        <strong>{match.homeTeam.name}</strong>
-        <span>VS</span>
-        <strong>{match.awayTeam.name}</strong>
-      </div>
+        <div className="teams-row">
+          <strong>{match.homeTeam.name}</strong>
+          <span>VS</span>
+          <strong>{match.awayTeam.name}</strong>
+        </div>
 
-      {match.status === 'finished' ? (
-        <p className="match-note">Score final : {match.homeScore} - {match.awayScore}</p>
-      ) : null}
-      {prediction ? <p className="match-note">Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
-      {typeof points === 'number' ? <p className="match-note">Tes points : {points} pts</p> : null}
+        {!editable && match.status === 'upcoming' ? <p className="match-note">Deadline dépassée · pronostic verrouillé</p> : null}
+        {match.status === 'finished' ? (
+          <p className="match-note">Score final : {match.homeScore} - {match.awayScore}</p>
+        ) : null}
+        {prediction ? <p className="match-note">Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
+        {typeof points === 'number' ? <p className="match-note">Tes points : {points} pts</p> : null}
+      </Link>
 
       <div className="card-footer">
-        <span className={`status-pill ${statusLabel === 'Prono ouvert' ? 'open' : statusLabel === 'Déjà pronostiqué' ? 'done' : 'closed'}`}>
-          {statusLabel}
+        <span className={`status-pill ${editable ? 'open' : prediction ? 'done' : 'closed'}`}>
+          {prediction ? 'Déjà pronostiqué' : editable ? 'À faire' : 'Verrouillé'}
         </span>
-        <span className="cta-arrow">{actionLabel} →</span>
+        <button
+          className="btn small"
+          type="button"
+          disabled={!editable && !prediction && match.status !== 'finished'}
+          onClick={() => navigate(match.status === 'finished' ? `/matchs/${match.id}` : `/matchs/${match.id}/pronostic`)}
+        >
+          {actionLabel}
+        </button>
       </div>
-    </Link>
+    </article>
   );
 };
 

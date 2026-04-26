@@ -8,7 +8,7 @@
 body { margin: 0; background: #d8c9ff; }
 a { text-decoration: none; color: inherit; }
 h1, h2, h3, p { margin: 0; }
-button { font: inherit; }
+button { font: inherit; cursor: pointer; }
 
 .mobile-app-shell {
   max-width: 560px;
@@ -17,24 +17,40 @@ button { font: inherit; }
   background: #141425;
   border-left: 2px solid #050505;
   border-right: 2px solid #050505;
-  padding-bottom: 88px;
+  padding-bottom: 84px;
 }
 
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 0.7rem;
   background: #1b1b30;
   padding: 0.7rem 0.85rem;
   border-bottom: 2px solid #050505;
 }
 
+.brand-wrap { display: grid; gap: 0.1rem; }
 .brand { color: #ffe067; font-weight: 900; font-size: 1rem; letter-spacing: 0.04em; }
 .subtitle { font-size: 0.75rem; opacity: 0.9; }
 
+.header-nav { display: flex; gap: 0.25rem; justify-content: center; }
+.header-link {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid transparent;
+}
+.header-link.active {
+  background: #7251f2;
+  border-color: #fff;
+  font-weight: 700;
+}
+
+.header-actions { display: flex; align-items: center; gap: 0.4rem; }
 .account-chip {
   display: flex;
   align-items: center;
@@ -54,6 +70,41 @@ button { font: inherit; }
   background: #3a3a63;
   border-radius: 50%;
 }
+
+.avatar-menu-wrap { position: relative; }
+.avatar-trigger {
+  border: 2px solid #050505;
+  background: #29294a;
+  color: #fff;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  font-weight: 700;
+}
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  background: #22223f;
+  border: 2px solid #050505;
+  border-radius: 14px;
+  min-width: 180px;
+  display: grid;
+  padding: 0.3rem;
+}
+.avatar-menu a,
+.avatar-menu button {
+  color: #fff;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  border-radius: 10px;
+  padding: 0.5rem;
+}
+.avatar-menu a:hover,
+.avatar-menu button:hover { background: #31315c; }
 
 .app-main { padding: 0.8rem; }
 .stack { display: grid; gap: 0.85rem; }
@@ -98,7 +149,7 @@ button { font: inherit; }
   transform: translateX(-50%);
   width: min(560px, 100%);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.35rem;
   padding: 0.45rem;
   background: #1b1b30;
@@ -115,6 +166,8 @@ button { font: inherit; }
 .bottom-link.active { background: #7251f2; }
 
 .filter-row { display: flex; gap: 0.45rem; overflow-x: auto; padding-bottom: 0.2rem; }
+.filter-controls { display: grid; gap: 0.55rem; }
+.checkbox-inline { display: flex; gap: 0.45rem; align-items: center; }
 .pill {
   border: 1px solid #050505;
   border-radius: 999px;
@@ -131,6 +184,7 @@ button { font: inherit; }
   border-width: 3px;
   background: #22223f;
 }
+.match-card-main { display: grid; gap: 0.65rem; }
 .match-time { opacity: 0.9; font-size: 0.86rem; }
 .teams-row {
   display: grid;
@@ -180,3 +234,16 @@ input {
 .podium { display: grid; gap: 0.55rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .podium-1 { background: #3d3513; }
 .highlight { border-color: #ffe067; }
+
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'brand actions'
+      'nav nav';
+  }
+  .brand-wrap { grid-area: brand; }
+  .header-actions { grid-area: actions; }
+  .header-nav { grid-area: nav; justify-content: flex-start; overflow-x: auto; }
+  .header-link { white-space: nowrap; }
+}
