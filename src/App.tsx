@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import LoginPage from './pages/LoginPage';
 import MatchesPage from './pages/MatchesPage';
+import MyPredictionsPage from './pages/MyPredictionsPage';
 import PlayerSpacePage from './pages/PlayerSpacePage';
 
 const NotFoundPage = () => (
@@ -26,6 +27,7 @@ const App = () => (
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/matchs" element={<MatchesPage />} />
+        <Route path="/mes-pronos" element={<MyPredictionsPage />} />
         <Route path="/classement" element={<LeaderboardPage />} />
         <Route path="/connexion" element={<LoginPage />} />
         <Route path="/espace-joueur" element={<PlayerSpacePage />} />

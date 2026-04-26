@@ -1,12 +1,14 @@
-import type { Match } from '../types';
+import type { Match, Prediction } from '../types';
 import { canEditPrediction, formatKickoff, getMatchStatusLabel } from '../utils/date';
 
 interface MatchCardProps {
   match: Match;
+  prediction?: Prediction;
   onPredict?: (match: Match) => void;
+  ctaLabel?: string;
 }
 
-const MatchCard = ({ match, onPredict }: MatchCardProps) => {
+const MatchCard = ({ match, prediction, onPredict, ctaLabel = 'Pronostiquer' }: MatchCardProps) => {
   const editable = canEditPrediction(match);
 
   return (
@@ -19,13 +21,16 @@ const MatchCard = ({ match, onPredict }: MatchCardProps) => {
       <p>{formatKickoff(match.kickoff)}</p>
       <p className="status">Statut : {getMatchStatusLabel(match.status)}</p>
       <p className="status">Pronostic : {editable ? 'Ouvert' : 'Fermé'}</p>
+      <p>Ton prono : {prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun'}</p>
       {match.status === 'finished' ? (
-        <p className="score">Score final : {match.homeScore} - {match.awayScore}</p>
+        <p className="score">
+          Score final : {match.homeScore} - {match.awayScore}
+        </p>
       ) : null}
 
       {match.status === 'upcoming' && editable ? (
         <button type="button" className="btn" onClick={() => onPredict?.(match)}>
-          Pronostiquer
+          {ctaLabel}
         </button>
       ) : (
         <span className="locked">Pronostic fermé</span>

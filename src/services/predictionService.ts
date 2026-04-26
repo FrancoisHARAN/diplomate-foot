@@ -90,26 +90,31 @@ export const predictionService = {
       return updated;
     }
 
-    const { data, error } = await supabase
-      .from('predictions')
-      .upsert(
-        {
-          player_id: playerId,
-          match_id: matchId,
-          home_score: homeScore,
-          away_score: awayScore,
-          locked_at: new Date().toISOString(),
-        },
-        { onConflict: 'player_id,match_id' },
-      )
-      .select('id,match_id,player_id,home_score,away_score,points,updated_at')
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('predictions')
+        .upsert(
+          {
+            player_id: playerId,
+            match_id: matchId,
+            home_score: homeScore,
+            away_score: awayScore,
+            locked_at: new Date().toISOString(),
+          },
+          { onConflict: 'player_id,match_id' },
+        )
+        .select('id,match_id,player_id,home_score,away_score,points,updated_at')
+        .single();
 
-    if (error) throw error;
+      if (error) throw error;
 
-    const saved = data;
-    if (!saved) throw new Error("Impossible d'enregistrer le pronostic.");
-    return mapRowToPrediction(saved);
+      const saved = data;
+      if (!saved) throw new Error("Impossible d'enregistrer le pronostic.");
+      return mapRowToPrediction(saved);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur Supabase inconnue.';
+      throw new Error(`Impossible d'enregistrer le pronostic (${message}).`);
+    }
   },
 
   calculatePointsForPrediction: (prediction: Prediction, match: Match): number => {
