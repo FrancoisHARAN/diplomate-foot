@@ -1,70 +1,67 @@
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import PlayerSummary from '../components/PlayerSummary';
+import AccountCard from '../components/AccountCard';
+import UserStats from '../components/UserStats';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { matchService } from '../services/matchService';
+import { playerService } from '../services/playerService';
 import { predictionService } from '../services/predictionService';
-import type { Match, Prediction } from '../types';
+import type { Standing } from '../types';
+import { buildStandings, getUserRank } from '../utils/appState';
 
 const PlayerSpacePage = () => {
   const navigate = useNavigate();
   const { player, logout } = usePlayerSession();
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [matchesById, setMatchesById] = useState<Record<string, Match>>({});
   const [points, setPoints] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [rank, setRank] = useState<Standing | undefined>();
+  const [predictionCount, setPredictionCount] = useState(0);
 
   useEffect(() => {
     const load = async () => {
       if (!player) return;
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const [playerPredictions, matches] = await Promise.all([
-          predictionService.getPredictionsForPlayer(player.id),
-          matchService.getAll(),
-        ]);
-
-        const byId = Object.fromEntries(matches.map((match) => [match.id, match]));
-        const totalPoints = playerPredictions.reduce((total, prediction) => {
-          const match = byId[prediction.matchId];
-          if (!match) return total;
-          return total + predictionService.calculatePointsForPrediction(prediction, match);
-        }, 0);
-
-        setPredictions(playerPredictions);
-        setMatchesById(byId);
-        setPoints(totalPoints);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Chargement impossible.');
-      } finally {
-        setIsLoading(false);
-      }
+      const [players, predictions, matches] = await Promise.all([
+        playerService.getPlayers(),
+        predictionService.getAllPredictions(),
+        matchService.getAll(),
+      ]);
+      const standings = buildStandings(players, predictions, matches);
+      const mine = predictions.filter((item) => item.playerId === player.id);
+      const donePoints = mine.reduce((sum, prediction) => {
+        const match = matches.find((item) => item.id === prediction.matchId);
+        return match ? sum + predictionService.calculatePointsForPrediction(prediction, match) : sum;
+      }, 0);
+      setPoints(donePoints);
+      setPredictionCount(mine.length);
+      setRank(getUserRank(standings, player.id));
     };
-
     void load();
   }, [player]);
 
   if (!player) return <Navigate to="/connexion" replace />;
 
   return (
-    <>
-      {isLoading ? <p className="card">Chargement de ton espace...</p> : null}
-      {error ? <p className="card">⚠️ {error}</p> : null}
-      <PlayerSummary
-        nickname={player.nickname}
-        points={points}
-        predictionCount={predictions.length}
-        onLogout={() => {
+    <div className="stack">
+      <AccountCard nickname={player.nickname} points={points} rank={rank?.position} />
+      <UserStats
+        items={[
+          { label: 'Pronostics faits', value: predictionCount },
+          { label: 'Scores exacts', value: rank?.exactScores ?? 0 },
+          { label: 'Bons résultats', value: rank?.correctResults ?? 0 },
+        ]}
+      />
+      <Link className="btn" to="/mes-pronos">Voir mes pronos</Link>
+      <Link className="btn secondary" to="/classement">Voir le classement</Link>
+      <Link className="btn secondary" to="/reglement">Lire le règlement</Link>
+      <button
+        className="btn"
+        onClick={() => {
           logout();
           navigate('/connexion');
         }}
-      />
-      <p className="card">Matchs analysés : {Object.keys(matchesById).length}</p>
-    </>
+      >
+        Déconnexion
+      </button>
+    </div>
   );
 };
 

@@ -1,34 +1,37 @@
 import { useState } from 'react';
-import type { Match, Prediction } from '../types';
+import type { Prediction } from '../types';
 
-interface PredictionFormProps {
-  match: Match;
-  existing?: Prediction;
-  onSave: (homeScore: number, awayScore: number) => void;
-}
-
-const PredictionForm = ({ match, existing, onSave }: PredictionFormProps) => {
-  const [homeScore, setHomeScore] = useState<number>(existing?.homeScore ?? 0);
-  const [awayScore, setAwayScore] = useState<number>(existing?.awayScore ?? 0);
+const PredictionForm = ({
+  initial,
+  onSubmit,
+  loading,
+}: {
+  initial?: Prediction;
+  onSubmit: (homeScore: number, awayScore: number) => Promise<void>;
+  loading: boolean;
+}) => {
+  const [home, setHome] = useState(initial?.homeScore ?? 0);
+  const [away, setAway] = useState(initial?.awayScore ?? 0);
 
   return (
     <form
-      className="card prediction-form"
-      onSubmit={(event) => {
+      className="stack"
+      onSubmit={async (event) => {
         event.preventDefault();
-        onSave(homeScore, awayScore);
+        await onSubmit(home, away);
       }}
     >
-      <h3>Pronostic : {match.homeTeam.name} vs {match.awayTeam.name}</h3>
       <label>
-        {match.homeTeam.name}
-        <input type="number" min={0} value={homeScore} onChange={(event) => setHomeScore(Number(event.target.value))} />
+        Score équipe 1
+        <input type="number" min={0} value={home} onChange={(event) => setHome(Number(event.target.value))} required />
       </label>
       <label>
-        {match.awayTeam.name}
-        <input type="number" min={0} value={awayScore} onChange={(event) => setAwayScore(Number(event.target.value))} />
+        Score équipe 2
+        <input type="number" min={0} value={away} onChange={(event) => setAway(Number(event.target.value))} required />
       </label>
-      <button type="submit" className="btn">Enregistrer</button>
+      <button className="btn" type="submit" disabled={loading}>
+        {loading ? 'Enregistrement...' : initial ? 'Modifier mon prono' : 'Valider mon prono'}
+      </button>
     </form>
   );
 };

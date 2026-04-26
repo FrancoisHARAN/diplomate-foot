@@ -1,38 +1,41 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import LoginForm from '../components/LoginForm';
+import { useLocation, useNavigate } from 'react-router-dom';
+import PageTitle from '../components/PageTitle';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { playerService } from '../services/playerService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { player, refreshPlayer } = usePlayerSession();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const { refreshPlayer } = usePlayerSession();
+  const [nickname, setNickname] = useState('');
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
 
   return (
-    <section>
-      <p className="card">Entre ton pseudo et ton code secret pour accéder à la compétition.</p>
-      {player ? <p className="card">Tu es déjà connecté en tant que {player.nickname}.</p> : null}
-      {error ? <p className="card">⚠️ {error}</p> : null}
-      <LoginForm
-        isLoading={isLoading}
-        onSubmit={async (nickname, secretCode) => {
-          setError(null);
-          setIsLoading(true);
-
+    <div className="stack">
+      <PageTitle title="Connexion joueur" subtitle="Entre ton pseudo et ton code secret donné au bar." />
+      <form
+        className="card stack"
+        onSubmit={async (event) => {
+          event.preventDefault();
           try {
-            await playerService.login(nickname, secretCode);
+            await playerService.login(nickname, code);
             refreshPlayer();
-            navigate('/espace-joueur');
+            const state = location.state as { from?: string } | undefined;
+            navigate(state?.from ?? '/mon-compte');
           } catch (loginError) {
-            setError(loginError instanceof Error ? loginError.message : 'Connexion impossible.');
-          } finally {
-            setIsLoading(false);
+            setError(loginError instanceof Error ? loginError.message : 'Connexion impossible');
           }
         }}
-      />
-    </section>
+      >
+        <label>Pseudo<input value={nickname} onChange={(event) => setNickname(event.target.value)} required /></label>
+        <label>Code secret<input value={code} onChange={(event) => setCode(event.target.value)} required /></label>
+        <button className="btn" type="submit">Entrer dans la compétition</button>
+        {error ? <p>⚠️ {error}</p> : null}
+      </form>
+      <section className="card">Pas encore inscrit ? Demande ton code au comptoir.</section>
+    </div>
   );
 };
 

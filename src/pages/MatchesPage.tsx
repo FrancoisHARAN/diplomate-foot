@@ -1,68 +1,61 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import MatchCard from '../components/MatchCard';
+import MatchList from '../components/MatchList';
+import PageTitle from '../components/PageTitle';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { matchService } from '../services/matchService';
 import { predictionService } from '../services/predictionService';
 import type { Match, Prediction } from '../types';
+import { canEditPrediction } from '../utils/date';
+
+type Filter = 'all' | 'toPredict' | 'mine' | 'closed' | 'finished';
 
 const MatchesPage = () => {
-  const navigate = useNavigate();
   const { player } = usePlayerSession();
   const [matches, setMatches] = useState<Match[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>('all');
 
   useEffect(() => {
     const load = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const loadedMatches = await matchService.getAll();
-        setMatches(loadedMatches);
-
-        if (player) {
-          const loadedPredictions = await predictionService.getPredictionsForPlayer(player.id);
-          setPredictions(loadedPredictions);
-        } else {
-          setPredictions([]);
-        }
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Chargement impossible.');
-      } finally {
-        setIsLoading(false);
-      }
+      const loadedMatches = await matchService.getAll();
+      setMatches(loadedMatches);
+      if (!player) return setPredictions([]);
+      setPredictions(await predictionService.getPredictionsForPlayer(player.id));
     };
-
     void load();
   }, [player]);
 
-  const predictionsByMatchId = useMemo(
+  const predictionsByMatch = useMemo(
     () => Object.fromEntries(predictions.map((prediction) => [prediction.matchId, prediction])),
     [predictions],
   );
 
-  return (
-    <section>
-      <h2>Matchs</h2>
-      {isLoading ? <p className="card">Chargement des matchs...</p> : null}
-      {error ? <p className="card">⚠️ {error}</p> : null}
-      {!player ? <p className="card">Connectez-vous pour enregistrer vos pronostics.</p> : null}
+  const filteredMatches = useMemo(() => {
+    if (filter === 'all') return matches;
+    if (filter === 'mine') return matches.filter((match) => Boolean(predictionsByMatch[match.id]));
+    if (filter === 'finished') return matches.filter((match) => match.status === 'finished');
+    if (filter === 'closed') return matches.filter((match) => match.status !== 'finished' && !canEditPrediction(match));
+    return matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match) && !predictionsByMatch[match.id]);
+  }, [filter, matches, predictionsByMatch]);
 
-      <div className="grid">
-        {matches.map((match) => (
-          <MatchCard
-            key={match.id}
-            match={match}
-            prediction={predictionsByMatchId[match.id]}
-            ctaLabel={player ? 'Voir mes pronos' : 'Connexion'}
-            onPredict={() => navigate(player ? '/mes-pronos' : '/connexion')}
-          />
+  return (
+    <div className="stack">
+      <PageTitle title="Tous les matchs" subtitle="Clique sur un match pour faire ton prono." />
+      <section className="filter-row">
+        {[
+          ['all', 'Tous'],
+          ['toPredict', 'À pronostiquer'],
+          ['mine', 'Mes pronos'],
+          ['closed', 'Fermés'],
+          ['finished', 'Terminés'],
+        ].map(([value, label]) => (
+          <button key={value} className={`pill ${filter === value ? 'active' : ''}`} onClick={() => setFilter(value as Filter)}>
+            {label}
+          </button>
         ))}
-      </div>
-    </section>
+      </section>
+      <MatchList matches={filteredMatches} predictionsByMatch={predictionsByMatch} />
+    </div>
   );
 };
 
