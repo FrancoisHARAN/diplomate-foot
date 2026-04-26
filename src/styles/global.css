@@ -1,0 +1,78 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #f4efe4;
+  background: #161616;
+  line-height: 1.45;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+.app-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.app-header h1 { margin: 0.2rem 0 0.8rem; font-size: 1.4rem; }
+.brand { color: #d4af37; font-weight: 700; margin: 0; }
+
+.card {
+  background: #232323;
+  border: 1px solid #343434;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prize-banner { border-color: #d4af37; text-align: center; font-weight: 700; }
+
+.main-nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.nav-link { padding: 0.55rem; border-radius: 8px; text-align: center; background: #2f2f2f; }
+.nav-link.active { background: #1f5f3d; }
+
+.cta-row { display: grid; gap: 0.7rem; }
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  background: #d4af37;
+  color: #1b1b1b;
+  font-weight: 600;
+  text-align: center;
+}
+.btn.secondary { background: #1f5f3d; color: #f2f2f2; }
+
+.grid { display: grid; gap: 1rem; }
+.match-card .match-teams { display: flex; gap: 0.5rem; align-items: center; }
+.status, .locked { color: #8ed1a9; }
+.score { font-weight: 700; }
+
+input {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #585858;
+  margin-top: 0.3rem;
+  background: #111;
+  color: #fff;
+}
+
+label { display: block; margin-bottom: 0.8rem; }
+
+.leaderboard { display: grid; gap: 0.7rem; }
+.leader { padding: 0.7rem; border-radius: 8px; background: #2d2d2d; }
+.leader.first { border: 1px solid #d4af37; background: #3b3216; }
+
+.prediction-list { padding-left: 1.1rem; }
+.actions { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+
+@media (min-width: 768px) {
+  .main-nav { grid-template-columns: repeat(6, 1fr); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cta-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-header h1 { font-size: 1.8rem; }
+}
