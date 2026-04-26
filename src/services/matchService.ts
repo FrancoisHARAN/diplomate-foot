@@ -48,10 +48,13 @@ const getAll = async (): Promise<Match[]> => {
   if (!isSupabaseConfigured || !supabase) return getFallbackMatches();
 
   try {
-    const data = await supabase.select<MatchRow>(
-      'matches?select=id,home_team,away_team,kickoff,status,home_score,away_score&order=kickoff.asc',
-    );
-    return data.map(mapRowToMatch);
+    const { data, error } = await supabase
+      .from('matches')
+      .select('id,home_team,away_team,kickoff,status,home_score,away_score')
+      .order('kickoff', { ascending: true });
+
+    if (error) throw error;
+    return (data ?? []).map(mapRowToMatch);
   } catch (error) {
     console.warn('Unable to read matches from Supabase, fallback to local data.', error);
     return getFallbackMatches();
@@ -85,7 +88,8 @@ export const matchService = {
       status: match.status,
     }));
 
-    await supabase.insert('matches?on_conflict=external_id&select=id', payload, true);
+    const { error } = await supabase.from('matches').upsert(payload, { onConflict: 'external_id' }).select('id');
+    if (error) throw error;
     return payload.length;
   },
 
