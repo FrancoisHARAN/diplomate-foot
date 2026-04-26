@@ -7,7 +7,7 @@ import { predictionService } from '../services/predictionService';
 import type { Match, Prediction } from '../types';
 import { canEditPrediction } from '../utils/date';
 
-type Filter = 'all' | 'toPredict' | 'mine' | 'closed' | 'finished';
+type Filter = 'all' | 'open' | 'mine' | 'closed' | 'finished';
 
 const MatchesPage = () => {
   const { player } = usePlayerSession();
@@ -35,16 +35,16 @@ const MatchesPage = () => {
     if (filter === 'mine') return matches.filter((match) => Boolean(predictionsByMatch[match.id]));
     if (filter === 'finished') return matches.filter((match) => match.status === 'finished');
     if (filter === 'closed') return matches.filter((match) => match.status !== 'finished' && !canEditPrediction(match));
-    return matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match) && !predictionsByMatch[match.id]);
+    return matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match));
   }, [filter, matches, predictionsByMatch]);
 
   return (
     <div className="stack">
-      <PageTitle title="Tous les matchs" subtitle="Clique sur un match pour faire ton prono." />
+      <PageTitle title="Matchs" subtitle="Choisis un match pour faire ton prono." />
       <section className="filter-row">
         {[
           ['all', 'Tous'],
-          ['toPredict', 'À pronostiquer'],
+          ['open', 'Ouverts'],
           ['mine', 'Mes pronos'],
           ['closed', 'Fermés'],
           ['finished', 'Terminés'],

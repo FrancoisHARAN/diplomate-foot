@@ -29,9 +29,9 @@ const LeaderboardPage = () => {
 
   return (
     <div className="stack">
-      <PageTitle title="Classement du bar" subtitle="Le 1er remporte 50 € de consommation." />
+      <PageTitle title="Classement" subtitle="Le 1er remporte 50 €." />
       <Podium top={standings.slice(0, 3)} />
-      {userRank ? <section className="card">Tu es actuellement {userRank.position}e avec {userRank.points} points.</section> : null}
+      {userRank ? <section className="card">Tu es {userRank.position}e avec {userRank.points} points.</section> : null}
       <RankingList standings={standings} currentPlayerId={player?.id} />
     </div>
   );

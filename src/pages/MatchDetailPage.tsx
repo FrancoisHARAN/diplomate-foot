@@ -1,12 +1,12 @@
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import PredictionForm from '../components/PredictionForm';
-import MatchStatusBadge from '../components/MatchStatusBadge';
+import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { matchService } from '../services/matchService';
 import { predictionService } from '../services/predictionService';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoff } from '../utils/date';
+import { canEditPrediction } from '../utils/date';
 
 const MatchDetailPage = () => {
   const { matchId } = useParams();
@@ -36,31 +36,25 @@ const MatchDetailPage = () => {
 
   return (
     <div className="stack">
-      <Link className="btn secondary" to="/matchs">← Retour aux matchs</Link>
-      <section className="card">
-        <h1>{match.homeTeam.name} vs {match.awayTeam.name}</h1>
-        <p>{formatKickoff(match.kickoff)}</p>
-        <MatchStatusBadge status={match.status} />
-        {match.status === 'finished' ? <p>Score final : {match.homeScore} - {match.awayScore}</p> : null}
-      </section>
+      <Link className="back-link" to="/matchs">← Matchs</Link>
+      <MatchCard match={match} prediction={prediction} />
 
-      <section className="card">
+      <section className="card stack-sm">
+        <h2>Ton pronostic</h2>
+
         {!player ? (
           <>
-            <p>Connecte-toi pour pronostiquer ce match.</p>
-            <button
-              className="btn"
-              onClick={() => navigate('/connexion', { state: { from: location.pathname } })}
-            >
-              Se connecter
+            <p>Connecte-toi pour pronostiquer.</p>
+            <button className="btn" onClick={() => navigate('/connexion', { state: { from: location.pathname } })}>
+              Connexion
             </button>
           </>
         ) : null}
 
         {player && editable ? (
           <>
-            <h2>Ton pronostic</h2>
             <PredictionForm
+              match={match}
               initial={prediction}
               loading={saving}
               onSubmit={async (homeScore, awayScore) => {
@@ -68,7 +62,7 @@ const MatchDetailPage = () => {
                 await predictionService.savePrediction(player.id, match.id, homeScore, awayScore);
                 const refreshed = await predictionService.getPredictionsForPlayer(player.id);
                 setPrediction(refreshed.find((item) => item.matchId === match.id));
-                setMessage('Pronostic enregistré');
+                setMessage('Pronostic enregistré ✅');
                 setSaving(false);
               }}
             />
@@ -77,19 +71,20 @@ const MatchDetailPage = () => {
 
         {player && !editable && match.status !== 'finished' ? (
           <>
-            <p>Les pronostics sont fermés pour ce match.</p>
+            <p>Pronostics fermés.</p>
             {prediction ? <p>Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
           </>
         ) : null}
 
         {player && match.status === 'finished' ? (
           <>
+            <p>Score final : {match.homeScore} - {match.awayScore}</p>
             <p>Ton prono : {prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun'}</p>
             <p>Points gagnés : {prediction ? predictionService.calculatePointsForPrediction(prediction, match) : 0} pts</p>
           </>
         ) : null}
 
-        {message ? <p>{message}</p> : null}
+        {message ? <p className="success-msg">{message}</p> : null}
       </section>
     </div>
   );
