@@ -1,41 +1,35 @@
+import { Link } from 'react-router-dom';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoff, getMatchStatusLabel } from '../utils/date';
+import { formatKickoff } from '../utils/date';
+import { getPredictionUiStatus } from '../utils/appState';
+import MatchStatusBadge from './MatchStatusBadge';
+import PredictionStatusBadge from './PredictionStatusBadge';
 
-interface MatchCardProps {
+interface Props {
   match: Match;
   prediction?: Prediction;
-  onPredict?: (match: Match) => void;
-  ctaLabel?: string;
 }
 
-const MatchCard = ({ match, prediction, onPredict, ctaLabel = 'Pronostiquer' }: MatchCardProps) => {
-  const editable = canEditPrediction(match);
+const MatchCard = ({ match, prediction }: Props) => {
+  const predictionStatus = getPredictionUiStatus(match, prediction);
+  const actionLabel = match.status === 'finished' ? 'Voir résultat' : prediction ? 'Modifier' : predictionStatus === 'closed' ? 'Voir' : 'Pronostiquer';
 
   return (
-    <article className="card match-card">
-      <div className="match-teams">
+    <Link to={`/matchs/${match.id}`} className="match-card card">
+      <div className="teams-row">
         <strong>{match.homeTeam.name}</strong>
-        <span>vs</span>
+        <span>VS</span>
         <strong>{match.awayTeam.name}</strong>
       </div>
       <p>{formatKickoff(match.kickoff)}</p>
-      <p className="status">Statut : {getMatchStatusLabel(match.status)}</p>
-      <p className="status">Pronostic : {editable ? 'Ouvert' : 'Fermé'}</p>
-      <p>Ton prono : {prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun'}</p>
-      {match.status === 'finished' ? (
-        <p className="score">
-          Score final : {match.homeScore} - {match.awayScore}
-        </p>
-      ) : null}
-
-      {match.status === 'upcoming' && editable ? (
-        <button type="button" className="btn" onClick={() => onPredict?.(match)}>
-          {ctaLabel}
-        </button>
-      ) : (
-        <span className="locked">Pronostic fermé</span>
-      )}
-    </article>
+      <div className="badge-row">
+        <MatchStatusBadge status={match.status} />
+        <PredictionStatusBadge status={predictionStatus} />
+      </div>
+      {prediction ? <p>Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
+      {match.status === 'finished' ? <p>Score final : {match.homeScore} - {match.awayScore}</p> : null}
+      <span className="btn small">{actionLabel}</span>
+    </Link>
   );
 };
 
