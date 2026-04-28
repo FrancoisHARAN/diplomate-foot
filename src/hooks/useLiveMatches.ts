@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { createContext, createElement, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { mockMatches } from '../data/mockMatches';
 import type { Match } from '../types';
 
@@ -56,7 +56,9 @@ const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   };
 };
 
-export const useLiveMatches = () => {
+const LiveMatchesContext = createContext<LiveMatchesState | undefined>(undefined);
+
+export const LiveMatchesProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<LiveMatchesState>(fallbackState);
 
   useEffect(() => {
@@ -80,5 +82,13 @@ export const useLiveMatches = () => {
     };
   }, []);
 
-  return state;
+  const value = useMemo(() => state, [state]);
+
+  return createElement(LiveMatchesContext.Provider, { value }, children);
+};
+
+export const useLiveMatches = () => {
+  const context = useContext(LiveMatchesContext);
+  if (!context) return fallbackState;
+  return context;
 };

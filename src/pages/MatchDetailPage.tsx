@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type TouchEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import MatchCard from '../components/MatchCard';
 import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
-import { canEditPrediction, formatKickoff, getMinutesBeforeLock } from '../utils/date';
+import { canEditPrediction, formatKickoffLong, formatTimeUntilKickoff } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 
 const MatchDetailPage = () => {
@@ -20,12 +19,14 @@ const MatchDetailPage = () => {
   const [awayScore, setAwayScore] = useState(0);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const match = matches.find((item) => item.id === matchId);
   const playableMatches = matches.filter((item) => item.status !== 'finished');
   const currentIndex = match ? playableMatches.findIndex((item) => item.id === match.id) : -1;
-  const nextMatch = currentIndex >= 0 ? playableMatches[currentIndex + 1] ?? playableMatches[0] : null;
-  const previousMatch = currentIndex > 0 ? playableMatches[currentIndex - 1] : null;
+  const canStep = currentIndex >= 0 && playableMatches.length > 1;
+  const nextMatch = canStep ? playableMatches[currentIndex + 1] ?? playableMatches[0] : null;
+  const previousMatch = canStep ? playableMatches[currentIndex - 1] ?? playableMatches[playableMatches.length - 1] : null;
   const prediction = useMemo(() => (match ? getPredictionForMatch(match.id) : undefined), [match, refresh]);
 
   useEffect(() => {
@@ -84,50 +85,87 @@ const MatchDetailPage = () => {
     setError('');
   };
 
+  const navigateToMatch = (target: typeof match | null) => {
+    if (!target) return;
+    navigate(`/matchs/${target.id}`);
+  };
+
+  const onTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const onTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (!touchStart.current) return;
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStart.current.x;
+    const deltaY = touch.clientY - touchStart.current.y;
+    touchStart.current = null;
+
+    if (Math.abs(deltaX) < 70 || Math.abs(deltaY) > 90) return;
+    if (deltaX > 0) navigateToMatch(nextMatch);
+    if (deltaX < 0) navigateToMatch(previousMatch);
+  };
+
   return (
-    <div className="screen-stack">
+    <div className="screen-stack match-detail-screen" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
       <Link className="back-link" to="/matchs">Retour aux matchs</Link>
 
-      <MatchCard match={match} prediction={prediction} variant="compact" />
-
-      <section className="section-block">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Coup d'envoi</p>
-            <h1>{formatKickoff(match.kickoff)}</h1>
-          </div>
-          <span className="mini-badge">{editable ? `${getMinutesBeforeLock(match, new Date(clock))} min` : 'Prono fermé'}</span>
+      <section className={`match-detail-card ${multiplier > 1 ? 'is-boosted' : ''}`}>
+        <div className="match-detail-kickoff">
+          <p className="eyebrow">Coup d'envoi</p>
+          <h1>{formatKickoffLong(match.kickoff)}</h1>
+          <span className={`mini-badge ${editable ? 'success' : ''}`}>{editable ? formatTimeUntilKickoff(match, new Date(clock)) : 'Prono fermé'}</span>
         </div>
+
         {multiplier > 1 ? (
           <div className="booster-panel">
-            <strong>⚡ Booster x{multiplier}</strong>
-            <span>Un score exact vaut {3 * multiplier} points sur ce match.</span>
+            <strong>Boost x{multiplier}</strong>
+            <span>Les points comptent x{multiplier} sur ce match.</span>
           </div>
         ) : null}
-      </section>
 
-      <section className="prediction-panel">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Ton score</p>
-            <h2>{prediction ? 'Modifier le prono' : 'Faire un prono'}</h2>
+        <div className="match-detail-teams">
+          <div className="detail-team">
+            <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
+            <strong>{match.homeTeam.name}</strong>
+            <small>{match.homeTeam.shortName}</small>
           </div>
-          {prediction ? <span className="mini-badge success">Déjà joué</span> : null}
+          <span className="detail-versus">{match.status === 'finished' || match.status === 'live' ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}` : 'VS'}</span>
+          <div className="detail-team">
+            <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
+            <strong>{match.awayTeam.name}</strong>
+            <small>{match.awayTeam.shortName}</small>
+          </div>
         </div>
+
+        {prediction ? (
+          <div className="detail-current-prono">
+            <span>Ton prono</span>
+            <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
+            {points !== null ? <small>{points} pts</small> : <small>{editable ? 'Modifiable jusqu’au coup d’envoi' : 'Enregistré'}</small>}
+          </div>
+        ) : null}
 
         {!player ? (
           <div className="empty-state inline">
             <strong>Connecte-toi pour pronostiquer</strong>
-            <p>Ton score sera ensuite gardé pour cette version de test.</p>
+            <p>Ton score sera gardé pour cette version de test.</p>
             <button className="btn primary" type="button" onClick={() => navigate('/connexion', { state: { redirectTo: location.pathname } })}>Connexion</button>
           </div>
         ) : null}
 
         {player && editable ? (
           <form className="score-form" onSubmit={submit}>
+            <div className="section-heading compact-heading">
+              <div>
+                <p className="eyebrow">Ton score</p>
+                <h2>{prediction ? 'Modifier le prono' : 'Faire un prono'}</h2>
+              </div>
+            </div>
+
             <div className="score-editor">
               <div className="score-team">
-                <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
                 <strong>{match.homeTeam.name}</strong>
                 <div className="score-stepper">
                   <button type="button" onClick={() => updateScore('home', -1)} aria-label={`Retirer un but à ${match.homeTeam.name}`}>-</button>
@@ -139,7 +177,6 @@ const MatchDetailPage = () => {
               <span className="score-separator">-</span>
 
               <div className="score-team">
-                <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
                 <strong>{match.awayTeam.name}</strong>
                 <div className="score-stepper">
                   <button type="button" onClick={() => updateScore('away', -1)} aria-label={`Retirer un but à ${match.awayTeam.name}`}>-</button>
@@ -167,8 +204,8 @@ const MatchDetailPage = () => {
       </section>
 
       <nav className="match-step-nav" aria-label="Navigation entre les matchs">
-        <button className="btn ghost" type="button" disabled={!previousMatch} onClick={() => previousMatch && navigate(`/matchs/${previousMatch.id}`)}>Match précédent</button>
-        <button className="btn secondary" type="button" disabled={!nextMatch} onClick={() => nextMatch && navigate(`/matchs/${nextMatch.id}`)}>Match suivant</button>
+        <button className="btn ghost" type="button" disabled={!previousMatch} onClick={() => navigateToMatch(previousMatch)}>Match précédent</button>
+        <button className="btn secondary" type="button" disabled={!nextMatch} onClick={() => navigateToMatch(nextMatch)}>Match suivant</button>
       </nav>
     </div>
   );

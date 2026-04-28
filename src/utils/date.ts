@@ -11,6 +11,12 @@ const timeFormatter = new Intl.DateTimeFormat('fr-FR', {
   minute: '2-digit',
 });
 
+const longDateFormatter = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+});
+
 export const formatKickoff = (isoDate: string): string => {
   const date = new Date(isoDate);
   return `${dateFormatter.format(date)} · ${timeFormatter.format(date)}`;
@@ -19,6 +25,11 @@ export const formatKickoff = (isoDate: string): string => {
 export const formatKickoffDay = (isoDate: string): string => dateFormatter.format(new Date(isoDate));
 
 export const formatKickoffTime = (isoDate: string): string => timeFormatter.format(new Date(isoDate));
+
+export const formatKickoffLong = (isoDate: string): string => {
+  const date = new Date(isoDate);
+  return `${longDateFormatter.format(date)} à ${timeFormatter.format(date).replace(':', 'h')}`;
+};
 
 export const getMatchStatusLabel = (status: MatchStatus): string => {
   const labels: Record<MatchStatus, string> = {
@@ -38,6 +49,22 @@ export const canEditPrediction = (match: Match, now = new Date()): boolean => {
 export const getMinutesBeforeLock = (match: Match, now = new Date()): number => {
   const kickoff = new Date(match.kickoff).getTime();
   return Math.max(0, Math.ceil((kickoff - now.getTime()) / (1000 * 60)));
+};
+
+export const formatTimeUntilKickoff = (match: Match, now = new Date()): string => {
+  const totalMinutes = getMinutesBeforeLock(match, now);
+  if (totalMinutes <= 0) return 'Prono fermé';
+
+  const days = Math.floor(totalMinutes / (24 * 60));
+  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+  const minutes = totalMinutes % 60;
+  const parts: string[] = [];
+
+  if (days > 0) parts.push(`${days} j`);
+  if (hours > 0) parts.push(`${hours} h`);
+  if (minutes > 0 && days === 0) parts.push(`${minutes} min`);
+
+  return `Dans ${parts.join(' ')}`;
 };
 
 export const getLiveMinute = (match: Match, now = new Date()): number | null => {

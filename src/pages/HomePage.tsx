@@ -29,7 +29,10 @@ const HomePage = () => {
             <Link className="btn secondary" to={player ? '/matchs' : '/connexion'}>{player ? 'Jouer mes matchs' : 'Se connecter'}</Link>
           </div>
         </div>
-        <img className="hero-cup" src={`${import.meta.env.BASE_URL}world-cup/trophy-26.jpg`} alt="" />
+        <div className="hero-visuals" aria-hidden="true">
+          <img className="hero-player" src={`${import.meta.env.BASE_URL}players/mbappe.png`} alt="" />
+          <img className="hero-cup" src={`${import.meta.env.BASE_URL}world-cup/trophy-cutout.png`} alt="" />
+        </div>
       </section>
 
       {!player ? (

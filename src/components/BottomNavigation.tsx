@@ -1,8 +1,9 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 
 const BottomNavigation = () => {
   const { player } = usePlayerSession();
+  const location = useLocation();
 
   const navItems = [
     { to: '/', label: 'Accueil', icon: '⌂' },
@@ -16,7 +17,15 @@ const BottomNavigation = () => {
   return (
     <nav className="bottom-nav" aria-label="Navigation principale">
       {navItems.map((item) => (
-        <NavLink key={item.label} to={item.to} end={item.to === '/'} className={({ isActive }) => `bottom-link ${isActive ? 'active' : ''}`}>
+        <NavLink
+          key={item.label}
+          to={item.to}
+          end={item.to === '/'}
+          className={({ isActive }) => `bottom-link ${isActive ? 'active' : ''}`}
+          onClick={(event) => {
+            if (location.pathname === item.to) event.preventDefault();
+          }}
+        >
           <span className="bottom-icon" aria-hidden="true">{item.icon}</span>
           <span>{item.label}</span>
         </NavLink>
