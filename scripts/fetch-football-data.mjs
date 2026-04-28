@@ -24,6 +24,25 @@ const statusMap = {
   FINISHED: 'finished',
 };
 
+const knownFixtureTeams = {
+  '552092': {
+    homeTeam: { id: '524', name: 'PSG', shortName: 'PSG', crest: 'https://crests.football-data.org/524.png' },
+    awayTeam: { id: '5', name: 'Bayern', shortName: 'FCB', crest: 'https://crests.football-data.org/5.png' },
+  },
+  '552093': {
+    homeTeam: { id: '78', name: 'Atletico Madrid', shortName: 'ATL', crest: 'https://crests.football-data.org/78.png' },
+    awayTeam: { id: '57', name: 'Arsenal', shortName: 'ARS', crest: 'https://crests.football-data.org/57.png' },
+  },
+  '552095': {
+    homeTeam: { id: '57', name: 'Arsenal', shortName: 'ARS', crest: 'https://crests.football-data.org/57.png' },
+    awayTeam: { id: '78', name: 'Atletico Madrid', shortName: 'ATL', crest: 'https://crests.football-data.org/78.png' },
+  },
+  '552094': {
+    homeTeam: { id: '5', name: 'Bayern', shortName: 'FCB', crest: 'https://crests.football-data.org/5.png' },
+    awayTeam: { id: '524', name: 'PSG', shortName: 'PSG', crest: 'https://crests.football-data.org/524.png' },
+  },
+};
+
 const cleanTeamName = (name) =>
   name
     .replace(/\bFC\b/g, '')
@@ -72,33 +91,50 @@ const shortNameFor = (team) => {
     .toUpperCase();
 };
 
-const normalizeMatch = (match, competition) => ({
-  id: `fd-${match.id}`,
-  externalId: String(match.id),
-  competitionCode: competition.code,
-  competitionName: competition.name,
-  homeTeam: {
-    id: String(match.homeTeam?.id ?? `home-${match.id}`),
-    name: cleanTeamName(match.homeTeam?.shortName ?? match.homeTeam?.name ?? 'Équipe domicile'),
-    shortName: shortNameFor(match.homeTeam ?? {}),
-    crest: match.homeTeam?.crest ?? undefined,
-  },
-  awayTeam: {
-    id: String(match.awayTeam?.id ?? `away-${match.id}`),
-    name: cleanTeamName(match.awayTeam?.shortName ?? match.awayTeam?.name ?? 'Équipe extérieure'),
-    shortName: shortNameFor(match.awayTeam ?? {}),
-    crest: match.awayTeam?.crest ?? undefined,
-  },
-  kickoff: match.utcDate,
-  status: statusMap[match.status] ?? 'upcoming',
-  homeScore: match.score?.fullTime?.home ?? match.score?.halfTime?.home ?? undefined,
-  awayScore: match.score?.fullTime?.away ?? match.score?.halfTime?.away ?? undefined,
-  minute: typeof match.minute === 'number' ? match.minute : null,
-  venue: match.venue ?? undefined,
-  matchday: match.matchday ?? null,
-  source: 'football-data.org',
-  lastUpdated: match.lastUpdated ?? undefined,
-});
+const hasUsefulTeam = (team) => {
+  if (!team) return false;
+  const label = cleanTeamName(team.shortName ?? team.name ?? '');
+  return Boolean(team.id || team.crest || (label && label !== 'T'));
+};
+
+const normalizeTeam = (team, knownTeam, fallbackId, fallbackName) => {
+  const apiTeamIsUseful = hasUsefulTeam(team);
+  const sourceTeam = apiTeamIsUseful ? team : knownTeam;
+  const displayName = apiTeamIsUseful ? sourceTeam?.shortName ?? sourceTeam?.name : knownTeam?.name;
+
+  return {
+    id: String(sourceTeam?.id ?? fallbackId),
+    name: cleanTeamName(displayName ?? fallbackName),
+    shortName: shortNameFor(sourceTeam ?? {}),
+    crest: sourceTeam?.crest ?? undefined,
+  };
+};
+
+const isPlaceholderTeam = (team) => team.id.startsWith('home-') || team.id.startsWith('away-');
+
+const isDisplayableMatch = (match) => !isPlaceholderTeam(match.homeTeam) && !isPlaceholderTeam(match.awayTeam);
+
+const normalizeMatch = (match, competition) => {
+  const knownFixture = knownFixtureTeams[String(match.id)] ?? {};
+
+  return {
+    id: `fd-${match.id}`,
+    externalId: String(match.id),
+    competitionCode: competition.code,
+    competitionName: competition.name,
+    homeTeam: normalizeTeam(match.homeTeam, knownFixture.homeTeam, `home-${match.id}`, 'Home team'),
+    awayTeam: normalizeTeam(match.awayTeam, knownFixture.awayTeam, `away-${match.id}`, 'Away team'),
+    kickoff: match.utcDate,
+    status: statusMap[match.status] ?? 'upcoming',
+    homeScore: match.score?.fullTime?.home ?? match.score?.halfTime?.home ?? undefined,
+    awayScore: match.score?.fullTime?.away ?? match.score?.halfTime?.away ?? undefined,
+    minute: typeof match.minute === 'number' ? match.minute : null,
+    venue: match.venue ?? undefined,
+    matchday: match.matchday ?? null,
+    source: 'football-data.org',
+    lastUpdated: match.lastUpdated ?? undefined,
+  };
+};
 
 const fetchCompetition = async (competition) => {
   const url = new URL(`https://api.football-data.org/v4/competitions/${competition.code}/matches`);
@@ -117,7 +153,13 @@ const fetchCompetition = async (competition) => {
   }
 
   const data = await response.json();
-  return (data.matches ?? []).map((match) => normalizeMatch(match, competition));
+  const normalizedMatches = (data.matches ?? []).map((match) => normalizeMatch(match, competition));
+  const displayableMatches = normalizedMatches.filter(isDisplayableMatch);
+  const hiddenCount = normalizedMatches.length - displayableMatches.length;
+  if (hiddenCount > 0) {
+    console.log(`${competition.code}: hidden ${hiddenCount} match(es) without complete teams`);
+  }
+  return displayableMatches;
 };
 
 if (!token) {

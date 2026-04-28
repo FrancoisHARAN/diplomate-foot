@@ -27,12 +27,25 @@ const fallbackState: LiveMatchesState = {
 
 const liveDataUrl = () => `${import.meta.env.BASE_URL}live-data/matches.json?ts=${Date.now()}`;
 
+const hasPlaceholderTeam = (match: Match) => {
+  const labels = [match.homeTeam.name, match.awayTeam.name].join(' ').toLowerCase();
+  return (
+    match.homeTeam.id.startsWith('home-') ||
+    match.awayTeam.id.startsWith('away-') ||
+    labels.includes('equipe domicile') ||
+    labels.includes('equipe exterieure') ||
+    labels.includes('équipe domicile') ||
+    labels.includes('équipe extérieure')
+  );
+};
+
 const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   const response = await fetch(liveDataUrl(), { cache: 'no-store' });
   if (!response.ok) return fallbackState;
 
   const payload = (await response.json()) as LiveMatchesPayload;
-  const matches = Array.isArray(payload.matches) && payload.matches.length > 0 ? payload.matches : mockMatches;
+  const liveMatches = Array.isArray(payload.matches) ? payload.matches.filter((match) => !hasPlaceholderTeam(match)) : [];
+  const matches = liveMatches.length > 0 ? liveMatches : mockMatches;
 
   return {
     matches,
