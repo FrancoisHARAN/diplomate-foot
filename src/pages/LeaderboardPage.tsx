@@ -1,38 +1,44 @@
-import { useEffect, useState } from 'react';
-import PageTitle from '../components/PageTitle';
-import Podium from '../components/Podium';
-import RankingList from '../components/RankingList';
+import { useMemo } from 'react';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { matchService } from '../services/matchService';
-import { playerService } from '../services/playerService';
-import { predictionService } from '../services/predictionService';
-import type { Standing } from '../types';
-import { buildStandings, getUserRank } from '../utils/appState';
+import { mockMatches } from '../data/mockMatches';
+import { mockPlayers } from '../data/mockPlayers';
+import { buildStandings, getStoredPredictions } from '../utils/appState';
 
 const LeaderboardPage = () => {
   const { player } = usePlayerSession();
-  const [standings, setStandings] = useState<Standing[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const [players, predictions, matches] = await Promise.all([
-        playerService.getPlayers(),
-        predictionService.getAllPredictions(),
-        matchService.getAll(),
-      ]);
-      setStandings(buildStandings(players, predictions, matches));
-    };
-    void load();
-  }, []);
-
-  const userRank = getUserRank(standings, player?.id);
+  const standings = useMemo(() => buildStandings(mockPlayers, getStoredPredictions(), mockMatches), []);
+  const me = standings.find((row) => row.playerId === player?.id);
 
   return (
     <div className="stack">
-      <PageTitle title="Classement" subtitle="Le 1er remporte 50 €." />
-      <Podium top={standings.slice(0, 3)} />
-      {userRank ? <section className="card">Tu es {userRank.position}e avec {userRank.points} points.</section> : null}
-      <RankingList standings={standings} currentPlayerId={player?.id} />
+      <section className="card stack-sm">
+        <h1>Classement</h1>
+        <p>Le 1er remporte 50 € de consommation.</p>
+      </section>
+
+      <section className="podium">
+        {standings.slice(0, 3).map((row) => (
+          <article key={row.playerId} className={`card ${row.position === 1 ? 'podium-1' : ''}`}>
+            <p>#{row.position}</p>
+            <strong>{row.nickname}</strong>
+            <p>{row.points} pts</p>
+          </article>
+        ))}
+      </section>
+
+      {me ? <section className="card">Tu es actuellement {me.position}ème avec {me.points} points.</section> : null}
+
+      <section className="stack-sm">
+        {standings.map((row) => (
+          <article key={row.playerId} className={`card ${row.playerId === player?.id ? 'highlight' : ''}`}>
+            <div className="row-between">
+              <strong>{row.position}. {row.nickname}</strong>
+              <strong>{row.points} pts</strong>
+            </div>
+            <p>Scores exacts : {row.exactScores} · Bons résultats : {row.correctResults}</p>
+          </article>
+        ))}
+      </section>
     </div>
   );
 };

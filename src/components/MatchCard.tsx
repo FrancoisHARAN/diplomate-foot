@@ -1,65 +1,58 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoff, getMatchStatusLabel } from '../utils/date';
-import { predictionService } from '../services/predictionService';
+import { formatKickoff } from '../utils/date';
+import { canEditPrediction } from '../utils/date';
 
-interface Props {
+interface MatchCardProps {
   match: Match;
   prediction?: Prediction;
+  variant?: 'compact' | 'full';
+  onClick?: () => void;
+  linkTo?: string;
 }
 
-const MatchCard = ({ match, prediction }: Props) => {
+const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: MatchCardProps) => {
   const navigate = useNavigate();
   const editable = canEditPrediction(match);
 
-  const actionLabel =
-    match.status === 'finished'
-      ? 'Voir le détail'
-      : prediction
-        ? 'Voir mon pronostic'
-        : editable
-          ? 'Pronostiquer'
-          : 'Pronostic clôturé';
+  const cta =
+    match.status === 'finished' ? 'Résultat' : match.status === 'live' ? 'Voir' : prediction ? (editable ? 'Modifier' : 'Voir') : editable ? 'Pronostiquer' : 'Voir';
 
-  const points =
-    match.status === 'finished' && prediction
-      ? predictionService.calculatePointsForPrediction(prediction, match)
-      : undefined;
+  const note =
+    match.status === 'finished'
+      ? `Score final : ${match.homeScore} - ${match.awayScore}`
+      : prediction
+        ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}`
+        : editable
+          ? 'Prono ouvert'
+          : 'Pronostics fermés';
+
+  const statusBadge =
+    match.status === 'finished' ? 'Terminé' : match.status === 'live' ? 'En cours' : editable ? 'Ouvert' : 'Fermé';
+
+  const click = () => {
+    if (onClick) return onClick();
+    navigate(linkTo ?? `/matchs/${match.id}`);
+  };
 
   return (
-    <article className="match-card card">
-      <Link to={`/matchs/${match.id}`} className="match-card-main">
-        <p className="match-time">{formatKickoff(match.kickoff)}</p>
-        <p className="match-note">Statut : {getMatchStatusLabel(match.status)}</p>
+    <button type="button" className={`match-card card ${variant === 'compact' ? 'compact' : ''}`} onClick={click}>
+      <div className="card-footer">
+        <p className="match-time">{match.status === 'finished' ? 'Terminé' : formatKickoff(match.kickoff)}</p>
+        <span className={`status-pill ${editable ? 'open' : match.status === 'finished' ? 'done' : 'closed'}`}>{statusBadge}</span>
+      </div>
 
-        <div className="teams-row">
-          <strong>{match.homeTeam.name}</strong>
-          <span>VS</span>
-          <strong>{match.awayTeam.name}</strong>
-        </div>
-
-        {!editable && match.status === 'upcoming' ? <p className="match-note">Deadline dépassée · pronostic verrouillé</p> : null}
-        {match.status === 'finished' ? (
-          <p className="match-note">Score final : {match.homeScore} - {match.awayScore}</p>
-        ) : null}
-        {prediction ? <p className="match-note">Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
-        {typeof points === 'number' ? <p className="match-note">Tes points : {points} pts</p> : null}
-      </Link>
+      <div className="teams-row">
+        <strong>{match.homeTeam.name}</strong>
+        <span>{match.status === 'finished' ? `${match.homeScore} - ${match.awayScore}` : 'VS'}</span>
+        <strong>{match.awayTeam.name}</strong>
+      </div>
 
       <div className="card-footer">
-        <span className={`status-pill ${editable ? 'open' : prediction ? 'done' : 'closed'}`}>
-          {prediction ? 'Déjà pronostiqué' : editable ? 'À faire' : 'Verrouillé'}
-        </span>
-        <button
-          className="btn small"
-          type="button"
-          disabled={!editable && !prediction && match.status !== 'finished'}
-          onClick={() => navigate(match.status === 'finished' ? `/matchs/${match.id}` : `/matchs/${match.id}/pronostic`)}
-        >
-          {actionLabel}
-        </button>
+        <p className="match-note">{note}</p>
+        <p className="cta-arrow">{cta} →</p>
       </div>
-    </article>
+    </button>
   );
 };
 

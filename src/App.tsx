@@ -17,13 +17,10 @@ const App = () => (
       <Route path="/" element={<HomePage />} />
       <Route path="/matchs" element={<MatchesPage />} />
       <Route path="/matchs/:matchId" element={<MatchDetailPage />} />
-      <Route path="/matchs/:matchId/pronostic" element={<MatchDetailPage />} />
       <Route path="/classement" element={<LeaderboardPage />} />
-      <Route path="/classements" element={<LeaderboardPage />} />
       <Route path="/mes-pronos" element={<MyPredictionsPage />} />
       <Route path="/mon-compte" element={<PlayerSpacePage />} />
       <Route path="/connexion" element={<LoginPage />} />
-      <Route path="/aide" element={<ReglementPage />} />
       <Route path="/reglement" element={<ReglementPage />} />
       <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<NotFoundPage />} />

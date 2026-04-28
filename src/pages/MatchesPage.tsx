@@ -1,104 +1,52 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import MatchList from '../components/MatchList';
-import PageTitle from '../components/PageTitle';
+import { useMemo, useState } from 'react';
+import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { matchService } from '../services/matchService';
-import { predictionService } from '../services/predictionService';
-import type { Match, Prediction } from '../types';
+import { mockMatches } from '../data/mockMatches';
 import { canEditPrediction } from '../utils/date';
+import { getStoredPredictions } from '../utils/appState';
 
-type StatusFilter = 'all' | 'upcoming' | 'live' | 'finished' | 'closed';
+type FilterKey = 'all' | 'open' | 'mine' | 'closed' | 'done';
 
 const MatchesPage = () => {
   const { player } = usePlayerSession();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = useState<FilterKey>('all');
+  const predictions = getStoredPredictions();
+  const myPredictions = predictions.filter((p) => p.playerId === player?.id);
+  const myMap = new Map(myPredictions.map((p) => [p.matchId, p]));
 
-  const status = (searchParams.get('status') as StatusFilter) || 'all';
-  const mineOnly = searchParams.get('mine') === '1';
-  const date = searchParams.get('date') ?? '';
-
-  useEffect(() => {
-    const load = async () => {
-      const loadedMatches = await matchService.getAll();
-      setMatches(loadedMatches);
-      if (!player) return setPredictions([]);
-      setPredictions(await predictionService.getPredictionsForPlayer(player.id));
-    };
-    void load();
-  }, [player]);
-
-  const predictionsByMatch = useMemo(
-    () => Object.fromEntries(predictions.map((prediction) => [prediction.matchId, prediction])),
-    [predictions],
-  );
-
-  const filteredMatches = useMemo(() => {
-    return matches
-      .filter((match) => {
-        if (mineOnly && !predictionsByMatch[match.id]) return false;
-        if (status === 'closed') return match.status !== 'finished' && !canEditPrediction(match);
-        if (status === 'upcoming' || status === 'live' || status === 'finished') {
-          if (match.status !== status) return false;
-        }
-        if (date) {
-          const day = new Date(match.kickoff).toISOString().slice(0, 10);
-          if (day !== date) return false;
-        }
-        return true;
-      })
-      .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
-  }, [date, matches, mineOnly, predictionsByMatch, status]);
-
-  const updateFilters = (next: Partial<{ status: StatusFilter; mine: boolean; date: string }>) => {
-    const params = new URLSearchParams(searchParams);
-    if (next.status) params.set('status', next.status); else if ('status' in next) params.delete('status');
-    if (typeof next.mine === 'boolean') {
-      if (next.mine) params.set('mine', '1');
-      else params.delete('mine');
-    }
-    if (typeof next.date === 'string') {
-      if (next.date) params.set('date', next.date);
-      else params.delete('date');
-    }
-    setSearchParams(params);
-  };
+  const filtered = useMemo(() => {
+    return mockMatches.filter((match) => {
+      const mine = myMap.get(match.id);
+      if (filter === 'mine') return Boolean(mine);
+      if (filter === 'open') return match.status === 'upcoming' && canEditPrediction(match);
+      if (filter === 'closed') return (match.status === 'upcoming' && !canEditPrediction(match)) || match.status === 'live';
+      if (filter === 'done') return match.status === 'finished';
+      return true;
+    });
+  }, [filter, myMap]);
 
   return (
     <div className="stack">
-      <PageTitle title="Matchs à venir" subtitle="Choisis un match et pronostique en quelques secondes." />
-
-      <section className="card stack-sm">
-        <h2>Filtres</h2>
-        <div className="filter-row">
-          {[
-            ['all', 'Tous'],
-            ['upcoming', 'À venir'],
-            ['live', 'En cours'],
-            ['closed', 'Verrouillés'],
-            ['finished', 'Terminés'],
-          ].map(([value, label]) => (
-            <button key={value} className={`pill ${status === value ? 'active' : ''}`} onClick={() => updateFilters({ status: value as StatusFilter })}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="filter-controls">
-          <label>
-            Date
-            <input type="date" value={date} onChange={(event) => updateFilters({ date: event.target.value })} />
-          </label>
-          <label className="checkbox-inline">
-            <input type="checkbox" checked={mineOnly} onChange={(event) => updateFilters({ mine: event.target.checked })} />
-            Mes matchs non pronostiqués
-          </label>
-          <button className="btn small secondary" type="button" onClick={() => setSearchParams(new URLSearchParams())}>Réinitialiser</button>
-        </div>
+      <section className="stack-sm">
+        <h1>Matchs</h1>
+        <p>Choisis un match pour faire ton prono.</p>
       </section>
 
-      <MatchList matches={filteredMatches} predictionsByMatch={predictionsByMatch} />
+      <div className="filter-row">
+        {[
+          ['all', 'Tous'],
+          ['open', 'Ouverts'],
+          ['mine', 'Mes pronos'],
+          ['closed', 'Fermés'],
+          ['done', 'Terminés'],
+        ].map(([id, label]) => (
+          <button key={id} type="button" className={`pill ${filter === id ? 'active' : ''}`} onClick={() => setFilter(id as FilterKey)}>{label}</button>
+        ))}
+      </div>
+
+      <section className="stack-sm">
+        {filtered.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+      </section>
     </div>
   );
 };

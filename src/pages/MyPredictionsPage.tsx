@@ -1,51 +1,53 @@
-import { useEffect, useMemo, useState } from 'react';
-import EmptyState from '../components/EmptyState';
-import PageTitle from '../components/PageTitle';
-import UserPredictionsList from '../components/UserPredictionsList';
-import UserStats from '../components/UserStats';
+import { Link } from 'react-router-dom';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { matchService } from '../services/matchService';
-import { predictionService } from '../services/predictionService';
-import type { Match, Prediction } from '../types';
+import { mockMatches } from '../data/mockMatches';
+import { canEditPrediction } from '../utils/date';
+import { getStoredPredictions, getUserPointsMock } from '../utils/appState';
+import { calculatePredictionPoints } from '../utils/points';
 
 const MyPredictionsPage = () => {
   const { player } = usePlayerSession();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
 
-  useEffect(() => {
-    const load = async () => {
-      const allMatches = await matchService.getAll();
-      setMatches(allMatches);
-      if (!player) return setPredictions([]);
-      setPredictions(await predictionService.getPredictionsForPlayer(player.id));
-    };
-    void load();
-  }, [player]);
+  if (!player) {
+    return (
+      <section className="card stack-sm">
+        <h1>Mes pronos</h1>
+        <p>Connecte-toi pour voir tes pronos.</p>
+        <Link className="btn full" to="/connexion">Connexion</Link>
+      </section>
+    );
+  }
 
-  const map = useMemo(() => Object.fromEntries(predictions.map((item) => [item.matchId, item])), [predictions]);
-
-  if (!player) return <EmptyState title="Connecte-toi" text="Connecte-toi pour voir tes pronostics." ctaLabel="Connexion" to="/connexion" />;
-
-  const upcoming = matches.filter((match) => match.status === 'upcoming').map((match) => ({ match, prediction: map[match.id] }));
-  const locked = matches.filter((match) => match.status === 'live').map((match) => ({ match, prediction: map[match.id] }));
-  const done = matches
-    .filter((match) => match.status === 'finished')
-    .map((match) => ({ match, prediction: map[match.id], points: map[match.id] ? predictionService.calculatePointsForPrediction(map[match.id], match) : 0 }));
+  const mine = getStoredPredictions().filter((p) => p.playerId === player.id);
+  const map = new Map(mine.map((p) => [p.matchId, p]));
+  const remaining = mockMatches.filter((m) => m.status !== 'finished' && !map.has(m.id)).length;
 
   return (
     <div className="stack">
-      <PageTitle title="Mes pronos" />
-      <UserStats
-        items={[
-          { label: 'Pronostics faits', value: predictions.length },
-          { label: 'Points totaux', value: done.reduce((sum, item) => sum + (item.points ?? 0), 0) },
-          { label: 'Matchs restants', value: upcoming.length },
-        ]}
-      />
-      <UserPredictionsList title="À venir" items={upcoming} />
-      <UserPredictionsList title="Verrouillés" items={locked} />
-      <UserPredictionsList title="Terminés" items={done} />
+      <section className="card stack-sm">
+        <h1>Mes pronos</h1>
+        <p>Points : {getUserPointsMock()} · Pronostics faits : {mine.length} · Matchs restants : {remaining}</p>
+      </section>
+
+      <section className="stack-sm">
+        {mockMatches.filter((m) => map.has(m.id)).map((match) => {
+          const prediction = map.get(match.id);
+          const state = match.status === 'finished' ? 'terminé' : canEditPrediction(match) ? 'modifiable' : 'verrouillé';
+          const points = prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+            ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+            : undefined;
+
+          return (
+            <article className="card stack-sm" key={match.id}>
+              <strong>{match.homeTeam.name} vs {match.awayTeam.name}</strong>
+              <p>Ton prono : {prediction?.homeScore} - {prediction?.awayScore}</p>
+              <p>Statut : {state}</p>
+              {typeof points === 'number' ? <p>Points : {points} pts</p> : null}
+              <Link className="btn small" to={`/matchs/${match.id}`}>{state === 'modifiable' ? 'Modifier' : 'Voir match'}</Link>
+            </article>
+          );
+        })}
+      </section>
     </div>
   );
 };

@@ -1,84 +1,79 @@
+import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import PredictionForm from '../components/PredictionForm';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { matchService } from '../services/matchService';
-import { predictionService } from '../services/predictionService';
-import type { Match, Prediction } from '../types';
+import { mockMatches } from '../data/mockMatches';
 import { canEditPrediction } from '../utils/date';
+import { getPredictionForMatch, getStoredPredictions, savePrediction } from '../utils/appState';
+import { calculatePredictionPoints } from '../utils/points';
 
 const MatchDetailPage = () => {
   const { matchId } = useParams();
+  const { player } = usePlayerSession();
   const navigate = useNavigate();
   const location = useLocation();
-  const { player } = usePlayerSession();
-  const [match, setMatch] = useState<Match | null>(null);
-  const [prediction, setPrediction] = useState<Prediction | undefined>();
+  const [refresh, setRefresh] = useState(0);
+  const [homeScore, setHomeScore] = useState('');
+  const [awayScore, setAwayScore] = useState('');
   const [message, setMessage] = useState('');
-  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      if (!matchId) return;
-      const found = await matchService.getById(matchId);
-      setMatch(found ?? null);
-      if (!player || !found) return;
-      const playerPredictions = await predictionService.getPredictionsForPlayer(player.id);
-      setPrediction(playerPredictions.find((item) => item.matchId === found.id));
-    };
-    void load();
-  }, [matchId, player]);
+  const match = mockMatches.find((m) => m.id === matchId);
+  const prediction = useMemo(() => (match ? getPredictionForMatch(match.id) : undefined), [match, refresh]);
 
   if (!match) return <section className="card">Match introuvable.</section>;
 
-  const editable = canEditPrediction(match);
+  const editable = canEditPrediction(match) && match.status === 'upcoming';
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    savePrediction(match.id, Number(homeScore), Number(awayScore));
+    setRefresh((v) => v + 1);
+    setMessage('Pronostic enregistré');
+  };
+
+  const points =
+    match.status === 'finished' && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+      ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+      : 0;
 
   return (
     <div className="stack">
-      <Link className="back-link" to="/matchs">← Retour aux matchs</Link>
-      <MatchCard match={match} prediction={prediction} />
+      <Link className="back-link" to="/matchs">← Matchs</Link>
+      <MatchCard match={match} prediction={prediction} variant="full" />
 
       <section className="card stack-sm">
-        <h1>Pronostiquer maintenant</h1>
+        <h2>Ton pronostic</h2>
 
         {!player ? (
           <div className="stack-sm">
-            <p>Connectez-vous pour enregistrer ce pronostic.</p>
-            <button className="btn" onClick={() => navigate('/connexion', { state: { from: location.pathname } })}>
-              Se connecter
-            </button>
+            <p>Connecte-toi pour pronostiquer ce match.</p>
+            <button className="btn full" type="button" onClick={() => navigate('/connexion', { state: { redirectTo: location.pathname } })}>Connexion</button>
           </div>
         ) : null}
 
         {player && editable ? (
-          <PredictionForm
-            match={match}
-            initial={prediction}
-            loading={saving}
-            onSubmit={async (homeScore, awayScore) => {
-              setSaving(true);
-              await predictionService.savePrediction(player.id, match.id, homeScore, awayScore);
-              const refreshed = await predictionService.getPredictionsForPlayer(player.id);
-              setPrediction(refreshed.find((item) => item.matchId === match.id));
-              setMessage('Pronostic enregistré ✅ Vous pouvez le modifier avant la clôture.');
-              setSaving(false);
-            }}
-          />
+          <form className="stack-sm" onSubmit={submit}>
+            <div className="score-row">
+              <label>{match.homeTeam.name}<input type="number" min={0} required value={homeScore} onChange={(e) => setHomeScore(e.target.value)} /></label>
+              <strong>-</strong>
+              <label>{match.awayTeam.name}<input type="number" min={0} required value={awayScore} onChange={(e) => setAwayScore(e.target.value)} /></label>
+            </div>
+            <button className="btn full" type="submit">{prediction ? 'Modifier mon prono' : 'Valider mon prono'}</button>
+          </form>
         ) : null}
 
         {player && !editable && match.status !== 'finished' ? (
           <>
-            <p>Les pronostics sont clôturés pour ce match.</p>
-            {prediction ? <p>Ton prono : {prediction.homeScore} - {prediction.awayScore}</p> : null}
+            <p>Les pronostics sont fermés pour ce match.</p>
+            <p>{prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun prono enregistré.'}</p>
           </>
         ) : null}
 
         {player && match.status === 'finished' ? (
           <>
             <p>Score final : {match.homeScore} - {match.awayScore}</p>
-            <p>Ton prono : {prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun'}</p>
-            <p>Points gagnés : {prediction ? predictionService.calculatePointsForPrediction(prediction, match) : 0} pts</p>
+            <p>{prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun prono enregistré.'}</p>
+            <p>Tes points : {points} pts</p>
           </>
         ) : null}
 

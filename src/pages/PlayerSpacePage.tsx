@@ -1,59 +1,56 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { matchService } from '../services/matchService';
-import { playerService } from '../services/playerService';
-import { predictionService } from '../services/predictionService';
-import type { Standing } from '../types';
-import { buildStandings, getUserRank } from '../utils/appState';
+import { mockMatches } from '../data/mockMatches';
+import { mockPlayers } from '../data/mockPlayers';
+import { countUserPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
 
 const PlayerSpacePage = () => {
   const navigate = useNavigate();
   const { player, logout } = usePlayerSession();
-  const [points, setPoints] = useState(0);
-  const [rank, setRank] = useState<Standing | undefined>();
 
-  useEffect(() => {
-    const load = async () => {
-      if (!player) return;
-      const [players, predictions, matches] = await Promise.all([
-        playerService.getPlayers(),
-        predictionService.getAllPredictions(),
-        matchService.getAll(),
-      ]);
-      const standings = buildStandings(players, predictions, matches);
-      const mine = predictions.filter((item) => item.playerId === player.id);
-      const donePoints = mine.reduce((sum, prediction) => {
-        const match = matches.find((item) => item.id === prediction.matchId);
-        return match ? sum + predictionService.calculatePointsForPrediction(prediction, match) : sum;
-      }, 0);
-      setPoints(donePoints);
-      setRank(getUserRank(standings, player.id));
-    };
-    void load();
-  }, [player]);
+  if (!player) {
+    return (
+      <section className="card stack-sm">
+        <h1>Mon compte</h1>
+        <p>Tu n’es pas connecté.</p>
+        <Link className="btn full" to="/connexion">Connexion</Link>
+      </section>
+    );
+  }
 
-  if (!player) return <Navigate to="/connexion" replace />;
+  const playerData = mockPlayers.find((p) => p.id === player.id);
+  const done = countUserPredictions();
+  const toPredict = mockMatches.filter((m) => m.status !== 'finished').length - done;
 
   return (
     <div className="stack">
       <section className="card stack-sm">
-        <h1>Mon compte</h1>
-        <p>{player.nickname}</p>
-        <p>{points} pts</p>
-        <p>Rang : {rank?.position ?? '-'}</p>
+        <h1>👤 {player.nickname}</h1>
+        <p>{getUserPointsMock()} pts · Rang actuel : {getUserRankMock()}ème</p>
       </section>
-      <Link className="btn" to="/mes-pronos">Mes pronos</Link>
-      <Link className="btn secondary" to="/classement">Classement</Link>
-      <button
-        className="btn secondary"
-        onClick={() => {
-          logout();
-          navigate('/connexion');
-        }}
-      >
-        Déconnexion
-      </button>
+
+      <section className="card stack-sm">
+        <p>Pronostics faits : {done}</p>
+        <p>Scores exacts : {playerData?.exactScores ?? 0}</p>
+        <p>Bons résultats : {playerData?.correctResults ?? 0}</p>
+        <p>Matchs à pronostiquer : {Math.max(toPredict, 0)}</p>
+      </section>
+
+      <section className="stack-sm">
+        <Link className="btn full" to="/mes-pronos">Mes pronos</Link>
+        <Link className="btn secondary full" to="/classement">Classement</Link>
+        <Link className="btn secondary full" to="/reglement">Règlement</Link>
+        <button
+          className="btn secondary full"
+          onClick={() => {
+            logout();
+            navigate('/');
+          }}
+          type="button"
+        >
+          Déconnexion
+        </button>
+      </section>
     </div>
   );
 };
