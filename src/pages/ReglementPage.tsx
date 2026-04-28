@@ -1,36 +1,70 @@
 const rules = [
-  { title: 'Score exact', points: '3 pts', text: 'Tu trouves le score final complet, par exemple 2 - 1.' },
-  { title: 'Bon écart', points: '2 pts', text: 'Tu trouves le bon vainqueur et le bon écart, par exemple 3 - 2 au lieu de 2 - 1.' },
-  { title: 'Bon résultat', points: '1 pt', text: "Tu trouves la bonne équipe gagnante, ou le bon match nul." },
-  { title: 'Mauvais résultat', points: '0 pt', text: 'Le résultat du match ne correspond pas à ton prono.' },
+  {
+    title: 'Score exact',
+    points: '3 pts',
+    condition: 'Tu trouves exactement le score final.',
+    example: 'Exemple : tu joues 2 - 1, le match finit 2 - 1.',
+  },
+  {
+    title: 'Bon écart',
+    points: '2 pts',
+    condition: 'Tu trouves le bon vainqueur avec le bon écart de buts.',
+    example: 'Exemple : tu joues 3 - 1, le match finit 2 - 0.',
+  },
+  {
+    title: 'Bon résultat',
+    points: '1 pt',
+    condition: 'Tu trouves le bon gagnant, ou tu annonces le bon match nul.',
+    example: 'Exemple : tu joues 1 - 0, ton équipe gagne 3 - 2.',
+  },
+  {
+    title: 'Prono perdu',
+    points: '0 pt',
+    condition: 'Le résultat ne correspond pas à ton pari.',
+    example: 'Exemple : tu joues victoire à domicile, mais l’extérieur gagne.',
+  },
 ];
 
 const ReglementPage = () => (
   <div className="screen-stack">
-    <section className="page-hero">
+    <section className="page-hero rules-hero">
       <p className="eyebrow">Jeu du bar</p>
       <h1>Règlement</h1>
-      <p>Les pronostics ferment automatiquement au coup d'envoi du match.</p>
+      <p>Tu poses un score avant le coup d’envoi. Dès que le match commence, le prono est verrouillé.</p>
+    </section>
+
+    <section className="rules-lead-card">
+      <span>Objectif</span>
+      <strong>Marquer le plus de points possible sur les vrais matchs.</strong>
+      <p>Plus ton score est précis, plus tu prends de points au classement du Diplomate.</p>
     </section>
 
     <section className="rules-grid">
       {rules.map((rule) => (
-        <article className="rule-tile" key={rule.title}>
-          <span>{rule.points}</span>
-          <strong>{rule.title}</strong>
-          <p>{rule.text}</p>
+        <article className="rule-card" key={rule.title}>
+          <div className="rule-points">
+            <span>{rule.points}</span>
+          </div>
+          <div className="rule-body">
+            <strong>{rule.title}</strong>
+            <p>{rule.condition}</p>
+            <small>{rule.example}</small>
+          </div>
         </article>
       ))}
     </section>
 
-    <section className="notice-panel">
-      <strong>Boosters</strong>
-      <p>Certains matchs peuvent compter double ou plus. Sur un match boosté x2, un score exact vaut 6 points.</p>
-    </section>
-
-    <section className="notice-panel compact">
-      <strong>Lots finaux</strong>
-      <p>1er : 20 € de consommation au bar · 2e : une pizza · 3e : un saucisson.</p>
+    <section className="rules-note-grid">
+      <article className="rules-note-card boost-card">
+        <span>Boost</span>
+        <strong>Certains matchs comptent x2 ou plus.</strong>
+        <p>Sur un match boosté x2, un score exact vaut 6 points au lieu de 3.</p>
+      </article>
+      <article className="rules-note-card prizes-card">
+        <span>Podium</span>
+        <strong>Les lots finaux</strong>
+        <p>1er : 20 € de conso au bar. 2e : une pizza. 3e : un saucisson.</p>
+      </article>
     </section>
   </div>
 );

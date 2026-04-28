@@ -402,16 +402,16 @@ small {
 
 .hero-player {
   position: absolute;
-  right: -5.65rem;
-  bottom: -3.45rem;
-  width: 15.5rem;
+  right: -1.35rem;
+  bottom: -3.7rem;
+  width: 15.15rem;
   max-width: none;
   filter: drop-shadow(0 20px 22px rgba(0, 16, 90, 0.36));
 }
 
 .hero-cup {
   position: absolute;
-  right: 4.45rem;
+  right: 6.25rem;
   bottom: 1.2rem;
   width: 4.8rem;
   max-width: none;
@@ -431,6 +431,26 @@ small {
   color: var(--blue);
   font-family: Impact, "Arial Black", sans-serif;
   text-transform: uppercase;
+}
+
+.rules-hero {
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    var(--blue);
+  background-size: 22px 22px;
+  border-color: var(--blue);
+}
+
+.rules-hero h1,
+.rules-hero p {
+  color: #fff;
+}
+
+.rules-hero .eyebrow {
+  color: var(--lime);
 }
 
 .intro-panel {
@@ -1350,6 +1370,156 @@ button.action-row {
   gap: 0.45rem;
 }
 
+.rules-lead-card {
+  display: grid;
+  gap: 0.34rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rules-lead-card span,
+.rules-note-card span {
+  justify-self: start;
+  padding: 0.28rem 0.52rem;
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.rules-lead-card strong {
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.42rem;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.rules-grid {
+  gap: 0.65rem;
+}
+
+.rule-card {
+  display: grid;
+  grid-template-columns: 4.65rem minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 6.4rem;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rule-card:nth-child(1) {
+  border-color: var(--blue);
+}
+
+.rule-card:nth-child(2) {
+  border-color: var(--aqua);
+}
+
+.rule-card:nth-child(3) {
+  border-color: var(--lime);
+}
+
+.rule-card:nth-child(4) {
+  border-color: #d7def6;
+}
+
+.rule-points {
+  display: grid;
+  place-items: center;
+  padding: 0.58rem;
+  background: var(--blue);
+}
+
+.rule-card:nth-child(2) .rule-points {
+  background: var(--aqua);
+}
+
+.rule-card:nth-child(3) .rule-points {
+  background: var(--lime);
+}
+
+.rule-card:nth-child(4) .rule-points {
+  background: var(--ink);
+}
+
+.rule-points span {
+  color: #fff;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.22rem;
+  line-height: 0.94;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.rule-card:nth-child(3) .rule-points span {
+  color: var(--ink);
+}
+
+.rule-body {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.7rem;
+}
+
+.rule-body strong {
+  color: var(--blue);
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.rule-body p {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 780;
+  line-height: 1.22;
+}
+
+.rule-body small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.24;
+}
+
+.rules-note-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.rules-note-card {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.rules-note-card strong {
+  color: var(--blue);
+  font-size: 1rem;
+}
+
+.boost-card {
+  border-color: var(--lime);
+  background:
+    linear-gradient(90deg, rgba(210, 255, 82, 0.36) 1px, transparent 1px),
+    linear-gradient(rgba(210, 255, 82, 0.36) 1px, transparent 1px),
+    #fff;
+  background-size: 18px 18px;
+}
+
+.prizes-card {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
 .rules-strip span,
 .rule-tile {
   min-height: 4.2rem;
@@ -1487,15 +1657,15 @@ button.action-row {
   }
 
   .hero-player {
-    right: -6.15rem;
-    bottom: -3.15rem;
-    width: 14.9rem;
+    right: -1.95rem;
+    bottom: -3.45rem;
+    width: 14.55rem;
   }
 
   .hero-cup {
-    right: 3.55rem;
-    bottom: 1rem;
-    width: 4.25rem;
+    right: 5.2rem;
+    bottom: 0.95rem;
+    width: 4rem;
   }
 
   .hero-actions,
