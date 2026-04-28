@@ -3,65 +3,113 @@ import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
-import { countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
+import { buildStandings, countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
 
 const HomePage = () => {
   const { player } = usePlayerSession();
-  const upcoming = mockMatches.filter((match) => match.status !== 'finished').slice(0, 4);
   const predictions = getStoredPredictions();
-  const myMap = new Map(predictions.filter((p) => p.playerId === player?.id).map((p) => [p.matchId, p]));
+  const standings = buildStandings(mockPlayers, predictions, mockMatches);
+  const nextMatches = mockMatches.filter((match) => match.status !== 'finished').slice(0, 3);
+  const myMap = new Map(predictions.filter((prediction) => prediction.playerId === player?.id).map((prediction) => [prediction.matchId, prediction]));
+  const openMatches = mockMatches.filter((match) => match.status === 'upcoming').length;
+  const finishedMatches = mockMatches.filter((match) => match.status === 'finished').length;
 
   return (
-    <div className="stack">
-      <section className="card stack-sm">
-        <p className="hero-brand">LE DIPLOMATE</p>
-        <h1>Pronos Coupe du Monde 2026</h1>
-        <p className="prize-badge">1er prix : 50 €</p>
-        {!player ? <Link className="btn full" to="/connexion">Se connecter</Link> : <p>Salut {player.nickname} · {getUserPointsMock()} pts</p>}
+    <div className="screen-stack">
+      <section className="hero-panel">
+        <div>
+          <p className="eyebrow">LE DIPLOMATE</p>
+          <h1>Pronos Coupe du Monde 2026</h1>
+          <p className="hero-copy">Classement du bar, pronostics match par match, 50 € de conso pour le premier.</p>
+        </div>
+        <div className="hero-actions">
+          <Link className="btn primary" to={player ? '/matchs' : '/connexion'}>{player ? 'Faire mes pronos' : 'Se connecter'}</Link>
+          <Link className="btn ghost" to="/classement">Voir le classement</Link>
+        </div>
       </section>
 
-      <section className="card stack-sm">
-        <div className="row-between">
-          <h2>Classement en direct</h2>
-          <Link className="btn small secondary" to="/classement">Voir tout</Link>
+      <section className="quick-stats" aria-label="Résumé de la compétition">
+        <article>
+          <small>Mon score</small>
+          <strong>{player ? `${getUserPointsMock()} pts` : 'Invité'}</strong>
+        </article>
+        <article>
+          <small>Mon rang</small>
+          <strong>{player ? `#${getUserRankMock()}` : '-'}</strong>
+        </article>
+        <article>
+          <small>Ouverts</small>
+          <strong>{openMatches}</strong>
+        </article>
+        <article>
+          <small>Joués</small>
+          <strong>{finishedMatches}</strong>
+        </article>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">En direct</p>
+            <h2>Classement du bar</h2>
+          </div>
+          <Link className="text-link" to="/classement">Voir tout</Link>
         </div>
-        <div className="stack-sm">
-          {mockPlayers.slice(0, 3).map((p, idx) => (
-            <div key={p.id} className="mini-rank-card">
-              <strong>{idx + 1}. {p.nickname}</strong>
-              <span>{p.points} pts</span>
-            </div>
+
+        <div className="ranking-list compact">
+          {standings.slice(0, 3).map((row) => (
+            <article key={row.playerId} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
+              <span className="rank-number">{row.position}</span>
+              <span>
+                <strong>{row.nickname}</strong>
+                <small>{row.exactScores} scores exacts</small>
+              </span>
+              <strong>{row.points} pts</strong>
+            </article>
           ))}
         </div>
-        {player ? <p>Ton rang : {getUserRankMock()}ème · {getUserPointsMock()} pts</p> : null}
       </section>
 
-      <section className="stack-sm">
-        <h2>Prochains matchs</h2>
-        {upcoming.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">À jouer</p>
+            <h2>Prochains matchs</h2>
+          </div>
+          <Link className="text-link" to="/matchs">Tous</Link>
+        </div>
+        <p className="helper-text">Clique sur un match pour faire ton prono.</p>
+        <div className="match-list">
+          {nextMatches.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+        </div>
       </section>
 
-      {!player ? (
-        <section className="card stack-sm">
-          <h2>Prêt à jouer ?</h2>
-          <p>Connecte-toi avec ton pseudo et ton code donné au bar.</p>
-          <Link className="btn full" to="/connexion">Connexion</Link>
-        </section>
-      ) : (
-        <section className="card stack-sm">
-          <h2>Ton espace</h2>
-          <p>{player.nickname} · {getUserPointsMock()} pts</p>
-          <p>{countUserPredictions()} pronostics faits</p>
-          <Link className="btn full" to="/mes-pronos">Voir mes pronos</Link>
-        </section>
-      )}
+      <section className="account-panel">
+        {player ? (
+          <>
+            <span className="avatar-dot large">{player.nickname.charAt(0).toUpperCase()}</span>
+            <div>
+              <h2>{player.nickname}</h2>
+              <p>{countUserPredictions()} pronostics enregistrés · {getUserPointsMock()} pts</p>
+            </div>
+            <Link className="btn secondary" to="/mes-pronos">Mes pronos</Link>
+          </>
+        ) : (
+          <>
+            <span className="avatar-dot large">?</span>
+            <div>
+              <h2>Prêt à jouer ?</h2>
+              <p>Connecte-toi avec le pseudo et le code donnés au comptoir.</p>
+            </div>
+            <Link className="btn secondary" to="/connexion">Connexion</Link>
+          </>
+        )}
+      </section>
 
-      <section className="card stack-sm">
-        <h2>Règles rapides</h2>
-        <p>Score exact : 3 pts</p>
-        <p>Bon écart : 2 pts</p>
-        <p>Bon vainqueur : 1 pt</p>
-        <Link className="btn secondary full" to="/reglement">Règlement</Link>
+      <section className="rules-strip">
+        <span>Score exact <strong>3 pts</strong></span>
+        <span>Bon écart <strong>2 pts</strong></span>
+        <span>Bon vainqueur <strong>1 pt</strong></span>
       </section>
     </div>
   );

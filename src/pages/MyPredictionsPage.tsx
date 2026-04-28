@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
+import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockMatches } from '../data/mockMatches';
-import { canEditPrediction } from '../utils/date';
 import { getStoredPredictions, getUserPointsMock } from '../utils/appState';
+import { canEditPrediction } from '../utils/date';
 import { calculatePredictionPoints } from '../utils/points';
 
 const MyPredictionsPage = () => {
@@ -10,43 +11,70 @@ const MyPredictionsPage = () => {
 
   if (!player) {
     return (
-      <section className="card stack-sm">
-        <h1>Mes pronos</h1>
-        <p>Connecte-toi pour voir tes pronos.</p>
-        <Link className="btn full" to="/connexion">Connexion</Link>
+      <section className="empty-state">
+        <strong>Mes pronos</strong>
+        <p>Connecte-toi pour retrouver tes scores enregistrés.</p>
+        <Link className="btn primary" to="/connexion">Connexion</Link>
       </section>
     );
   }
 
-  const mine = getStoredPredictions().filter((p) => p.playerId === player.id);
-  const map = new Map(mine.map((p) => [p.matchId, p]));
-  const remaining = mockMatches.filter((m) => m.status !== 'finished' && !map.has(m.id)).length;
+  const mine = getStoredPredictions().filter((prediction) => prediction.playerId === player.id);
+  const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
+  const remaining = mockMatches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
+  const predictedMatches = mockMatches.filter((match) => predictionByMatch.has(match.id));
 
   return (
-    <div className="stack">
-      <section className="card stack-sm">
+    <div className="screen-stack">
+      <section className="page-hero">
+        <p className="eyebrow">Espace joueur</p>
         <h1>Mes pronos</h1>
-        <p>Points : {getUserPointsMock()} · Pronostics faits : {mine.length} · Matchs restants : {remaining}</p>
+        <p>{getUserPointsMock()} pts · {mine.length} pronostics faits · {remaining} matchs restants</p>
       </section>
 
-      <section className="stack-sm">
-        {mockMatches.filter((m) => map.has(m.id)).map((match) => {
-          const prediction = map.get(match.id);
-          const state = match.status === 'finished' ? 'terminé' : canEditPrediction(match) ? 'modifiable' : 'verrouillé';
-          const points = prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
-            ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
-            : undefined;
+      {predictedMatches.length > 0 ? (
+        <section className="match-list">
+          {predictedMatches.map((match) => {
+            const prediction = predictionByMatch.get(match.id);
+            return <MatchCard key={match.id} match={match} prediction={prediction} />;
+          })}
+        </section>
+      ) : (
+        <section className="empty-state inline">
+          <strong>Aucun prono pour l’instant</strong>
+          <p>Va dans Matchs et choisis un bloc pour commencer.</p>
+          <Link className="btn secondary" to="/matchs">Voir les matchs</Link>
+        </section>
+      )}
 
-          return (
-            <article className="card stack-sm" key={match.id}>
-              <strong>{match.homeTeam.name} vs {match.awayTeam.name}</strong>
-              <p>Ton prono : {prediction?.homeScore} - {prediction?.awayScore}</p>
-              <p>Statut : {state}</p>
-              {typeof points === 'number' ? <p>Points : {points} pts</p> : null}
-              <Link className="btn small" to={`/matchs/${match.id}`}>{state === 'modifiable' ? 'Modifier' : 'Voir match'}</Link>
-            </article>
-          );
-        })}
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Détail</p>
+            <h2>Suivi des points</h2>
+          </div>
+        </div>
+        <div className="prediction-list">
+          {predictedMatches.map((match) => {
+            const prediction = predictionByMatch.get(match.id);
+            const state = match.status === 'finished' ? 'Terminé' : canEditPrediction(match) ? 'Modifiable' : 'Verrouillé';
+            const points =
+              prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+                ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+                : null;
+
+            return (
+              <Link className="prediction-row" key={match.id} to={`/matchs/${match.id}`}>
+                <span>
+                  <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
+                  <small>{state}</small>
+                </span>
+                <span>{prediction?.homeScore} - {prediction?.awayScore}</span>
+                <strong>{points !== null ? `${points} pts` : 'À venir'}</strong>
+              </Link>
+            );
+          })}
+        </div>
       </section>
     </div>
   );

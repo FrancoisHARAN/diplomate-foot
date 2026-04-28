@@ -1,36 +1,36 @@
+const rules = [
+  { title: 'Score exact', points: '3 pts', text: 'Tu trouves le score final complet, par exemple 2 - 1.' },
+  { title: 'Bon écart', points: '2 pts', text: 'Tu trouves le bon vainqueur et le bon écart, par exemple 3 - 2 au lieu de 2 - 1.' },
+  { title: 'Bon vainqueur', points: '1 pt', text: 'Tu trouves simplement la bonne équipe gagnante.' },
+  { title: 'Mauvais résultat', points: '0 pt', text: 'Le résultat du match ne correspond pas à ton prono.' },
+];
+
 const ReglementPage = () => (
-  <div className="stack">
-    <section className="card stack-sm">
-      <h2>Comment participer</h2>
-      <p>Demande ton pseudo/code au comptoir.</p>
-      <p>Connecte-toi puis fais tes pronos.</p>
+  <div className="screen-stack">
+    <section className="page-hero">
+      <p className="eyebrow">Jeu du bar</p>
+      <h1>Règlement</h1>
+      <p>Les pronostics ferment automatiquement 1 heure avant le coup d’envoi.</p>
     </section>
 
-    <section className="card stack-sm">
-      <h2>Fermeture des pronos</h2>
-      <p>Les pronostics ferment 1h avant le début du match.</p>
+    <section className="rules-grid">
+      {rules.map((rule) => (
+        <article className="rule-tile" key={rule.title}>
+          <span>{rule.points}</span>
+          <strong>{rule.title}</strong>
+          <p>{rule.text}</p>
+        </article>
+      ))}
     </section>
 
-    <section className="card stack-sm">
-      <h2>Points</h2>
-      <p>Score exact = 3 points</p>
-      <p>Bon écart avec bon vainqueur = 2 points</p>
-      <p>Bon vainqueur = 1 point</p>
-      <p>Mauvais résultat = 0 point</p>
+    <section className="notice-panel">
+      <strong>Exemple</strong>
+      <p>Résultat France 2 - 1 Canada : le prono 2 - 1 vaut 3 pts, le prono 3 - 2 vaut 2 pts, le prono 1 - 0 vaut 2 pts, le prono 2 - 0 vaut 1 pt.</p>
     </section>
 
-    <section className="card stack-sm">
-      <h2>Exemple</h2>
-      <p>Résultat : France 2 - 1 Canada</p>
-      <p>Prono 2 - 1 = 3 pts</p>
-      <p>Prono 3 - 2 = 2 pts</p>
-      <p>Prono 3 - 1 = 1 pt</p>
-      <p>Prono Canada gagnant = 0 pt</p>
-    </section>
-
-    <section className="card stack-sm">
-      <h2>Lot final</h2>
-      <p>Le gagnant remporte 50 € de consommation.</p>
+    <section className="notice-panel compact">
+      <strong>Lot final</strong>
+      <p>Le gagnant remporte 50 € de consommation au Diplomate.</p>
     </section>
   </div>
 );

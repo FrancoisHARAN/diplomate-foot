@@ -3,3 +3,7 @@ node_modules
 dist
 .vscode
 *.log
+.codex-tools
+*.tsbuildinfo
+vite.config.d.ts
+vite.config.js

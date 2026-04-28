@@ -1,7 +1,11 @@
-import EmptyState from '../components/EmptyState';
+import { Link } from 'react-router-dom';
 
 const NotFoundPage = () => (
-  <EmptyState title="Page introuvable" text="Cette page n'existe pas ou a été déplacée." ctaLabel="Retour à l'accueil" to="/" />
+  <section className="empty-state">
+    <strong>Page introuvable</strong>
+    <p>Cette page n’existe pas ou n’est plus disponible.</p>
+    <Link className="btn primary" to="/">Retour à l’accueil</Link>
+  </section>
 );
 
 export default NotFoundPage;

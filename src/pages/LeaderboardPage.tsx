@@ -10,32 +10,39 @@ const LeaderboardPage = () => {
   const me = standings.find((row) => row.playerId === player?.id);
 
   return (
-    <div className="stack">
-      <section className="card stack-sm">
+    <div className="screen-stack">
+      <section className="page-hero">
+        <p className="eyebrow">En direct</p>
         <h1>Classement</h1>
-        <p>Le 1er remporte 50 € de consommation.</p>
+        <p>Le premier à la fin de la Coupe du Monde gagne 50 € de consommation au Diplomate.</p>
       </section>
 
       <section className="podium">
         {standings.slice(0, 3).map((row) => (
-          <article key={row.playerId} className={`card ${row.position === 1 ? 'podium-1' : ''}`}>
-            <p>#{row.position}</p>
+          <article key={row.playerId} className={`podium-card rank-${row.position}`}>
+            <span>#{row.position}</span>
             <strong>{row.nickname}</strong>
             <p>{row.points} pts</p>
           </article>
         ))}
       </section>
 
-      {me ? <section className="card">Tu es actuellement {me.position}ème avec {me.points} points.</section> : null}
+      {me ? (
+        <section className="notice-panel compact">
+          <strong>Ton classement : #{me.position}</strong>
+          <p>{me.points} points · {me.exactScores} scores exacts</p>
+        </section>
+      ) : null}
 
-      <section className="stack-sm">
+      <section className="ranking-list">
         {standings.map((row) => (
-          <article key={row.playerId} className={`card ${row.playerId === player?.id ? 'highlight' : ''}`}>
-            <div className="row-between">
-              <strong>{row.position}. {row.nickname}</strong>
-              <strong>{row.points} pts</strong>
-            </div>
-            <p>Scores exacts : {row.exactScores} · Bons résultats : {row.correctResults}</p>
+          <article key={row.playerId} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
+            <span className="rank-number">{row.position}</span>
+            <span>
+              <strong>{row.nickname}</strong>
+              <small>{row.exactScores} exacts · {row.correctResults} bons résultats</small>
+            </span>
+            <strong>{row.points} pts</strong>
           </article>
         ))}
       </section>
