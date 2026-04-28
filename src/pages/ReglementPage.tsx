@@ -1,7 +1,7 @@
 const rules = [
   { title: 'Score exact', points: '3 pts', text: 'Tu trouves le score final complet, par exemple 2 - 1.' },
   { title: 'Bon écart', points: '2 pts', text: 'Tu trouves le bon vainqueur et le bon écart, par exemple 3 - 2 au lieu de 2 - 1.' },
-  { title: 'Bon vainqueur', points: '1 pt', text: 'Tu trouves simplement la bonne équipe gagnante.' },
+  { title: 'Bon résultat', points: '1 pt', text: 'Tu trouves simplement la bonne équipe gagnante, ou le bon match nul.' },
   { title: 'Mauvais résultat', points: '0 pt', text: 'Le résultat du match ne correspond pas à ton prono.' },
 ];
 

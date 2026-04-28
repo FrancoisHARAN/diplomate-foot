@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "fetch:football": "node scripts/fetch-football-data.mjs",
     "preview": "vite preview",
     "lint": "eslint ."
   },

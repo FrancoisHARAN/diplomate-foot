@@ -7,7 +7,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshPlayer } = usePlayerSession();
-  const [nickname, setNickname] = useState('Nico');
+  const [nickname, setNickname] = useState('François');
   const [code, setCode] = useState('1234');
   const [error, setError] = useState('');
 
@@ -47,7 +47,7 @@ const LoginPage = () => {
 
       <section className="notice-panel compact">
         <strong>Compte de test</strong>
-        <p>Nico / 1234 fonctionne tout de suite. Les autres joueurs fictifs ont aussi leur code dans les mocks.</p>
+        <p>François / 1234 et Solène / 1234 fonctionnent tout de suite pour faire deux tests séparés.</p>
         <Link className="text-link" to="/reglement">Voir le règlement</Link>
       </section>
     </div>

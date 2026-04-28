@@ -1,4 +1,5 @@
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
+export type CompetitionCode = 'FL1' | 'PL' | 'PD' | 'CL' | 'WORLD' | 'TEST';
 
 export interface Team {
   id: string;
@@ -8,12 +9,20 @@ export interface Team {
 
 export interface Match {
   id: string;
+  externalId?: string;
+  competitionCode?: CompetitionCode;
+  competitionName?: string;
   homeTeam: Team;
   awayTeam: Team;
   kickoff: string;
   status: MatchStatus;
   homeScore?: number;
   awayScore?: number;
+  minute?: number | null;
+  venue?: string;
+  matchday?: number | null;
+  source?: string;
+  lastUpdated?: string;
 }
 
 export interface Player {

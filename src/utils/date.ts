@@ -41,3 +41,21 @@ export const getMinutesBeforeLock = (match: Match, now = new Date()): number => 
   const oneHourBefore = kickoff - 60 * 60 * 1000;
   return Math.max(0, Math.ceil((oneHourBefore - now.getTime()) / (1000 * 60)));
 };
+
+export const getLiveMinute = (match: Match, now = new Date()): number | null => {
+  if (match.status !== 'live') return null;
+  if (typeof match.minute === 'number') return match.minute;
+
+  const kickoff = new Date(match.kickoff).getTime();
+  const elapsed = Math.floor((now.getTime() - kickoff) / (1000 * 60));
+  if (elapsed < 1) return 1;
+  return Math.min(elapsed, 120);
+};
+
+export const formatLastUpdated = (isoDate?: string | null): string | null => {
+  if (!isoDate) return null;
+  return new Intl.DateTimeFormat('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(isoDate));
+};

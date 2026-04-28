@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { usePlayerSession } from '../context/PlayerSessionContext';
+import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getUserPointsMock } from '../utils/appState';
 
 const AppHeader = () => {
   const { player } = usePlayerSession();
-  const points = player ? getUserPointsMock() : 0;
+  const { matches } = useLiveMatches();
+  const points = player ? getUserPointsMock(matches) : 0;
   const initial = player?.nickname.charAt(0).toUpperCase() ?? '?';
 
   return (

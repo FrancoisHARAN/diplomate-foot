@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoffDay, formatKickoffTime, getMinutesBeforeLock } from '../utils/date';
-import { getTeamFlagUrl } from '../utils/flags';
+import { canEditPrediction, formatKickoffDay, formatKickoffTime, getLiveMinute, getMinutesBeforeLock } from '../utils/date';
+import { getTeamFlagUrl, getTeamInitials } from '../utils/flags';
 import { calculatePredictionPoints } from '../utils/points';
 
 interface MatchCardProps {
@@ -24,8 +24,14 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const navigate = useNavigate();
   const editable = canEditPrediction(match);
   const state = getMatchState(match, editable);
+  const liveMinute = getLiveMinute(match);
+  const homeFlag = getTeamFlagUrl(match.homeTeam.shortName);
+  const awayFlag = getTeamFlagUrl(match.awayTeam.shortName);
 
-  const scoreLabel = match.status === 'finished' ? `${match.homeScore} - ${match.awayScore}` : 'VS';
+  const scoreLabel =
+    (match.status === 'finished' || match.status === 'live') && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+      ? `${match.homeScore} - ${match.awayScore}`
+      : 'VS';
   const actionLabel =
     match.status === 'finished'
       ? 'Voir le résultat'
@@ -55,19 +61,19 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
       <span className={`status-pill ${state.tone}`}>{state.label}</span>
 
       <div className="match-meta">
-        <span>{formatKickoffDay(match.kickoff)}</span>
-        <strong>{formatKickoffTime(match.kickoff)}</strong>
+        <span>{match.competitionName ?? 'Compétition test'}</span>
+        <strong>{liveMinute ? `${liveMinute}'` : formatKickoffTime(match.kickoff)}</strong>
       </div>
 
       <div className="match-teams">
         <span className="team-block">
-          <img src={getTeamFlagUrl(match.homeTeam.shortName)} alt="" />
+          {homeFlag ? <img src={homeFlag} alt="" /> : <span className="club-badge">{getTeamInitials(match.homeTeam.name, match.homeTeam.shortName)}</span>}
           <strong>{match.homeTeam.name}</strong>
           <small>{match.homeTeam.shortName}</small>
         </span>
         <span className="versus-pill">{scoreLabel}</span>
         <span className="team-block">
-          <img src={getTeamFlagUrl(match.awayTeam.shortName)} alt="" />
+          {awayFlag ? <img src={awayFlag} alt="" /> : <span className="club-badge">{getTeamInitials(match.awayTeam.name, match.awayTeam.shortName)}</span>}
           <strong>{match.awayTeam.name}</strong>
           <small>{match.awayTeam.shortName}</small>
         </span>
@@ -75,7 +81,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
       <div className="match-card-footer">
         <span>
-          {prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}
+          {formatKickoffDay(match.kickoff)} · {prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}
           {points !== null ? ` · ${points} pts` : ''}
         </span>
         <strong>{actionLabel}</strong>

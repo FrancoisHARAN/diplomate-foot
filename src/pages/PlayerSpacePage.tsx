@@ -1,12 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
+import { useLiveMatches } from '../hooks/useLiveMatches';
 import { countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
 
 const PlayerSpacePage = () => {
   const navigate = useNavigate();
   const { player, logout } = usePlayerSession();
+  const { matches } = useLiveMatches();
 
   if (!player) {
     return (
@@ -20,7 +21,7 @@ const PlayerSpacePage = () => {
 
   const playerData = mockPlayers.find((item) => item.id === player.id);
   const predictionByMatch = new Set(getStoredPredictions().filter((prediction) => prediction.playerId === player.id).map((prediction) => prediction.matchId));
-  const toPredict = mockMatches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
+  const toPredict = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
 
   return (
     <div className="screen-stack">
@@ -29,7 +30,7 @@ const PlayerSpacePage = () => {
         <div>
           <p className="eyebrow">Compte joueur</p>
           <h1>{player.nickname}</h1>
-          <p>{getUserPointsMock()} pts · rang #{getUserRankMock()}</p>
+          <p>{getUserPointsMock(matches)} pts · rang #{getUserRankMock(matches)}</p>
         </div>
       </section>
 

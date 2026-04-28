@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { mockMatches } from '../data/mockMatches';
+import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getStoredPredictions, getUserPointsMock } from '../utils/appState';
 import { canEditPrediction } from '../utils/date';
 import { calculatePredictionPoints } from '../utils/points';
 
 const MyPredictionsPage = () => {
   const { player } = usePlayerSession();
+  const { matches } = useLiveMatches();
 
   if (!player) {
     return (
@@ -21,15 +22,15 @@ const MyPredictionsPage = () => {
 
   const mine = getStoredPredictions().filter((prediction) => prediction.playerId === player.id);
   const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
-  const remaining = mockMatches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
-  const predictedMatches = mockMatches.filter((match) => predictionByMatch.has(match.id));
+  const remaining = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
+  const predictedMatches = matches.filter((match) => predictionByMatch.has(match.id));
 
   return (
     <div className="screen-stack">
       <section className="page-hero">
         <p className="eyebrow">Espace joueur</p>
         <h1>Mes pronos</h1>
-        <p>{getUserPointsMock()} pts · {mine.length} pronostics faits · {remaining} matchs restants</p>
+        <p>{getUserPointsMock(matches)} pts · {mine.length} pronostics faits · {remaining} matchs restants</p>
       </section>
 
       {predictedMatches.length > 0 ? (

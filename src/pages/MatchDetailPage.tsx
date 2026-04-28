@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { mockMatches } from '../data/mockMatches';
+import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
 import { canEditPrediction, formatKickoff, getMinutesBeforeLock } from '../utils/date';
 import { calculatePredictionPoints } from '../utils/points';
@@ -10,6 +10,7 @@ import { calculatePredictionPoints } from '../utils/points';
 const MatchDetailPage = () => {
   const { matchId } = useParams();
   const { player } = usePlayerSession();
+  const { matches } = useLiveMatches();
   const navigate = useNavigate();
   const location = useLocation();
   const [refresh, setRefresh] = useState(0);
@@ -17,7 +18,7 @@ const MatchDetailPage = () => {
   const [awayScore, setAwayScore] = useState(0);
   const [message, setMessage] = useState('');
 
-  const match = mockMatches.find((item) => item.id === matchId);
+  const match = matches.find((item) => item.id === matchId);
   const prediction = useMemo(() => (match ? getPredictionForMatch(match.id) : undefined), [match, refresh]);
 
   useEffect(() => {

@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { usePlayerSession } from '../context/PlayerSessionContext';
-import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
+import { useLiveMatches } from '../hooks/useLiveMatches';
 import { buildStandings, getStoredPredictions } from '../utils/appState';
 
 const LeaderboardPage = () => {
   const { player } = usePlayerSession();
-  const standings = useMemo(() => buildStandings(mockPlayers, getStoredPredictions(), mockMatches), []);
+  const { matches } = useLiveMatches();
+  const standings = useMemo(() => buildStandings(mockPlayers, getStoredPredictions(), matches), [matches]);
   const me = standings.find((row) => row.playerId === player?.id);
 
   return (

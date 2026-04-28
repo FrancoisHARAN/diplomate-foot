@@ -134,4 +134,23 @@ Une démonstration est fournie dans `src/utils/points.demo.ts`.
 npm install
 npm run dev
 npm run build
+npm run fetch:football
 ```
+
+## Mode live football
+
+L'application lit `public/live-data/matches.json` pour afficher les prochains matchs, les scores et les matchs en cours. Le workflow `.github/workflows/update-football-data.yml` peut mettre ce fichier à jour automatiquement toutes les 10 minutes.
+
+Pour activer les vraies données :
+
+1. Créer un token gratuit sur `football-data.org`.
+2. Dans GitHub, aller dans `Settings > Secrets and variables > Actions > Secrets`.
+3. Ajouter un secret nommé `FOOTBALL_DATA_TOKEN`.
+4. Lancer le workflow `Update football data` manuellement une première fois.
+
+Sans ce secret, le site reste en mode test avec des matchs Champions League / Ligue 1 / Premier League / Liga.
+
+Comptes de test :
+
+- `François` / `1234`
+- `Solène` / `1234`

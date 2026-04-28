@@ -124,19 +124,19 @@ const calculateFinishedPoints = (playerId: string, predictions: Prediction[], ma
     }, 0);
 };
 
-export const getUserPointsMock = (): number => {
+export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
   const player = getCurrentPlayer();
   if (!player) return 0;
 
   const base = mockPlayers.find((entry) => entry.id === player.id)?.points ?? 0;
-  const dynamic = calculateFinishedPoints(player.id, getStoredPredictions(), mockMatches);
+  const dynamic = calculateFinishedPoints(player.id, getStoredPredictions(), matches);
   return Math.max(base, dynamic);
 };
 
-export const getUserRankMock = (): number | null => {
+export const getUserRankMock = (matches: Match[] = mockMatches): number | null => {
   const player = getCurrentPlayer();
   if (!player) return null;
-  const standings = buildStandings(mockPlayers, getStoredPredictions(), mockMatches);
+  const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
   return standings.find((entry) => entry.playerId === player.id)?.position ?? standings.length + 1;
 };
 

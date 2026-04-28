@@ -1,0 +1,6 @@
+{
+  "generatedAt": "2026-04-28T01:15:00.000Z",
+  "source": "fallback-test",
+  "message": "Mode test local. Ajoute FOOTBALL_DATA_TOKEN dans GitHub Secrets pour alimenter ce fichier avec de vraies données API.",
+  "matches": []
+}
