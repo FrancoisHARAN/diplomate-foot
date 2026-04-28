@@ -67,8 +67,8 @@ const MatchesPage = () => {
         if (filter === 'live') return match.status === 'live';
         if (filter === 'locked') return (match.status === 'upcoming' && !canEditPrediction(match)) || match.status === 'live';
         if (filter === 'done') return match.status === 'finished';
-        if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter;
-        return true;
+        if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
+        return match.status !== 'finished';
       }),
     [filter, matches, myMap],
   );

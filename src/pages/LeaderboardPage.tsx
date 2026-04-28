@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
+import PrizePanel from '../components/PrizePanel';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
@@ -16,7 +17,17 @@ const LeaderboardPage = () => {
       <section className="page-hero">
         <p className="eyebrow">En direct</p>
         <h1>Classement</h1>
-        <p>1er : 20 € de conso · 2e : une pizza · 3e : un saucisson.</p>
+        <p>Le podium final repart avec les lots du Diplomate.</p>
+      </section>
+
+      <section className="section-block prize-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">À gagner</p>
+            <h2>Lots du podium</h2>
+          </div>
+        </div>
+        <PrizePanel />
       </section>
 
       <section className="podium">

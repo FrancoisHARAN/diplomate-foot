@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import PlayerAvatar from '../components/PlayerAvatar';
+import PrizePanel from '../components/PrizePanel';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
@@ -20,38 +21,23 @@ const HomePage = () => {
     <div className="screen-stack">
       <section className="hero-panel">
         <div className="hero-content">
+          <img className="hero-brand-logo" src={`${import.meta.env.BASE_URL}brand/logo-diplomate.png`} alt="" />
           <p className="eyebrow">Le Diplomate</p>
-          <h1>Prono foot</h1>
-          <p className="hero-copy">Classement du bar, vrais matchs à venir et boosters sur les affiches chaudes.</p>
-          <div className="hero-actions">
-            <Link className="btn primary" to={player ? '/matchs' : '/connexion'}>{player ? 'Faire mes pronos' : 'Se connecter'}</Link>
-            <Link className="btn ghost" to="/classement">Classement</Link>
+          <h1>Deviens champion des pronos</h1>
+          <p className="hero-copy">Pose tes scores, suis les vrais matchs et grimpe au classement du bar.</p>
+          <div className="hero-actions single">
+            <Link className="btn secondary" to={player ? '/matchs' : '/connexion'}>{player ? 'Jouer mes matchs' : 'Se connecter'}</Link>
           </div>
         </div>
-        <div className="hero-players" aria-hidden="true">
-          <img className="hero-player mbappe" src={`${import.meta.env.BASE_URL}players/mbappe.png`} alt="" />
-          <img className="hero-player dembele" src={`${import.meta.env.BASE_URL}players/dembele.jpg`} alt="" />
-          <img className="hero-player olise" src={`${import.meta.env.BASE_URL}players/olise.png`} alt="" />
-        </div>
+        <img className="hero-cup" src={`${import.meta.env.BASE_URL}world-cup/trophy-26.jpg`} alt="" />
       </section>
 
-      <section className="prize-panel">
-        <article>
-          <span>1</span>
-          <strong>20 €</strong>
-          <small>conso au bar</small>
-        </article>
-        <article>
-          <span>2</span>
-          <strong>Pizza</strong>
-          <small>au Diplomate</small>
-        </article>
-        <article>
-          <span>3</span>
-          <strong>Saucisson</strong>
-          <small>à partager</small>
-        </article>
-      </section>
+      {!player ? (
+        <section className="intro-panel">
+          <strong>Entre dans la compétition</strong>
+          <p>Connecte-toi avec ton pseudo, pronostique les matchs ouverts et marque des points dès le score final.</p>
+        </section>
+      ) : null}
 
       <section className="quick-stats" aria-label="Résumé de la compétition">
         <article>
@@ -63,7 +49,7 @@ const HomePage = () => {
           <strong>{player ? `#${getUserRankMock(matches)}` : '-'}</strong>
         </article>
         <article>
-          <small>Ouverts</small>
+          <small>Matchs ouverts</small>
           <strong>{openMatches}</strong>
         </article>
         <article>
@@ -72,7 +58,7 @@ const HomePage = () => {
         </article>
       </section>
 
-      <section className="section-block">
+      <section className="section-block home-ranking-section">
         <div className="section-heading">
           <div>
             <p className="eyebrow">En direct</p>
@@ -96,7 +82,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block home-match-section">
         <div className="section-heading">
           <div>
             <p className="eyebrow">À jouer</p>
@@ -117,18 +103,28 @@ const HomePage = () => {
               <h2>{player.nickname}</h2>
               <p>{countUserPredictions()} pronostics enregistrés · {getUserPointsMock(matches)} pts</p>
             </div>
-            <Link className="btn secondary" to="/mes-pronos">Mes pronos</Link>
+            <Link className="btn primary" to="/mes-pronos">Mes pronos</Link>
           </>
         ) : (
           <>
             <PlayerAvatar nickname="?" size="large" />
             <div>
               <h2>Prêt à jouer ?</h2>
-              <p>Connecte-toi avec le pseudo et le code donnés au comptoir.</p>
+              <p>Demande ton code au comptoir et rejoins la ligue du bar.</p>
             </div>
-            <Link className="btn secondary" to="/connexion">Connexion</Link>
+            <Link className="btn primary" to="/connexion">Connexion</Link>
           </>
         )}
+      </section>
+
+      <section className="section-block prize-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">À gagner</p>
+            <h2>Lots du podium</h2>
+          </div>
+        </div>
+        <PrizePanel />
       </section>
     </div>
   );

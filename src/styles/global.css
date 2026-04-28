@@ -32,6 +32,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100%;
+  overflow-y: auto;
+  scroll-behavior: auto;
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.08) 1px, transparent 1px),
     linear-gradient(rgba(28, 70, 245, 0.08) 1px, transparent 1px),
@@ -97,6 +99,7 @@ small {
 
 .app-viewport {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .mobile-app-shell {
@@ -104,7 +107,8 @@ small {
   max-width: 520px;
   min-height: 100vh;
   margin: 0 auto;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.045) 1px, transparent 1px),
     linear-gradient(rgba(28, 70, 245, 0.045) 1px, transparent 1px),
@@ -137,7 +141,7 @@ small {
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  min-height: 68px;
+  min-height: 76px;
   padding: 0.72rem 0.85rem;
   background: rgba(255, 255, 255, 0.93);
   border-bottom: 2px solid var(--blue);
@@ -152,14 +156,13 @@ small {
 }
 
 .header-logo {
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 3.35rem;
+  height: 3.35rem;
   object-fit: contain;
   padding: 0.16rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fff;
-  filter: saturate(0.2) contrast(1.1);
 }
 
 .brand-wrap strong,
@@ -174,7 +177,7 @@ small {
   display: block;
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   line-height: 1;
 }
 
@@ -300,7 +303,7 @@ small {
 
 .hero-panel {
   position: relative;
-  min-height: 14.6rem;
+  min-height: 15.4rem;
   overflow: hidden;
   padding: 1rem;
   background:
@@ -313,11 +316,11 @@ small {
 
 .hero-panel::before {
   position: absolute;
-  right: 4.4rem;
-  top: 3.8rem;
+  right: 3.1rem;
+  top: 2.6rem;
   z-index: 1;
-  width: 7.4rem;
-  height: 4.6rem;
+  width: 8.6rem;
+  height: 5.2rem;
   content: "";
   background: var(--lime);
   clip-path: polygon(0 38%, 62% 38%, 50% 0, 100% 52%, 38% 52%, 52% 100%);
@@ -329,7 +332,7 @@ small {
   left: 0.9rem;
   bottom: 1rem;
   z-index: 1;
-  width: 9.6rem;
+  width: 10.8rem;
   height: 2.5rem;
   content: "";
   background: var(--lime);
@@ -342,13 +345,14 @@ small {
   z-index: 3;
   display: grid;
   gap: 0.55rem;
-  max-width: 72%;
+  max-width: 66%;
 }
 
 .hero-panel h1 {
-  max-width: 10rem;
+  max-width: 12rem;
   color: #fff;
-  font-size: 2.55rem;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 2.35rem;
   line-height: 0.88;
   text-transform: uppercase;
 }
@@ -366,41 +370,33 @@ small {
   margin-top: 0.35rem;
 }
 
-.hero-players {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
+.hero-actions.single {
+  grid-template-columns: 1fr;
+  max-width: 10.5rem;
 }
 
-.hero-player {
-  position: absolute;
+.hero-brand-logo {
+  width: 4.1rem;
+  height: 4.1rem;
   object-fit: contain;
-  filter: drop-shadow(0 16px 20px rgba(0, 19, 88, 0.28));
+  padding: 0.18rem;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.hero-player.mbappe {
-  right: -4.8rem;
-  bottom: -3.7rem;
-  width: 14.4rem;
-}
-
-.hero-player.dembele {
-  right: 5.8rem;
-  bottom: -1.4rem;
-  width: 5.2rem;
-  border: 3px solid #fff;
-  border-radius: 999px;
-  opacity: 0.86;
-  transform: rotate(-8deg);
-}
-
-.hero-player.olise {
-  right: 3.1rem;
-  top: 1rem;
-  width: 5.2rem;
-  opacity: 0.7;
-  mask-image: radial-gradient(circle, #000 52%, transparent 76%);
+.hero-cup {
+  position: absolute;
+  right: -1.7rem;
+  bottom: 0.7rem;
+  z-index: 2;
+  width: 9.8rem;
+  height: 9.8rem;
+  object-fit: cover;
+  object-position: center;
+  border: 4px solid #fff;
+  border-radius: 8px;
+  box-shadow: 0 16px 28px rgba(0, 18, 94, 0.28);
+  transform: rotate(2deg);
 }
 
 .page-hero {
@@ -413,6 +409,30 @@ small {
 
 .page-hero h1 {
   color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  text-transform: uppercase;
+}
+
+.intro-panel {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  color: #fff;
+  background: var(--deep);
+}
+
+.intro-panel strong {
+  color: var(--lime);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.3rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.intro-panel p {
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .profile-panel,
@@ -514,6 +534,33 @@ small {
   min-width: 0;
 }
 
+.section-heading h2,
+.match-day-group h2 {
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.45rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.home-match-section {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+
+.home-match-section .section-heading h2,
+.home-match-section .eyebrow,
+.home-match-section .text-link {
+  color: #fff;
+}
+
+.home-match-section .text-link {
+  color: var(--lime);
+}
+
+.prize-section .prize-panel {
+  margin-top: 0.75rem;
+}
+
 .helper-text {
   margin-top: 0.35rem;
   font-size: 0.9rem;
@@ -608,8 +655,8 @@ small {
 .match-day-group h2 {
   padding-inline: 0.1rem;
   color: var(--blue);
-  font-size: 0.96rem;
-  text-transform: capitalize;
+  font-size: 1.25rem;
+  text-transform: uppercase;
 }
 
 .match-card {
@@ -622,7 +669,7 @@ small {
   overflow: hidden;
   color: var(--text);
   text-align: left;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-radius: 8px;
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.045) 1px, transparent 1px),
@@ -630,6 +677,11 @@ small {
     #fff;
   background-size: 20px 20px;
   box-shadow: 0 10px 22px rgba(28, 70, 245, 0.08);
+}
+
+.match-card.is-boosted {
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px rgba(210, 255, 82, 0.72), 0 14px 28px rgba(28, 70, 245, 0.14);
 }
 
 .match-card.compact {
@@ -669,6 +721,26 @@ small {
   font-weight: 950;
 }
 
+.booster-pill {
+  display: grid;
+  gap: 0.02rem;
+  min-height: auto;
+  padding: 0.32rem 0.58rem;
+  border: 2px solid #fff;
+  background: var(--lime);
+}
+
+.booster-pill strong,
+.booster-pill small {
+  display: block;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.booster-pill small {
+  font-size: 0.58rem;
+}
+
 .status-pill.open,
 .status-pill.success {
   background: var(--aqua);
@@ -690,11 +762,6 @@ small {
 .status-pill.done {
   color: #fff;
   background: var(--blue);
-}
-
-.booster-pill {
-  color: var(--ink);
-  background: var(--lime);
 }
 
 .match-meta span,
@@ -790,9 +857,19 @@ small {
   background: var(--blue-soft);
 }
 
-.match-prediction-card.has-prono {
-  border-color: rgba(210, 255, 82, 0.75);
-  background: linear-gradient(135deg, var(--lime), #ffffff);
+.match-prediction-card.pending {
+  border-color: #ff8a00;
+  background: #fff0d9;
+}
+
+.match-prediction-card.won {
+  border-color: var(--green);
+  background: #dcffe9;
+}
+
+.match-prediction-card.lost {
+  border-color: var(--red);
+  background: #ffe1e5;
 }
 
 .match-prediction-card span,
@@ -811,6 +888,21 @@ small {
   grid-column: 1 / -1;
   color: var(--blue);
   font-weight: 850;
+}
+
+.match-prediction-card.pending small,
+.match-prediction-card.pending span {
+  color: #8a4a00;
+}
+
+.match-prediction-card.won small,
+.match-prediction-card.won span {
+  color: #06753b;
+}
+
+.match-prediction-card.lost small,
+.match-prediction-card.lost span {
+  color: #a01222;
 }
 
 .ranking-list.compact {
@@ -1225,16 +1317,28 @@ button.action-row {
   }
 
   .hero-content {
-    max-width: 76%;
+    max-width: 63%;
   }
 
   .hero-panel h1 {
-    font-size: 2.18rem;
+    font-size: 1.95rem;
   }
 
   .hero-panel::before {
     right: 3.4rem;
     width: 6.2rem;
+  }
+
+  .hero-brand-logo {
+    width: 3.55rem;
+    height: 3.55rem;
+  }
+
+  .hero-cup {
+    right: -2.2rem;
+    bottom: 1.15rem;
+    width: 8.25rem;
+    height: 8.25rem;
   }
 
   .hero-actions,

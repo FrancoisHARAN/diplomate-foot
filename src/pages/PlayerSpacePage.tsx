@@ -13,7 +13,7 @@ const resizeImageFile = (file: File): Promise<string> =>
       const img = new Image();
       img.onerror = () => reject(new Error('Image impossible à charger'));
       img.onload = () => {
-        const size = 360;
+        const size = 250;
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
@@ -26,7 +26,7 @@ const resizeImageFile = (file: File): Promise<string> =>
         const width = img.width * scale;
         const height = img.height * scale;
         context.drawImage(img, (size - width) / 2, (size - height) / 2, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
       };
       img.src = String(reader.result);
     };

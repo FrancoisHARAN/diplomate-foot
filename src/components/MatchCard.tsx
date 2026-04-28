@@ -20,6 +20,12 @@ const getMatchState = (match: Match, editable: boolean) => {
   return { label: 'Ouvert', tone: 'open' };
 };
 
+const getPredictionTone = (prediction: Prediction | undefined, points: number | null) => {
+  if (!prediction) return 'empty';
+  if (points === null) return 'pending';
+  return points > 0 ? 'won' : 'lost';
+};
+
 const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: MatchCardProps) => {
   const navigate = useNavigate();
   const editable = canEditPrediction(match);
@@ -46,6 +52,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
     prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
+  const predictionTone = getPredictionTone(prediction, points);
 
   const click = () => {
     if (onClick) {
@@ -56,10 +63,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   };
 
   return (
-    <button type="button" className={`match-card ${variant === 'compact' ? 'compact' : ''}`} onClick={click}>
+    <button type="button" className={`match-card ${variant === 'compact' ? 'compact' : ''} ${multiplier > 1 ? 'is-boosted' : ''}`} onClick={click}>
       <div className="match-card-topline">
         <span className={`status-pill ${state.tone}`}>{state.label}</span>
-        {multiplier > 1 ? <span className="booster-pill">⚡ Boost x{multiplier}</span> : null}
+        {multiplier > 1 ? (
+          <span className="booster-pill">
+            <strong>Boost x{multiplier}</strong>
+            <small>Points x{multiplier}</small>
+          </span>
+        ) : null}
       </div>
 
       <div className="match-meta">
@@ -86,10 +98,10 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
         <strong>{actionLabel}</strong>
       </div>
 
-      <div className={`match-prediction-card ${prediction ? 'has-prono' : ''}`}>
+      <div className={`match-prediction-card ${predictionTone}`}>
         <span>{prediction ? 'Ton prono' : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}</span>
         <strong>{prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'À jouer'}</strong>
-        {points !== null ? <small>{points} pts</small> : multiplier > 1 ? <small>Les points comptent x{multiplier}</small> : null}
+        {points !== null ? <small>{points} pts</small> : null}
       </div>
     </button>
   );
