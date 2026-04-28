@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { CompetitionCode } from '../types';
+import type { CompetitionCode, Match } from '../types';
 import { getStoredPredictions } from '../utils/appState';
 import { canEditPrediction } from '../utils/date';
 
@@ -21,6 +21,34 @@ const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'locked', label: 'Verrouillés' },
   { id: 'done', label: 'Terminés' },
 ];
+
+const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+
+const dayTitle = (iso: string) => {
+  const date = new Date(iso);
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const diffDays = Math.round((target - start) / (24 * 60 * 60 * 1000));
+
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return 'Demain';
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: diffDays > 5 ? 'numeric' : undefined,
+    month: diffDays > 5 ? 'short' : undefined,
+  }).format(date);
+};
+
+const groupByDay = (matches: Match[]) => {
+  const groups = new Map<string, Match[]>();
+  matches.forEach((match) => {
+    const key = dayKey(match.kickoff);
+    groups.set(key, [...(groups.get(key) ?? []), match]);
+  });
+  return Array.from(groups.entries()).map(([key, items]) => ({ key, title: dayTitle(items[0].kickoff), matches: items }));
+};
 
 const MatchesPage = () => {
   const { player } = usePlayerSession();
@@ -45,12 +73,14 @@ const MatchesPage = () => {
     [filter, matches, myMap],
   );
 
+  const grouped = useMemo(() => groupByDay(filtered), [filtered]);
+
   return (
     <div className="screen-stack">
       <section className="page-hero">
         <p className="eyebrow">Calendrier</p>
         <h1>Matchs</h1>
-        <p>Choisis un bloc match, puis saisis ton score sur la page dédiée.</p>
+        <p>Choisis un match, pose ton score, puis passe au suivant avec la flèche.</p>
       </section>
 
       {isFallback ? (
@@ -76,16 +106,21 @@ const MatchesPage = () => {
         </section>
       ) : null}
 
-      <section className="match-list">
-        {filtered.length > 0 ? (
-          filtered.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)
-        ) : (
-          <div className="empty-state">
-            <strong>Aucun match ici</strong>
-            <p>Change de filtre ou reviens dès que de nouveaux matchs sont ouverts.</p>
-          </div>
-        )}
-      </section>
+      {grouped.length > 0 ? (
+        grouped.map((group) => (
+          <section className="match-day-group" key={group.key}>
+            <h2>{group.title}</h2>
+            <div className="match-list">
+              {group.matches.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+            </div>
+          </section>
+        ))
+      ) : (
+        <div className="empty-state">
+          <strong>Aucun match ici</strong>
+          <p>Change de filtre ou reviens dès que de nouveaux matchs sont ouverts.</p>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,35 +1,56 @@
 import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
+import PlayerAvatar from '../components/PlayerAvatar';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { buildStandings, countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
-import { formatLastUpdated } from '../utils/date';
 
 const HomePage = () => {
   const { player } = usePlayerSession();
-  const { matches, generatedAt, source, message, isFallback } = useLiveMatches();
+  const { matches } = useLiveMatches();
   const predictions = getStoredPredictions();
   const standings = buildStandings(mockPlayers, predictions, matches);
-  const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 4);
+  const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 3);
   const myMap = new Map(predictions.filter((prediction) => prediction.playerId === player?.id).map((prediction) => [prediction.matchId, prediction]));
   const openMatches = matches.filter((match) => match.status === 'upcoming').length;
   const liveMatches = matches.filter((match) => match.status === 'live').length;
-  const updatedAt = formatLastUpdated(generatedAt);
 
   return (
     <div className="screen-stack">
       <section className="hero-panel">
-        <img className="hero-logo" src={`${import.meta.env.BASE_URL}brand/logo-diplomate.png`} alt="Le Diplomate" />
-        <div>
-          <p className="eyebrow">LE DIPLOMATE</p>
-          <h1>Pronos live football</h1>
-          <p className="hero-copy">Ligue 1, Premier League, Liga et Champions League pour tester les vraies journées avant la Coupe du Monde.</p>
+        <div className="hero-content">
+          <p className="eyebrow">Le Diplomate</p>
+          <h1>Prono foot</h1>
+          <p className="hero-copy">Classement du bar, vrais matchs à venir et boosters sur les affiches chaudes.</p>
+          <div className="hero-actions">
+            <Link className="btn primary" to={player ? '/matchs' : '/connexion'}>{player ? 'Faire mes pronos' : 'Se connecter'}</Link>
+            <Link className="btn ghost" to="/classement">Classement</Link>
+          </div>
         </div>
-        <div className="hero-actions">
-          <Link className="btn primary" to={player ? '/matchs' : '/connexion'}>{player ? 'Faire mes pronos' : 'Se connecter'}</Link>
-          <Link className="btn ghost" to="/classement">Voir le classement</Link>
+        <div className="hero-players" aria-hidden="true">
+          <img className="hero-player mbappe" src={`${import.meta.env.BASE_URL}players/mbappe.png`} alt="" />
+          <img className="hero-player dembele" src={`${import.meta.env.BASE_URL}players/dembele.jpg`} alt="" />
+          <img className="hero-player olise" src={`${import.meta.env.BASE_URL}players/olise.png`} alt="" />
         </div>
+      </section>
+
+      <section className="prize-panel">
+        <article>
+          <span>1</span>
+          <strong>20 €</strong>
+          <small>conso au bar</small>
+        </article>
+        <article>
+          <span>2</span>
+          <strong>Pizza</strong>
+          <small>au Diplomate</small>
+        </article>
+        <article>
+          <span>3</span>
+          <strong>Saucisson</strong>
+          <small>à partager</small>
+        </article>
       </section>
 
       <section className="quick-stats" aria-label="Résumé de la compétition">
@@ -51,29 +72,6 @@ const HomePage = () => {
         </article>
       </section>
 
-      <section className={`live-source ${isFallback ? 'is-fallback' : ''}`}>
-        <span>{isFallback ? 'Mode test' : 'Données live'}</span>
-        <p>{message ?? `${source} · dernière mise à jour ${updatedAt ?? 'en cours'}`}</p>
-      </section>
-
-      <section className="france-strip" aria-label="Inspiration équipe de France">
-        <div>
-          <p className="eyebrow">Style final</p>
-          <h2>Ambiance Équipe de France</h2>
-          <p>Cartes joueurs stylisées pour préparer la version Coupe du Monde.</p>
-        </div>
-        <article className="player-card">
-          <span className="player-silhouette" />
-          <strong>Mbappé</strong>
-          <small>#10 · Attaque</small>
-        </article>
-        <article className="player-card orange">
-          <span className="player-silhouette" />
-          <strong>Olise</strong>
-          <small>#7 · Création</small>
-        </article>
-      </section>
-
       <section className="section-block">
         <div className="section-heading">
           <div>
@@ -85,14 +83,15 @@ const HomePage = () => {
 
         <div className="ranking-list compact">
           {standings.slice(0, 3).map((row) => (
-            <article key={row.playerId} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
+            <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
               <span className="rank-number">{row.position}</span>
+              <PlayerAvatar nickname={row.nickname} avatarUrl={row.avatarUrl} />
               <span>
                 <strong>{row.nickname}</strong>
                 <small>{row.exactScores} scores exacts</small>
               </span>
               <strong>{row.points} pts</strong>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
@@ -105,7 +104,6 @@ const HomePage = () => {
           </div>
           <Link className="text-link" to="/matchs">Tous</Link>
         </div>
-        <p className="helper-text">Clique sur un match pour faire ton prono.</p>
         <div className="match-list">
           {nextMatches.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
         </div>
@@ -114,7 +112,7 @@ const HomePage = () => {
       <section className="account-panel">
         {player ? (
           <>
-            <span className="avatar-dot large">{player.nickname.charAt(0).toUpperCase()}</span>
+            <PlayerAvatar nickname={player.nickname} avatarUrl={player.avatarUrl} size="large" />
             <div>
               <h2>{player.nickname}</h2>
               <p>{countUserPredictions()} pronostics enregistrés · {getUserPointsMock(matches)} pts</p>
@@ -123,7 +121,7 @@ const HomePage = () => {
           </>
         ) : (
           <>
-            <span className="avatar-dot large">?</span>
+            <PlayerAvatar nickname="?" size="large" />
             <div>
               <h2>Prêt à jouer ?</h2>
               <p>Connecte-toi avec le pseudo et le code donnés au comptoir.</p>
@@ -131,12 +129,6 @@ const HomePage = () => {
             <Link className="btn secondary" to="/connexion">Connexion</Link>
           </>
         )}
-      </section>
-
-      <section className="rules-strip">
-        <span>Score exact <strong>3 pts</strong></span>
-        <span>Bon écart <strong>2 pts</strong></span>
-        <span>Bon vainqueur <strong>1 pt</strong></span>
       </section>
     </div>
   );

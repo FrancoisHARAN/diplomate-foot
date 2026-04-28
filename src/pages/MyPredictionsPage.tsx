@@ -4,7 +4,7 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getStoredPredictions, getUserPointsMock } from '../utils/appState';
 import { canEditPrediction } from '../utils/date';
-import { calculatePredictionPoints } from '../utils/points';
+import { calculatePredictionPointsForMatch } from '../utils/points';
 
 const MyPredictionsPage = () => {
   const { player } = usePlayerSession();
@@ -35,14 +35,13 @@ const MyPredictionsPage = () => {
 
       {predictedMatches.length > 0 ? (
         <section className="match-list">
-          {predictedMatches.map((match) => {
-            const prediction = predictionByMatch.get(match.id);
-            return <MatchCard key={match.id} match={match} prediction={prediction} />;
-          })}
+          {predictedMatches.map((match) => (
+            <MatchCard key={match.id} match={match} prediction={predictionByMatch.get(match.id)} />
+          ))}
         </section>
       ) : (
         <section className="empty-state inline">
-          <strong>Aucun prono pour l’instant</strong>
+          <strong>Aucun prono pour l'instant</strong>
           <p>Va dans Matchs et choisis un bloc pour commencer.</p>
           <Link className="btn secondary" to="/matchs">Voir les matchs</Link>
         </section>
@@ -58,10 +57,11 @@ const MyPredictionsPage = () => {
         <div className="prediction-list">
           {predictedMatches.map((match) => {
             const prediction = predictionByMatch.get(match.id);
-            const state = match.status === 'finished' ? 'Terminé' : canEditPrediction(match) ? 'Modifiable' : 'Verrouillé';
+            const editable = canEditPrediction(match);
+            const state = match.status === 'finished' ? 'Terminé' : editable ? 'Modifiable' : 'Verrouillé';
             const points =
               prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
-                ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+                ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
                 : null;
 
             return (
@@ -70,8 +70,9 @@ const MyPredictionsPage = () => {
                   <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
                   <small>{state}</small>
                 </span>
-                <span>{prediction?.homeScore} - {prediction?.awayScore}</span>
+                <span className="prediction-score-chip">{prediction?.homeScore} - {prediction?.awayScore}</span>
                 <strong>{points !== null ? `${points} pts` : 'À venir'}</strong>
+                {editable ? <span className="edit-pencil" aria-label="Modifier le prono">✎</span> : null}
               </Link>
             );
           })}

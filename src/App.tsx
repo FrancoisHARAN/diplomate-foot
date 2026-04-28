@@ -8,6 +8,7 @@ import MatchDetailPage from './pages/MatchDetailPage';
 import MatchesPage from './pages/MatchesPage';
 import MyPredictionsPage from './pages/MyPredictionsPage';
 import NotFoundPage from './pages/NotFoundPage';
+import PlayerProfilePage from './pages/PlayerProfilePage';
 import PlayerSpacePage from './pages/PlayerSpacePage';
 import ReglementPage from './pages/ReglementPage';
 
@@ -18,6 +19,7 @@ const App = () => (
       <Route path="/matchs" element={<MatchesPage />} />
       <Route path="/matchs/:matchId" element={<MatchDetailPage />} />
       <Route path="/classement" element={<LeaderboardPage />} />
+      <Route path="/joueurs/:playerId" element={<PlayerProfilePage />} />
       <Route path="/mes-pronos" element={<MyPredictionsPage />} />
       <Route path="/mon-compte" element={<PlayerSpacePage />} />
       <Route path="/connexion" element={<LoginPage />} />

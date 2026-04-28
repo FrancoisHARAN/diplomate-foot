@@ -32,14 +32,12 @@ export const getMatchStatusLabel = (status: MatchStatus): string => {
 export const canEditPrediction = (match: Match, now = new Date()): boolean => {
   if (match.status !== 'upcoming') return false;
   const kickoff = new Date(match.kickoff).getTime();
-  const oneHourBefore = kickoff - 60 * 60 * 1000;
-  return now.getTime() < oneHourBefore;
+  return now.getTime() <= kickoff;
 };
 
 export const getMinutesBeforeLock = (match: Match, now = new Date()): number => {
   const kickoff = new Date(match.kickoff).getTime();
-  const oneHourBefore = kickoff - 60 * 60 * 1000;
-  return Math.max(0, Math.ceil((oneHourBefore - now.getTime()) / (1000 * 60)));
+  return Math.max(0, Math.ceil((kickoff - now.getTime()) / (1000 * 60)));
 };
 
 export const getLiveMinute = (match: Match, now = new Date()): number | null => {

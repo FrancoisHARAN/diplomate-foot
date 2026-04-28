@@ -6,11 +6,11 @@ const BottomNavigation = () => {
 
   const navItems = [
     { to: '/', label: 'Accueil', icon: '⌂' },
-    { to: '/matchs', label: 'Matchs', icon: '⚽' },
+    { to: '/matchs', label: 'Matchs', icon: '●' },
     { to: '/classement', label: 'Classement', icon: '#' },
     { to: '/mes-pronos', label: 'Pronos', icon: '✓' },
     { to: '/reglement', label: 'Règles', icon: '3' },
-    { to: player ? '/mon-compte' : '/connexion', label: 'Compte', icon: '◉' },
+    { to: player ? '/mon-compte' : '/connexion', label: 'Compte', icon: '◎' },
   ];
 
   return (

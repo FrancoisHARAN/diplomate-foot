@@ -5,6 +5,7 @@ export interface Team {
   id: string;
   name: string;
   shortName: string;
+  crest?: string;
 }
 
 export interface Match {
@@ -21,6 +22,7 @@ export interface Match {
   minute?: number | null;
   venue?: string;
   matchday?: number | null;
+  pointsMultiplier?: number;
   source?: string;
   lastUpdated?: string;
 }
@@ -29,6 +31,7 @@ export interface Player {
   id: string;
   nickname: string;
   secretCode?: string;
+  avatarUrl?: string;
   points: number;
   exactScores: number;
   correctResults: number;
@@ -48,6 +51,7 @@ export interface Standing {
   position: number;
   playerId: string;
   nickname: string;
+  avatarUrl?: string;
   points: number;
   exactScores: number;
   correctResults: number;

@@ -1,6 +1,6 @@
 import { mockPredictions } from '../data/mockPredictions';
 import type { Match, Prediction } from '../types';
-import { calculatePredictionPoints } from '../utils/points';
+import { calculatePredictionPointsForMatch } from '../utils/points';
 
 const STORAGE_KEY = 'diplomate.predictions';
 
@@ -31,6 +31,6 @@ export const predictionService = {
   },
   calculatePointsForPrediction: (prediction: Prediction, match: Match): number => {
     if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return 0;
-    return calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore);
+    return calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match);
   },
 };

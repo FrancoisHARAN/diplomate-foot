@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
 import { canEditPrediction, formatKickoffDay, formatKickoffTime, getLiveMinute, getMinutesBeforeLock } from '../utils/date';
-import { getTeamFlagUrl, getTeamInitials } from '../utils/flags';
-import { calculatePredictionPoints } from '../utils/points';
+import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 
 interface MatchCardProps {
   match: Match;
@@ -16,7 +16,7 @@ const getMatchState = (match: Match, editable: boolean) => {
   if (match.status === 'finished') return { label: 'Terminé', tone: 'done' };
   if (match.status === 'live') return { label: 'En cours', tone: 'live' };
   if (!editable) return { label: 'Fermé', tone: 'closed' };
-  if (getMinutesBeforeLock(match) <= 180) return { label: 'Ferme bientôt', tone: 'warning' };
+  if (getMinutesBeforeLock(match) <= 60) return { label: 'Ferme bientôt', tone: 'warning' };
   return { label: 'Ouvert', tone: 'open' };
 };
 
@@ -25,8 +25,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const editable = canEditPrediction(match);
   const state = getMatchState(match, editable);
   const liveMinute = getLiveMinute(match);
-  const homeFlag = getTeamFlagUrl(match.homeTeam.shortName);
-  const awayFlag = getTeamFlagUrl(match.awayTeam.shortName);
+  const multiplier = getMatchMultiplier(match);
 
   const scoreLabel =
     (match.status === 'finished' || match.status === 'live') && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
@@ -37,15 +36,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
       ? 'Voir le résultat'
       : prediction
         ? editable
-          ? 'Modifier mon prono'
-          : 'Voir mon prono'
+          ? 'Modifier'
+          : 'Voir'
         : editable
           ? 'Pronostiquer'
-          : 'Voir le match';
+          : 'Voir';
 
   const points =
     prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
-      ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+      ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
 
   const click = () => {
@@ -58,7 +57,10 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
   return (
     <button type="button" className={`match-card ${variant === 'compact' ? 'compact' : ''}`} onClick={click}>
-      <span className={`status-pill ${state.tone}`}>{state.label}</span>
+      <div className="match-card-topline">
+        <span className={`status-pill ${state.tone}`}>{state.label}</span>
+        {multiplier > 1 ? <span className="booster-pill">⚡ Boost x{multiplier}</span> : null}
+      </div>
 
       <div className="match-meta">
         <span>{match.competitionName ?? 'Compétition test'}</span>
@@ -67,24 +69,27 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
       <div className="match-teams">
         <span className="team-block">
-          {homeFlag ? <img src={homeFlag} alt="" /> : <span className="club-badge">{getTeamInitials(match.homeTeam.name, match.homeTeam.shortName)}</span>}
+          <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
           <strong>{match.homeTeam.name}</strong>
           <small>{match.homeTeam.shortName}</small>
         </span>
         <span className="versus-pill">{scoreLabel}</span>
         <span className="team-block">
-          {awayFlag ? <img src={awayFlag} alt="" /> : <span className="club-badge">{getTeamInitials(match.awayTeam.name, match.awayTeam.shortName)}</span>}
+          <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
           <strong>{match.awayTeam.name}</strong>
           <small>{match.awayTeam.shortName}</small>
         </span>
       </div>
 
       <div className="match-card-footer">
-        <span>
-          {formatKickoffDay(match.kickoff)} · {prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}
-          {points !== null ? ` · ${points} pts` : ''}
-        </span>
+        <span>{formatKickoffDay(match.kickoff)}</span>
         <strong>{actionLabel}</strong>
+      </div>
+
+      <div className={`match-prediction-card ${prediction ? 'has-prono' : ''}`}>
+        <span>{prediction ? 'Ton prono' : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}</span>
+        <strong>{prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'À jouer'}</strong>
+        {points !== null ? <small>{points} pts</small> : multiplier > 1 ? <small>Les points comptent x{multiplier}</small> : null}
       </div>
     </button>
   );

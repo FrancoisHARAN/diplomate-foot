@@ -3,16 +3,18 @@ import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
 import type { Match, Player, Prediction, Standing } from '../types';
 import { canEditPrediction } from './date';
-import { calculatePredictionPoints } from './points';
+import { applyMatchMultiplier, calculatePredictionPoints } from './points';
 
 const STORAGE_KEYS = {
   currentPlayer: 'diplomate.currentPlayer',
   predictions: 'diplomate.predictions',
+  profileImages: 'diplomate.profileImages',
 };
 
 export interface CurrentPlayer {
   id: string;
   nickname: string;
+  avatarUrl?: string;
 }
 
 const readJson = <T>(key: string, fallback: T): T => {
@@ -31,6 +33,18 @@ const writeJson = <T>(key: string, value: T): void => {
 
 const normalizeNickname = (nickname: string): string => nickname.trim().toLowerCase();
 
+export const getPlayerProfileImages = (): Record<string, string> => readJson<Record<string, string>>(STORAGE_KEYS.profileImages, {});
+
+export const getPlayerAvatarUrl = (playerId: string): string | undefined => getPlayerProfileImages()[playerId];
+
+export const setPlayerProfileImage = (playerId: string, imageDataUrl: string): void => {
+  writeJson(STORAGE_KEYS.profileImages, { ...getPlayerProfileImages(), [playerId]: imageDataUrl });
+  const current = getCurrentPlayer();
+  if (current?.id === playerId) {
+    writeJson(STORAGE_KEYS.currentPlayer, { ...current, avatarUrl: imageDataUrl });
+  }
+};
+
 const findOrCreatePlayer = (nickname: string, code: string): Player => {
   const clean = nickname.trim();
   const existing = mockPlayers.find((player) => normalizeNickname(player.nickname) === normalizeNickname(clean));
@@ -42,8 +56,8 @@ const findOrCreatePlayer = (nickname: string, code: string): Player => {
     return existing;
   }
 
-  if (code.trim().length < 4) {
-    throw new Error('Le code secret doit contenir au moins 4 caractères.');
+  if (code.trim().length < 6) {
+    throw new Error('Le code secret doit contenir 6 chiffres.');
   }
 
   return {
@@ -60,7 +74,7 @@ export const getCurrentPlayer = (): CurrentPlayer | null => readJson<CurrentPlay
 
 export const loginPlayer = (nickname: string, code: string): CurrentPlayer => {
   const player = findOrCreatePlayer(nickname, code);
-  const auth = { id: player.id, nickname: player.nickname };
+  const auth = { id: player.id, nickname: player.nickname, avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl };
   writeJson(STORAGE_KEYS.currentPlayer, auth);
   return auth;
 };
@@ -82,17 +96,20 @@ export const getPredictionForMatch = (matchId: string): Prediction | undefined =
   return getStoredPredictions().find((prediction) => prediction.matchId === matchId && prediction.playerId === current.id);
 };
 
-export const savePrediction = (matchId: string, homeScore: number, awayScore: number): Prediction => {
+export const savePrediction = (match: Match, homeScore: number, awayScore: number): Prediction => {
   const player = getCurrentPlayer();
   if (!player) throw new Error('Joueur non connecté');
+  if (!canEditPrediction(match, new Date())) {
+    throw new Error('Le match a commencé, ce prono est verrouillé.');
+  }
 
   const all = getStoredPredictions();
-  const existing = all.find((prediction) => prediction.matchId === matchId && prediction.playerId === player.id);
+  const existing = all.find((prediction) => prediction.matchId === match.id && prediction.playerId === player.id);
 
   const nextPrediction: Prediction = {
-    id: existing?.id ?? `pred-${player.id}-${matchId}`,
+    id: existing?.id ?? `pred-${player.id}-${match.id}`,
     playerId: player.id,
-    matchId,
+    matchId: match.id,
     homeScore,
     awayScore,
     updatedAt: new Date().toISOString(),
@@ -112,16 +129,24 @@ export const countUserPredictions = (): number => {
   return getStoredPredictions().filter((prediction) => prediction.playerId === player.id).length;
 };
 
-const calculateFinishedPoints = (playerId: string, predictions: Prediction[], matches: Match[]): number => {
+const calculateFinishedStats = (playerId: string, predictions: Prediction[], matches: Match[]) => {
   const finishedById = new Map(matches.filter((match) => match.status === 'finished').map((match) => [match.id, match]));
 
   return predictions
     .filter((prediction) => prediction.playerId === playerId)
-    .reduce((sum, prediction) => {
-      const match = finishedById.get(prediction.matchId);
-      if (!match || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return sum;
-      return sum + calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore);
-    }, 0);
+    .reduce(
+      (stats, prediction) => {
+        const match = finishedById.get(prediction.matchId);
+        if (!match || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return stats;
+        const basePoints = calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore);
+        return {
+          points: stats.points + applyMatchMultiplier(basePoints, match),
+          exactScores: stats.exactScores + (basePoints === 3 ? 1 : 0),
+          correctResults: stats.correctResults + (basePoints > 0 ? 1 : 0),
+        };
+      },
+      { points: 0, exactScores: 0, correctResults: 0 },
+    );
 };
 
 export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
@@ -129,7 +154,7 @@ export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
   if (!player) return 0;
 
   const base = mockPlayers.find((entry) => entry.id === player.id)?.points ?? 0;
-  const dynamic = calculateFinishedPoints(player.id, getStoredPredictions(), matches);
+  const dynamic = calculateFinishedStats(player.id, getStoredPredictions(), matches).points;
   return Math.max(base, dynamic);
 };
 
@@ -149,7 +174,7 @@ export const getPredictionUiStatus = (match: Match, prediction?: Prediction): Pr
 
   const kickoff = new Date(match.kickoff).getTime();
   const diffMinutes = (kickoff - Date.now()) / (1000 * 60);
-  if (diffMinutes <= 180) return 'closing';
+  if (diffMinutes <= 60) return 'closing';
   if (prediction) return 'open';
   return 'open';
 };
@@ -157,14 +182,15 @@ export const getPredictionUiStatus = (match: Match, prediction?: Prediction): Pr
 export const buildStandings = (players: Player[], predictions: Prediction[], matches: Match[]): Standing[] =>
   players
     .map((player) => {
-      const computed = calculateFinishedPoints(player.id, predictions, matches);
+      const computed = calculateFinishedStats(player.id, predictions, matches);
       return {
         position: 0,
         playerId: player.id,
         nickname: player.nickname,
-        points: Math.max(player.points, computed),
-        exactScores: player.exactScores,
-        correctResults: player.correctResults,
+        avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl,
+        points: Math.max(player.points, computed.points),
+        exactScores: Math.max(player.exactScores, computed.exactScores),
+        correctResults: Math.max(player.correctResults, computed.correctResults),
       };
     })
     .sort((a, b) => b.points - a.points)

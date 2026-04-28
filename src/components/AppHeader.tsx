@@ -1,26 +1,28 @@
 import { Link } from 'react-router-dom';
+import PlayerAvatar from './PlayerAvatar';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getUserPointsMock } from '../utils/appState';
+import { formatLastUpdated } from '../utils/date';
 
 const AppHeader = () => {
   const { player } = usePlayerSession();
-  const { matches } = useLiveMatches();
+  const { matches, generatedAt, isFallback } = useLiveMatches();
   const points = player ? getUserPointsMock(matches) : 0;
-  const initial = player?.nickname.charAt(0).toUpperCase() ?? '?';
+  const updatedAt = formatLastUpdated(generatedAt);
 
   return (
     <header className="app-header">
       <Link to="/" className="brand-wrap" aria-label="Accueil Le Diplomate">
-        <span className="brand-mark">LD</span>
+        <img className="header-logo" src={`${import.meta.env.BASE_URL}brand/logo-diplomate.png`} alt="" />
         <span>
           <strong>Le Diplomate</strong>
-          <small>Pronos 2026</small>
+          <small>Prono foot · {isFallback ? 'test' : updatedAt ?? 'live'}</small>
         </span>
       </Link>
 
       <Link className="account-chip" to={player ? '/mon-compte' : '/connexion'} aria-label={player ? 'Ouvrir mon compte' : 'Se connecter'}>
-        <span className="avatar-dot">{initial}</span>
+        <PlayerAvatar nickname={player?.nickname ?? '?'} avatarUrl={player?.avatarUrl} />
         <span className="account-text">
           {player ? (
             <>

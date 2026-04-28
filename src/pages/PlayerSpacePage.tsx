@@ -1,12 +1,41 @@
 import { Link, useNavigate } from 'react-router-dom';
+import PlayerAvatar from '../components/PlayerAvatar';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
+import { countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock, setPlayerProfileImage } from '../utils/appState';
+
+const resizeImageFile = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Lecture impossible'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Image impossible à charger'));
+      img.onload = () => {
+        const size = 360;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Canvas indisponible'));
+          return;
+        }
+        const scale = Math.max(size / img.width, size / img.height);
+        const width = img.width * scale;
+        const height = img.height * scale;
+        context.drawImage(img, (size - width) / 2, (size - height) / 2, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
 
 const PlayerSpacePage = () => {
   const navigate = useNavigate();
-  const { player, logout } = usePlayerSession();
+  const { player, logout, refreshPlayer } = usePlayerSession();
   const { matches } = useLiveMatches();
 
   if (!player) {
@@ -26,12 +55,26 @@ const PlayerSpacePage = () => {
   return (
     <div className="screen-stack">
       <section className="profile-panel">
-        <span className="avatar-dot xlarge">{player.nickname.charAt(0).toUpperCase()}</span>
+        <PlayerAvatar nickname={player.nickname} avatarUrl={player.avatarUrl} size="xlarge" />
         <div>
           <p className="eyebrow">Compte joueur</p>
           <h1>{player.nickname}</h1>
           <p>{getUserPointsMock(matches)} pts · rang #{getUserRankMock(matches)}</p>
         </div>
+        <label className="photo-upload">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={async (event) => {
+              const file = event.currentTarget.files?.[0];
+              if (!file) return;
+              const imageDataUrl = await resizeImageFile(file);
+              setPlayerProfileImage(player.id, imageDataUrl);
+              refreshPlayer();
+            }}
+          />
+          <span>Changer la photo</span>
+        </label>
       </section>
 
       <section className="quick-stats">

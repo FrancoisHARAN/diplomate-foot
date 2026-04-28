@@ -32,6 +32,35 @@ const cleanTeamName = (name) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const sleep = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms);
+});
+
+const getNumberHeader = (headers, name) => {
+  const value = headers.get(name);
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const throttleFromHeaders = async (headers) => {
+  const remaining =
+    getNumberHeader(headers, 'x-requestsavailable') ??
+    getNumberHeader(headers, 'x-requests-available-minute') ??
+    getNumberHeader(headers, 'x-requests-available');
+  const resetSeconds = getNumberHeader(headers, 'x-requestcounter-reset');
+
+  if (remaining !== null) {
+    console.log(`football-data.org remaining requests: ${remaining}`);
+  }
+
+  if (remaining !== null && remaining <= 2) {
+    const waitMs = Math.min(Math.max((resetSeconds ?? 60) * 1000, 5_000), 65_000);
+    console.log(`football-data.org throttle pause: ${Math.round(waitMs / 1000)}s`);
+    await sleep(waitMs);
+  }
+};
+
 const shortNameFor = (team) => {
   if (team.tla) return team.tla;
   if (team.shortName) return team.shortName.slice(0, 4).toUpperCase();
@@ -52,11 +81,13 @@ const normalizeMatch = (match, competition) => ({
     id: String(match.homeTeam?.id ?? `home-${match.id}`),
     name: cleanTeamName(match.homeTeam?.shortName ?? match.homeTeam?.name ?? 'Équipe domicile'),
     shortName: shortNameFor(match.homeTeam ?? {}),
+    crest: match.homeTeam?.crest ?? undefined,
   },
   awayTeam: {
     id: String(match.awayTeam?.id ?? `away-${match.id}`),
     name: cleanTeamName(match.awayTeam?.shortName ?? match.awayTeam?.name ?? 'Équipe extérieure'),
     shortName: shortNameFor(match.awayTeam ?? {}),
+    crest: match.awayTeam?.crest ?? undefined,
   },
   kickoff: match.utcDate,
   status: statusMap[match.status] ?? 'upcoming',
@@ -78,6 +109,8 @@ const fetchCompetition = async (competition) => {
     headers: { 'X-Auth-Token': token },
   });
 
+  await throttleFromHeaders(response.headers);
+
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`${competition.code}: ${response.status} ${text.slice(0, 180)}`);
@@ -92,7 +125,14 @@ if (!token) {
   process.exit(0);
 }
 
-const results = await Promise.allSettled(competitions.map(fetchCompetition));
+const results = [];
+for (const competition of competitions) {
+  try {
+    results.push({ status: 'fulfilled', value: await fetchCompetition(competition) });
+  } catch (error) {
+    results.push({ status: 'rejected', reason: error });
+  }
+}
 const matches = results.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
 const errors = results
   .filter((result) => result.status === 'rejected')

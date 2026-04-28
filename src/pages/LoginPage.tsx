@@ -7,8 +7,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { refreshPlayer } = usePlayerSession();
-  const [nickname, setNickname] = useState('François');
-  const [code, setCode] = useState('1234');
+  const [nickname, setNickname] = useState('');
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -35,11 +35,11 @@ const LoginPage = () => {
       <form className="auth-panel" onSubmit={submit}>
         <label>
           Pseudo
-          <input value={nickname} onChange={(event) => setNickname(event.target.value)} required autoComplete="username" />
+          <input value={nickname} onChange={(event) => setNickname(event.target.value)} required autoComplete="off" placeholder="Ton prénom" />
         </label>
         <label>
-          Code secret
-          <input value={code} onChange={(event) => setCode(event.target.value)} required inputMode="numeric" autoComplete="current-password" />
+          Code à 6 chiffres
+          <input value={code} onChange={(event) => setCode(event.target.value)} required inputMode="numeric" autoComplete="off" type="password" minLength={6} placeholder="••••••" />
         </label>
         {error ? <p className="error-msg">{error}</p> : null}
         <button className="btn primary" type="submit">Entrer dans la compétition</button>
@@ -47,7 +47,7 @@ const LoginPage = () => {
 
       <section className="notice-panel compact">
         <strong>Compte de test</strong>
-        <p>François / 1234 et Solène / 1234 fonctionnent tout de suite pour faire deux tests séparés.</p>
+        <p>Les comptes test sont donnés dans le message de livraison, pas affichés aux visiteurs.</p>
         <Link className="text-link" to="/reglement">Voir le règlement</Link>
       </section>
     </div>
