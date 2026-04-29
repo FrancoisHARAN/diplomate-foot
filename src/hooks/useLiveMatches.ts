@@ -44,7 +44,11 @@ const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   if (!response.ok) return fallbackState;
 
   const payload = (await response.json()) as LiveMatchesPayload;
-  const liveMatches = Array.isArray(payload.matches) ? payload.matches.filter((match) => !hasPlaceholderTeam(match)) : [];
+  const liveMatches = Array.isArray(payload.matches)
+    ? payload.matches
+        .filter((match) => !hasPlaceholderTeam(match))
+        .map((match) => ({ ...match, lastUpdated: payload.generatedAt ?? match.lastUpdated }))
+    : [];
   const matches = liveMatches.length > 0 ? liveMatches : mockMatches;
 
   return {

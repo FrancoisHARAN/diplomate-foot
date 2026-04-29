@@ -830,6 +830,37 @@ small {
   background: var(--red);
 }
 
+.live-update-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding: 0.46rem 0.58rem;
+  border: 1px solid rgba(255, 42, 76, 0.22);
+  border-radius: 8px;
+  background: #fff2f4;
+}
+
+.live-update-alert span {
+  flex: 0 0 auto;
+  padding: 0.24rem 0.5rem;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--red);
+  font-size: 0.7rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.live-update-alert small {
+  min-width: 0;
+  color: #8d1430;
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-align: right;
+}
+
 .status-pill.done {
   color: #fff;
   background: var(--blue);
@@ -1157,6 +1188,14 @@ small {
 .match-detail-card .booster-panel {
   margin-top: 0;
   border: 2px solid var(--ink);
+}
+
+.detail-live-alert {
+  align-items: flex-start;
+}
+
+.detail-live-alert small {
+  text-align: left;
 }
 
 .match-detail-teams {

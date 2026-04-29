@@ -67,6 +67,15 @@ export const formatTimeUntilKickoff = (match: Match, now = new Date()): string =
   return `Dans ${parts.join(' ')}`;
 };
 
+export const isLiveDisplayMatch = (match: Match, now = new Date()): boolean => {
+  if (match.status === 'live') return true;
+  if (match.status === 'finished') return false;
+
+  const kickoff = new Date(match.kickoff).getTime();
+  const elapsed = now.getTime() - kickoff;
+  return elapsed >= 0 && elapsed <= 3 * 60 * 60 * 1000;
+};
+
 export const getLiveMinute = (match: Match, now = new Date()): number | null => {
   if (match.status !== 'live') return null;
   if (typeof match.minute === 'number') return match.minute;

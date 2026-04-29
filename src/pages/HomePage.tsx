@@ -7,6 +7,7 @@ import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { Match } from '../types';
 import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
+import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 
 const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
 
@@ -41,8 +42,8 @@ const HomePage = () => {
   const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 3);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
-  const openMatches = matches.filter((match) => match.status === 'upcoming').length;
-  const liveMatches = matches.filter((match) => match.status === 'live').length;
+  const openMatches = matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
+  const liveMatches = matches.filter((match) => isLiveDisplayMatch(match)).length;
 
   return (
     <div className="screen-stack">

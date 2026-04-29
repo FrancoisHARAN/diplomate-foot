@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoffDay, formatKickoffTime, getLiveMinute, getMinutesBeforeLock } from '../utils/date';
+import { canEditPrediction, formatKickoffDay, formatKickoffTime, formatLastUpdated, getMinutesBeforeLock, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 
 interface MatchCardProps {
@@ -14,7 +14,7 @@ interface MatchCardProps {
 
 const getMatchState = (match: Match, editable: boolean) => {
   if (match.status === 'finished') return { label: 'Terminé', tone: 'done' };
-  if (match.status === 'live') return { label: 'En cours', tone: 'live' };
+  if (isLiveDisplayMatch(match)) return { label: 'Match en live', tone: 'live' };
   if (!editable) return { label: 'Fermé', tone: 'closed' };
   if (getMinutesBeforeLock(match) <= 60) return { label: 'Ferme bientôt', tone: 'warning' };
   return { label: 'Ouvert', tone: 'open' };
@@ -30,12 +30,16 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const navigate = useNavigate();
   const editable = canEditPrediction(match);
   const state = getMatchState(match, editable);
-  const liveMinute = getLiveMinute(match);
   const multiplier = getMatchMultiplier(match);
+  const updatedAt = formatLastUpdated(match.lastUpdated);
+  const isLiveDisplay = isLiveDisplayMatch(match);
+  const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
 
   const scoreLabel =
-    (match.status === 'finished' || match.status === 'live') && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+    (match.status === 'finished' || isLiveDisplay) && hasScore
       ? `${match.homeScore} - ${match.awayScore}`
+      : isLiveDisplay
+        ? 'Live'
       : 'VS';
   const actionLabel =
     match.status === 'finished'
@@ -76,8 +80,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
       <div className="match-meta">
         <span>{match.competitionName ?? 'Compétition test'}</span>
-        <strong>{liveMinute ? `${liveMinute}'` : formatKickoffTime(match.kickoff)}</strong>
+        <strong>{isLiveDisplay ? 'Score live' : formatKickoffTime(match.kickoff)}</strong>
       </div>
+
+      {isLiveDisplay ? (
+        <div className="live-update-alert">
+          <span>Live</span>
+          <small>Dernière actu : {updatedAt ?? 'en cours'}</small>
+        </div>
+      ) : null}
 
       <div className="match-teams">
         <span className="team-block">

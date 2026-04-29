@@ -4,7 +4,7 @@ import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
-import { canEditPrediction, formatKickoffLong, formatTimeUntilKickoff } from '../utils/date';
+import { canEditPrediction, formatKickoffLong, formatLastUpdated, formatTimeUntilKickoff, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 
 const MatchDetailPage = () => {
@@ -58,6 +58,9 @@ const MatchDetailPage = () => {
 
   const editable = canEditPrediction(match, new Date(clock)) && match.status === 'upcoming';
   const multiplier = getMatchMultiplier(match);
+  const updatedAt = formatLastUpdated(match.lastUpdated);
+  const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
+  const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
   const points =
     match.status === 'finished' && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
@@ -131,13 +134,20 @@ const MatchDetailPage = () => {
             <strong>{match.homeTeam.name}</strong>
             <small>{match.homeTeam.shortName}</small>
           </div>
-          <span className="detail-versus">{match.status === 'finished' || match.status === 'live' ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}` : 'VS'}</span>
+          <span className="detail-versus">{(match.status === 'finished' || isLiveDisplay) && hasScore ? `${match.homeScore} - ${match.awayScore}` : isLiveDisplay ? 'Live' : 'VS'}</span>
           <div className="detail-team">
             <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
             <strong>{match.awayTeam.name}</strong>
             <small>{match.awayTeam.shortName}</small>
           </div>
         </div>
+
+        {isLiveDisplay ? (
+          <div className="live-update-alert detail-live-alert">
+            <span>Match en live</span>
+            <small>Score affiché selon la dernière actu : {updatedAt ?? 'en cours'}</small>
+          </div>
+        ) : null}
 
         {prediction ? (
           <div className="detail-current-prono">

@@ -5,7 +5,7 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
-import { canEditPrediction } from '../utils/date';
+import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 
 type FilterKey = 'all' | CompetitionCode | 'open' | 'live' | 'mine' | 'locked' | 'done';
 
@@ -64,8 +64,8 @@ const MatchesPage = () => {
         const mine = myMap.get(match.id);
         if (filter === 'mine') return Boolean(mine);
         if (filter === 'open') return match.status === 'upcoming' && canEditPrediction(match);
-        if (filter === 'live') return match.status === 'live';
-        if (filter === 'locked') return (match.status === 'upcoming' && !canEditPrediction(match)) || match.status === 'live';
+        if (filter === 'live') return isLiveDisplayMatch(match);
+        if (filter === 'locked') return (match.status === 'upcoming' && !canEditPrediction(match)) || isLiveDisplayMatch(match);
         if (filter === 'done') return match.status === 'finished';
         if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
         return match.status !== 'finished';
