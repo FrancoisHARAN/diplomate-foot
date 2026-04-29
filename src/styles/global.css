@@ -402,7 +402,7 @@ small {
 
 .hero-player {
   position: absolute;
-  right: -1.35rem;
+  right: -3.1rem;
   bottom: -3.7rem;
   width: 15.15rem;
   max-width: none;
@@ -595,6 +595,37 @@ small {
 
 .home-match-section .text-link {
   color: var(--lime);
+}
+
+.home-match-groups,
+.home-match-day {
+  display: grid;
+}
+
+.home-match-groups {
+  gap: 0.9rem;
+  margin-top: 0.1rem;
+}
+
+.home-match-day {
+  gap: 0.62rem;
+}
+
+.home-match-day h3 {
+  color: #fff;
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.05rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.home-match-day .match-list {
+  gap: 0.85rem;
+  padding-top: 0.18rem;
+}
+
+.home-match-day .match-card.is-boosted {
+  margin-block: 0.12rem;
 }
 
 .prize-section .prize-panel {
@@ -1657,7 +1688,7 @@ button.action-row {
   }
 
   .hero-player {
-    right: -1.95rem;
+    right: -3.55rem;
     bottom: -3.45rem;
     width: 14.55rem;
   }

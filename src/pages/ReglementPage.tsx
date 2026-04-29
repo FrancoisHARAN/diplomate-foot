@@ -8,13 +8,13 @@ const rules = [
   {
     title: 'Bon écart',
     points: '2 pts',
-    condition: 'Tu trouves le bon vainqueur avec le bon écart de buts.',
-    example: 'Exemple : tu joues 3 - 1, le match finit 2 - 0.',
+    condition: 'Tu trouves le bon écart de buts, même si le score exact est différent.',
+    example: 'Exemples : tu joues 3 - 1 et ça finit 2 - 0, ou tu joues 3 - 3 et ça finit 2 - 2.',
   },
   {
-    title: 'Bon résultat',
+    title: 'Bon gagnant',
     points: '1 pt',
-    condition: 'Tu trouves le bon gagnant, ou tu annonces le bon match nul.',
+    condition: 'Tu trouves seulement la bonne équipe gagnante.',
     example: 'Exemple : tu joues 1 - 0, ton équipe gagne 3 - 2.',
   },
   {

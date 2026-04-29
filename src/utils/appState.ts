@@ -31,16 +31,38 @@ const writeJson = <T>(key: string, value: T): void => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
-const normalizeNickname = (nickname: string): string => nickname.trim().toLowerCase();
+const normalizeIdentity = (value: string): string =>
+  value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const normalizeNickname = (nickname: string): string => normalizeIdentity(nickname);
+
+export const canonicalPlayerId = (playerId?: string | null): string => {
+  if (!playerId) return '';
+  const normalized = normalizeIdentity(playerId);
+  if (normalized.includes('francois')) return 'p-francois';
+  if (normalized.includes('solene')) return 'p-solene';
+  return playerId;
+};
+
+export const samePlayerId = (left?: string | null, right?: string | null): boolean =>
+  Boolean(left && right && canonicalPlayerId(left) === canonicalPlayerId(right));
 
 export const getPlayerProfileImages = (): Record<string, string> => readJson<Record<string, string>>(STORAGE_KEYS.profileImages, {});
 
-export const getPlayerAvatarUrl = (playerId: string): string | undefined => getPlayerProfileImages()[playerId];
+export const getPlayerAvatarUrl = (playerId: string): string | undefined => {
+  const images = getPlayerProfileImages();
+  return images[playerId] ?? Object.entries(images).find(([storedPlayerId]) => samePlayerId(storedPlayerId, playerId))?.[1];
+};
 
 export const setPlayerProfileImage = (playerId: string, imageDataUrl: string): void => {
-  writeJson(STORAGE_KEYS.profileImages, { ...getPlayerProfileImages(), [playerId]: imageDataUrl });
+  const canonicalId = canonicalPlayerId(playerId);
+  writeJson(STORAGE_KEYS.profileImages, { ...getPlayerProfileImages(), [playerId]: imageDataUrl, [canonicalId]: imageDataUrl });
   const current = getCurrentPlayer();
-  if (current?.id === playerId) {
+  if (current && samePlayerId(current.id, playerId)) {
     writeJson(STORAGE_KEYS.currentPlayer, { ...current, avatarUrl: imageDataUrl });
   }
 };
@@ -90,10 +112,28 @@ export const getStoredPredictions = (): Prediction[] => {
   return mockPredictions;
 };
 
+const predictionTimestamp = (prediction: Prediction): number => new Date(prediction.updatedAt).getTime() || 0;
+
+export const getPredictionsForPlayer = (playerId?: string | null, predictions: Prediction[] = getStoredPredictions()): Prediction[] => {
+  if (!playerId) return [];
+
+  const byMatch = new Map<string, Prediction>();
+  predictions
+    .filter((prediction) => samePlayerId(prediction.playerId, playerId))
+    .forEach((prediction) => {
+      const existing = byMatch.get(prediction.matchId);
+      if (!existing || predictionTimestamp(prediction) >= predictionTimestamp(existing)) {
+        byMatch.set(prediction.matchId, prediction);
+      }
+    });
+
+  return Array.from(byMatch.values());
+};
+
 export const getPredictionForMatch = (matchId: string): Prediction | undefined => {
   const current = getCurrentPlayer();
   if (!current) return undefined;
-  return getStoredPredictions().find((prediction) => prediction.matchId === matchId && prediction.playerId === current.id);
+  return getPredictionsForPlayer(current.id).find((prediction) => prediction.matchId === matchId);
 };
 
 export const savePrediction = (match: Match, homeScore: number, awayScore: number): Prediction => {
@@ -104,11 +144,12 @@ export const savePrediction = (match: Match, homeScore: number, awayScore: numbe
   }
 
   const all = getStoredPredictions();
-  const existing = all.find((prediction) => prediction.matchId === match.id && prediction.playerId === player.id);
+  const playerId = canonicalPlayerId(player.id) || player.id;
+  const existing = all.find((prediction) => prediction.matchId === match.id && samePlayerId(prediction.playerId, player.id));
 
   const nextPrediction: Prediction = {
-    id: existing?.id ?? `pred-${player.id}-${match.id}`,
-    playerId: player.id,
+    id: existing?.id ?? `pred-${playerId}-${match.id}`,
+    playerId,
     matchId: match.id,
     homeScore,
     awayScore,
@@ -126,14 +167,13 @@ export const savePrediction = (match: Match, homeScore: number, awayScore: numbe
 export const countUserPredictions = (): number => {
   const player = getCurrentPlayer();
   if (!player) return 0;
-  return getStoredPredictions().filter((prediction) => prediction.playerId === player.id).length;
+  return getPredictionsForPlayer(player.id).length;
 };
 
 const calculateFinishedStats = (playerId: string, predictions: Prediction[], matches: Match[]) => {
   const finishedById = new Map(matches.filter((match) => match.status === 'finished').map((match) => [match.id, match]));
 
-  return predictions
-    .filter((prediction) => prediction.playerId === playerId)
+  return getPredictionsForPlayer(playerId, predictions)
     .reduce(
       (stats, prediction) => {
         const match = finishedById.get(prediction.matchId);
@@ -153,7 +193,7 @@ export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
   const player = getCurrentPlayer();
   if (!player) return 0;
 
-  const base = mockPlayers.find((entry) => entry.id === player.id)?.points ?? 0;
+  const base = mockPlayers.find((entry) => samePlayerId(entry.id, player.id))?.points ?? 0;
   const dynamic = calculateFinishedStats(player.id, getStoredPredictions(), matches).points;
   return Math.max(base, dynamic);
 };
@@ -162,7 +202,7 @@ export const getUserRankMock = (matches: Match[] = mockMatches): number | null =
   const player = getCurrentPlayer();
   if (!player) return null;
   const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
-  return standings.find((entry) => entry.playerId === player.id)?.position ?? standings.length + 1;
+  return standings.find((entry) => samePlayerId(entry.playerId, player.id))?.position ?? standings.length + 1;
 };
 
 export type PredictionUiStatus = 'open' | 'closing' | 'closed' | 'done';
@@ -179,8 +219,54 @@ export const getPredictionUiStatus = (match: Match, prediction?: Prediction): Pr
   return 'open';
 };
 
+const nicknameFromPlayerId = (playerId: string): string => {
+  const normalized = normalizeIdentity(playerId);
+  if (normalized.includes('francois')) return 'François';
+  if (normalized.includes('solene')) return 'Solène';
+
+  const cleaned = playerId.replace(/^guest-/, '').replace(/^p-/, '').replace(/[-_]+/g, ' ').trim();
+  return cleaned ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : 'Joueur';
+};
+
+const buildPlayerPool = (players: Player[], predictions: Prediction[]): Player[] => {
+  const byCanonicalId = new Map<string, Player>();
+
+  players.forEach((player) => {
+    byCanonicalId.set(canonicalPlayerId(player.id), player);
+  });
+
+  const current = getCurrentPlayer();
+  if (current) {
+    const currentId = canonicalPlayerId(current.id) || current.id;
+    const existing = byCanonicalId.get(currentId);
+    byCanonicalId.set(currentId, {
+      id: existing?.id ?? currentId,
+      nickname: existing?.nickname ?? current.nickname,
+      secretCode: existing?.secretCode,
+      avatarUrl: current.avatarUrl ?? existing?.avatarUrl,
+      points: existing?.points ?? 0,
+      exactScores: existing?.exactScores ?? 0,
+      correctResults: existing?.correctResults ?? 0,
+    });
+  }
+
+  predictions.forEach((prediction) => {
+    const predictionPlayerId = canonicalPlayerId(prediction.playerId) || prediction.playerId;
+    if (byCanonicalId.has(predictionPlayerId)) return;
+    byCanonicalId.set(predictionPlayerId, {
+      id: predictionPlayerId,
+      nickname: nicknameFromPlayerId(prediction.playerId),
+      points: 0,
+      exactScores: 0,
+      correctResults: 0,
+    });
+  });
+
+  return Array.from(byCanonicalId.values());
+};
+
 export const buildStandings = (players: Player[], predictions: Prediction[], matches: Match[]): Standing[] =>
-  players
+  buildPlayerPool(players, predictions)
     .map((player) => {
       const computed = calculateFinishedStats(player.id, predictions, matches);
       return {
@@ -196,4 +282,4 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
     .sort((a, b) => b.points - a.points)
     .map((entry, index) => ({ ...entry, position: index + 1 }));
 
-export const getUserRank = (standings: Standing[], playerId?: string) => standings.find((entry) => entry.playerId === playerId);
+export const getUserRank = (standings: Standing[], playerId?: string) => standings.find((entry) => samePlayerId(entry.playerId, playerId));

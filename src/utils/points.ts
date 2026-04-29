@@ -11,10 +11,6 @@ export const calculatePredictionPoints = (
   const predictedDiff = predictedHome - predictedAway;
   const actualDiff = actualHome - actualAway;
 
-  if (predictedDiff === 0 || actualDiff === 0) {
-    return predictedDiff === actualDiff ? 1 : 0;
-  }
-
   if (predictedDiff === actualDiff) return 2;
 
   const predictedOutcome = Math.sign(predictedDiff);

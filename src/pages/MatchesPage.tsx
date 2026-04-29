@@ -4,7 +4,7 @@ import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
-import { getStoredPredictions } from '../utils/appState';
+import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { canEditPrediction } from '../utils/date';
 
 type FilterKey = 'all' | CompetitionCode | 'open' | 'live' | 'mine' | 'locked' | 'done';
@@ -55,7 +55,7 @@ const MatchesPage = () => {
   const { matches, isFallback } = useLiveMatches();
   const [filter, setFilter] = useState<FilterKey>('all');
   const predictions = getStoredPredictions();
-  const myPredictions = predictions.filter((prediction) => prediction.playerId === player?.id);
+  const myPredictions = getPredictionsForPlayer(player?.id, predictions);
   const myMap = new Map(myPredictions.map((prediction) => [prediction.matchId, prediction]));
 
   const filtered = useMemo(

@@ -3,14 +3,14 @@ import PlayerAvatar from '../components/PlayerAvatar';
 import TeamBadge from '../components/TeamBadge';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { buildStandings, getPlayerAvatarUrl, getStoredPredictions } from '../utils/appState';
+import { buildStandings, getPlayerAvatarUrl, getPredictionsForPlayer, getStoredPredictions, samePlayerId } from '../utils/appState';
 import { formatKickoffDay } from '../utils/date';
 import { calculatePredictionPointsForMatch } from '../utils/points';
 
 const PlayerProfilePage = () => {
   const { playerId } = useParams();
   const { matches } = useLiveMatches();
-  const player = mockPlayers.find((item) => item.id === playerId);
+  const player = mockPlayers.find((item) => samePlayerId(item.id, playerId));
 
   if (!player) {
     return (
@@ -22,9 +22,10 @@ const PlayerProfilePage = () => {
     );
   }
 
-  const predictions = getStoredPredictions().filter((prediction) => prediction.playerId === player.id);
-  const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
-  const standing = standings.find((row) => row.playerId === player.id);
+  const allPredictions = getStoredPredictions();
+  const predictions = getPredictionsForPlayer(player.id, allPredictions);
+  const standings = buildStandings(mockPlayers, allPredictions, matches);
+  const standing = standings.find((row) => samePlayerId(row.playerId, player.id));
   const finishedRows = predictions
     .map((prediction) => {
       const match = matches.find((item) => item.id === prediction.matchId);

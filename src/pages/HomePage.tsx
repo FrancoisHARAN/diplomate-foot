@@ -5,7 +5,33 @@ import PrizePanel from '../components/PrizePanel';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { buildStandings, countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock } from '../utils/appState';
+import type { Match } from '../types';
+import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
+
+const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+
+const homeDayTitle = (iso: string) => {
+  const date = new Date(iso);
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const diffDays = Math.round((target - start) / (24 * 60 * 60 * 1000));
+
+  if (diffDays === 0) return "Aujourd'hui";
+  if (diffDays === 1) return 'Demain';
+  if (diffDays === 2) return 'Après-demain';
+
+  return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' }).format(date);
+};
+
+const groupHomeMatchesByDay = (matches: Match[]) => {
+  const groups = new Map<string, Match[]>();
+  matches.forEach((match) => {
+    const key = dayKey(match.kickoff);
+    groups.set(key, [...(groups.get(key) ?? []), match]);
+  });
+  return Array.from(groups.entries()).map(([key, items]) => ({ key, title: homeDayTitle(items[0].kickoff), matches: items }));
+};
 
 const HomePage = () => {
   const { player } = usePlayerSession();
@@ -13,7 +39,8 @@ const HomePage = () => {
   const predictions = getStoredPredictions();
   const standings = buildStandings(mockPlayers, predictions, matches);
   const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 3);
-  const myMap = new Map(predictions.filter((prediction) => prediction.playerId === player?.id).map((prediction) => [prediction.matchId, prediction]));
+  const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
+  const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
   const openMatches = matches.filter((match) => match.status === 'upcoming').length;
   const liveMatches = matches.filter((match) => match.status === 'live').length;
 
@@ -72,7 +99,7 @@ const HomePage = () => {
 
         <div className="ranking-list compact">
           {standings.slice(0, 3).map((row) => (
-            <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
+            <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${samePlayerId(row.playerId, player?.id) ? 'is-me' : ''}`}>
               <span className="rank-number">{row.position}</span>
               <PlayerAvatar nickname={row.nickname} avatarUrl={row.avatarUrl} />
               <span>
@@ -93,8 +120,15 @@ const HomePage = () => {
           </div>
           <Link className="text-link" to="/matchs">Tous</Link>
         </div>
-        <div className="match-list">
-          {nextMatches.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+        <div className="home-match-groups">
+          {nextMatchGroups.map((group) => (
+            <section className="home-match-day" key={group.key}>
+              <h3>{group.title}</h3>
+              <div className="match-list">
+                {group.matches.map((match) => <MatchCard key={match.id} match={match} prediction={myMap.get(match.id)} />)}
+              </div>
+            </section>
+          ))}
         </div>
       </section>
 

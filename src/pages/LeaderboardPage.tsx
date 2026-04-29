@@ -4,13 +4,13 @@ import PrizePanel from '../components/PrizePanel';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { buildStandings, getStoredPredictions } from '../utils/appState';
+import { buildStandings, getStoredPredictions, samePlayerId } from '../utils/appState';
 
 const LeaderboardPage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
   const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
-  const me = standings.find((row) => row.playerId === player?.id);
+  const me = standings.find((row) => samePlayerId(row.playerId, player?.id));
 
   return (
     <div className="screen-stack">
@@ -50,7 +50,7 @@ const LeaderboardPage = () => {
 
       <section className="ranking-list">
         {standings.map((row) => (
-          <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${row.playerId === player?.id ? 'is-me' : ''}`}>
+          <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${samePlayerId(row.playerId, player?.id) ? 'is-me' : ''}`}>
             <span className="rank-number">{row.position}</span>
             <PlayerAvatar nickname={row.nickname} avatarUrl={row.avatarUrl} />
             <span>

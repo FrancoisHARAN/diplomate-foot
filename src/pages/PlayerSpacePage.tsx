@@ -3,7 +3,7 @@ import PlayerAvatar from '../components/PlayerAvatar';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { countUserPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock, setPlayerProfileImage } from '../utils/appState';
+import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId, setPlayerProfileImage } from '../utils/appState';
 
 const resizeImageFile = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -48,8 +48,9 @@ const PlayerSpacePage = () => {
     );
   }
 
-  const playerData = mockPlayers.find((item) => item.id === player.id);
-  const predictionByMatch = new Set(getStoredPredictions().filter((prediction) => prediction.playerId === player.id).map((prediction) => prediction.matchId));
+  const predictions = getStoredPredictions();
+  const playerStanding = buildStandings(mockPlayers, predictions, matches).find((item) => samePlayerId(item.playerId, player.id));
+  const predictionByMatch = new Set(getPredictionsForPlayer(player.id, predictions).map((prediction) => prediction.matchId));
   const toPredict = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
 
   return (
@@ -88,11 +89,11 @@ const PlayerSpacePage = () => {
         </article>
         <article>
           <small>Exacts</small>
-          <strong>{playerData?.exactScores ?? 0}</strong>
+          <strong>{playerStanding?.exactScores ?? 0}</strong>
         </article>
         <article>
           <small>Bons</small>
-          <strong>{playerData?.correctResults ?? 0}</strong>
+          <strong>{playerStanding?.correctResults ?? 0}</strong>
         </article>
       </section>
 

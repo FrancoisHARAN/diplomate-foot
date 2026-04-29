@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { getStoredPredictions, getUserPointsMock } from '../utils/appState';
+import { getPredictionsForPlayer, getUserPointsMock } from '../utils/appState';
 import { canEditPrediction } from '../utils/date';
 import { calculatePredictionPointsForMatch } from '../utils/points';
 
@@ -20,7 +20,7 @@ const MyPredictionsPage = () => {
     );
   }
 
-  const mine = getStoredPredictions().filter((prediction) => prediction.playerId === player.id);
+  const mine = getPredictionsForPlayer(player.id);
   const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
   const remaining = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
   const predictedMatches = matches.filter((match) => predictionByMatch.has(match.id));
