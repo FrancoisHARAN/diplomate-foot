@@ -145,6 +145,7 @@ const HomePage = () => {
             </section>
           ))}
         </div>
+        <Link className="btn secondary home-match-cta" to="/matchs">Voir tous les matchs</Link>
       </section>
 
       <section className="account-panel">

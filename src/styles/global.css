@@ -706,6 +706,10 @@ small {
   margin-block: 0.12rem;
 }
 
+.home-match-cta {
+  margin-top: 0.85rem;
+}
+
 .prize-section .prize-panel {
   margin-top: 0.75rem;
 }
