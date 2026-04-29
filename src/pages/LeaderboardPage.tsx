@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
 import PrizePanel from '../components/PrizePanel';
+import RankingMovementBadge from '../components/RankingMovementBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
+import { useRankingMovements } from '../hooks/useRankingMovements';
 import { buildStandings, getStoredPredictions, samePlayerId } from '../utils/appState';
 
 const LeaderboardPage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
   const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
+  const movements = useRankingMovements(standings);
   const me = standings.find((row) => samePlayerId(row.playerId, player?.id));
 
   return (
@@ -52,8 +55,9 @@ const LeaderboardPage = () => {
         {standings.map((row) => (
           <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${samePlayerId(row.playerId, player?.id) ? 'is-me' : ''}`}>
             <span className="rank-number">{row.position}</span>
+            <RankingMovementBadge movement={movements[row.playerId]} />
             <PlayerAvatar nickname={row.nickname} avatarUrl={row.avatarUrl} />
-            <span>
+            <span className="ranking-player-summary">
               <strong>{row.nickname}</strong>
               <small>{row.exactScores} exacts · {row.correctResults} bons résultats</small>
             </span>

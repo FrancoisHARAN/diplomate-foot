@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import PlayerAvatar from '../components/PlayerAvatar';
 import PrizePanel from '../components/PrizePanel';
+import RankingMovementBadge from '../components/RankingMovementBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
+import { useRankingMovements } from '../hooks/useRankingMovements';
 import type { Match } from '../types';
 import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
@@ -39,6 +41,7 @@ const HomePage = () => {
   const { matches } = useLiveMatches();
   const predictions = getStoredPredictions();
   const standings = buildStandings(mockPlayers, predictions, matches);
+  const movements = useRankingMovements(standings);
   const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 3);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
@@ -99,8 +102,9 @@ const HomePage = () => {
           {standings.slice(0, 3).map((row) => (
             <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={`ranking-row ${samePlayerId(row.playerId, player?.id) ? 'is-me' : ''}`}>
               <span className="rank-number">{row.position}</span>
+              <RankingMovementBadge movement={movements[row.playerId]} />
               <PlayerAvatar nickname={row.nickname} avatarUrl={row.avatarUrl} />
-              <span>
+              <span className="ranking-player-summary">
                 <strong>{row.nickname}</strong>
                 <small>{row.exactScores} scores exacts</small>
               </span>
