@@ -312,9 +312,9 @@ small {
 
 .hero-panel {
   position: relative;
-  min-height: 15.4rem;
+  min-height: 17.2rem;
   overflow: hidden;
-  padding: 1rem;
+  padding: 1.28rem 1rem;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.11) 1px, transparent 1px),
     linear-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px),
@@ -324,51 +324,35 @@ small {
 }
 
 .hero-panel::before {
-  position: absolute;
-  right: 3.1rem;
-  top: 2.6rem;
-  z-index: 1;
-  width: 8.6rem;
-  height: 5.2rem;
-  content: "";
-  background: var(--lime);
-  clip-path: polygon(0 38%, 62% 38%, 50% 0, 100% 52%, 38% 52%, 52% 100%);
-  transform: rotate(-13deg);
+  display: none;
 }
 
 .hero-panel::after {
-  position: absolute;
-  left: 0.9rem;
-  bottom: 1rem;
-  z-index: 1;
-  width: 10.8rem;
-  height: 2.5rem;
-  content: "";
-  background: var(--lime);
-  clip-path: polygon(6% 0, 100% 8%, 94% 100%, 0 88%);
-  transform: rotate(-2deg);
+  display: none;
 }
 
 .hero-content {
   position: relative;
   z-index: 3;
   display: grid;
-  gap: 0.55rem;
-  max-width: 58%;
+  gap: 0.78rem;
+  max-width: 53%;
 }
 
 .hero-panel h1 {
-  max-width: 12rem;
+  max-width: 13.2rem;
   color: #fff;
   font-family: Impact, "Arial Black", sans-serif;
-  font-size: 2.35rem;
-  line-height: 0.88;
+  font-size: 2.75rem;
+  line-height: 0.86;
   text-transform: uppercase;
 }
 
 .hero-copy {
-  max-width: 17rem;
+  max-width: 14rem;
   color: rgba(255, 255, 255, 0.88);
+  font-size: 1.03rem;
+  line-height: 1.28;
   font-weight: 750;
 }
 
@@ -381,7 +365,16 @@ small {
 
 .hero-actions.single {
   grid-template-columns: 1fr;
-  max-width: 10.5rem;
+  max-width: 13.6rem;
+}
+
+.hero-panel .btn.secondary {
+  min-height: 3.35rem;
+  border-radius: 999px;
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.18rem;
+  text-transform: uppercase;
 }
 
 .hero-brand-logo {
@@ -400,23 +393,13 @@ small {
   pointer-events: none;
 }
 
-.hero-player {
+.hero-mascot {
   position: absolute;
-  right: -3.1rem;
-  bottom: -3.7rem;
-  width: 15.15rem;
+  right: -6.15rem;
+  bottom: -1.35rem;
+  width: 25rem;
   max-width: none;
   filter: drop-shadow(0 20px 22px rgba(0, 16, 90, 0.36));
-}
-
-.hero-cup {
-  position: absolute;
-  right: 6.25rem;
-  bottom: 1.2rem;
-  width: 4.8rem;
-  max-width: none;
-  filter: drop-shadow(0 14px 12px rgba(0, 16, 90, 0.28));
-  transform: rotate(-8deg);
 }
 
 .page-hero {
@@ -1709,33 +1692,30 @@ button.action-row {
   }
 
   .hero-content {
-    max-width: 58%;
+    max-width: 54%;
   }
 
   .hero-panel h1 {
-    font-size: 1.95rem;
+    font-size: 2.3rem;
   }
 
-  .hero-panel::before {
-    right: 3.4rem;
-    width: 6.2rem;
+  .hero-copy {
+    font-size: 0.95rem;
   }
 
-  .hero-brand-logo {
-    width: 3.55rem;
-    height: 3.55rem;
+  .hero-actions.single {
+    max-width: 12.4rem;
   }
 
-  .hero-player {
-    right: -3.55rem;
-    bottom: -3.45rem;
-    width: 14.55rem;
+  .hero-panel .btn.secondary {
+    min-height: 3.1rem;
+    font-size: 1.02rem;
   }
 
-  .hero-cup {
-    right: 5.2rem;
-    bottom: 0.95rem;
-    width: 4rem;
+  .hero-mascot {
+    right: -6.35rem;
+    bottom: -1.15rem;
+    width: 23.3rem;
   }
 
   .hero-actions,
