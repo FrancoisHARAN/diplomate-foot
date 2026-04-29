@@ -11,7 +11,10 @@ import type { Match } from '../types';
 import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 
-const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
+const localDayKey = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+const dayKey = (iso: string) => localDayKey(new Date(iso));
 
 const homeDayTitle = (iso: string) => {
   const date = new Date(iso);
@@ -36,13 +39,23 @@ const groupHomeMatchesByDay = (matches: Match[]) => {
   return Array.from(groups.entries()).map(([key, items]) => ({ key, title: homeDayTitle(items[0].kickoff), matches: items }));
 };
 
+const selectHomeMatches = (matches: Match[]): Match[] => {
+  const playableMatches = matches
+    .filter((match) => match.status !== 'finished')
+    .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
+  const todayKey = localDayKey(new Date());
+  const todayMatches = playableMatches.filter((match) => dayKey(match.kickoff) === todayKey);
+
+  return todayMatches.length > 3 ? todayMatches : playableMatches.slice(0, 3);
+};
+
 const HomePage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
   const predictions = getStoredPredictions();
   const standings = buildStandings(mockPlayers, predictions, matches);
   const movements = useRankingMovements(standings);
-  const nextMatches = matches.filter((match) => match.status !== 'finished').slice(0, 3);
+  const nextMatches = selectHomeMatches(matches);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
   const openMatches = matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
