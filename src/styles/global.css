@@ -939,6 +939,14 @@ small {
   text-align: right;
 }
 
+.match-card-live-alert {
+  flex-wrap: nowrap;
+}
+
+.match-card-live-alert small {
+  margin-left: auto;
+}
+
 .status-pill.done {
   color: #fff;
   background: var(--blue);

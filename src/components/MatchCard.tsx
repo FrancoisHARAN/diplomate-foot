@@ -68,27 +68,27 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
   return (
     <button type="button" className={`match-card ${variant === 'compact' ? 'compact' : ''} ${multiplier > 1 ? 'is-boosted' : ''}`} onClick={click}>
-      <div className="match-card-topline">
-        <span className={`status-pill ${state.tone}`}>{state.label}</span>
-        {multiplier > 1 ? (
-          <span className="booster-pill">
-            <strong>Boost x{multiplier}</strong>
-            <small>Points x{multiplier}</small>
-          </span>
-        ) : null}
-      </div>
-
-      <div className="match-meta">
-        <span>{match.competitionName ?? 'Compétition test'}</span>
-        <strong>{isLiveDisplay ? 'Score live' : formatKickoffTime(match.kickoff)}</strong>
-      </div>
-
       {isLiveDisplay ? (
-        <div className="live-update-alert">
+        <div className="live-update-alert match-card-live-alert">
           <span>Live</span>
           <small>Dernière actu : {updatedAt ?? 'en cours'}</small>
         </div>
-      ) : null}
+      ) : (
+        <div className="match-card-topline">
+          <span className={`status-pill ${state.tone}`}>{state.label}</span>
+          {multiplier > 1 ? (
+            <span className="booster-pill">
+              <strong>Boost x{multiplier}</strong>
+              <small>Points x{multiplier}</small>
+            </span>
+          ) : null}
+        </div>
+      )}
+
+      <div className="match-meta">
+        <span>{match.competitionName ?? 'Compétition test'}</span>
+        {!isLiveDisplay ? <strong>{formatKickoffTime(match.kickoff)}</strong> : null}
+      </div>
 
       <div className="match-teams">
         <span className="team-block">
