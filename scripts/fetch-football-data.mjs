@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 const competitions = [
@@ -15,6 +15,7 @@ const toIsoDate = (date) => date.toISOString().slice(0, 10);
 const today = new Date();
 const dateFrom = toIsoDate(new Date(today.getTime() - 24 * 60 * 60 * 1000));
 const dateTo = toIsoDate(new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000));
+const archiveFrom = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
 
 const statusMap = {
   SCHEDULED: 'upcoming',
@@ -114,6 +115,19 @@ const isPlaceholderTeam = (team) => team.id.startsWith('home-') || team.id.start
 
 const isDisplayableMatch = (match) => !isPlaceholderTeam(match.homeTeam) && !isPlaceholderTeam(match.awayTeam);
 
+const readArchivedFinishedMatches = async () => {
+  try {
+    const existing = JSON.parse(await readFile(outputPath, 'utf8'));
+    return (existing.matches ?? []).filter((match) => {
+      if (match.status !== 'finished') return false;
+      if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return false;
+      return new Date(match.kickoff).getTime() >= archiveFrom.getTime();
+    });
+  } catch {
+    return [];
+  }
+};
+
 const normalizeMatch = (match, competition) => {
   const knownFixture = knownFixtureTeams[String(match.id)] ?? {};
 
@@ -175,7 +189,14 @@ for (const competition of competitions) {
     results.push({ status: 'rejected', reason: error });
   }
 }
-const matches = results.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+const freshMatches = results.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+const archivedFinishedMatches = await readArchivedFinishedMatches();
+const byId = new Map();
+
+archivedFinishedMatches.forEach((match) => byId.set(match.id, match));
+freshMatches.forEach((match) => byId.set(match.id, match));
+
+const matches = Array.from(byId.values());
 const errors = results
   .filter((result) => result.status === 'rejected')
   .map((result) => result.reason?.message ?? String(result.reason));
