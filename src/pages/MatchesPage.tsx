@@ -5,21 +5,18 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
-import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
+import { isLiveDisplayMatch } from '../utils/date';
 
-type FilterKey = 'all' | CompetitionCode | 'open' | 'live' | 'mine' | 'locked' | 'done';
+type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
 
 const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'all', label: 'Tous' },
+  { id: 'live', label: 'Live' },
+  { id: 'done', label: 'Terminés' },
   { id: 'CL', label: 'Champions League' },
+  { id: 'PD', label: 'Liga' },
   { id: 'FL1', label: 'Ligue 1' },
   { id: 'PL', label: 'Premier League' },
-  { id: 'PD', label: 'Liga' },
-  { id: 'open', label: 'Ouverts' },
-  { id: 'live', label: 'Live' },
-  { id: 'mine', label: 'Mes pronos' },
-  { id: 'locked', label: 'Verrouillés' },
-  { id: 'done', label: 'Terminés' },
 ];
 
 const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
@@ -50,6 +47,13 @@ const groupByDay = (matches: Match[]) => {
   return Array.from(groups.entries()).map(([key, items]) => ({ key, title: dayTitle(items[0].kickoff), matches: items }));
 };
 
+const sortMatchesForFilter = (matches: Match[], filter: FilterKey): Match[] =>
+  [...matches].sort((left, right) => {
+    const leftKickoff = new Date(left.kickoff).getTime();
+    const rightKickoff = new Date(right.kickoff).getTime();
+    return filter === 'done' ? rightKickoff - leftKickoff : leftKickoff - rightKickoff;
+  });
+
 const MatchesPage = () => {
   const { player } = usePlayerSession();
   const { matches, isFallback } = useLiveMatches();
@@ -58,20 +62,16 @@ const MatchesPage = () => {
   const myPredictions = getPredictionsForPlayer(player?.id, predictions);
   const myMap = new Map(myPredictions.map((prediction) => [prediction.matchId, prediction]));
 
-  const filtered = useMemo(
-    () =>
-      matches.filter((match) => {
-        const mine = myMap.get(match.id);
-        if (filter === 'mine') return Boolean(mine);
-        if (filter === 'open') return match.status === 'upcoming' && canEditPrediction(match);
-        if (filter === 'live') return isLiveDisplayMatch(match);
-        if (filter === 'locked') return (match.status === 'upcoming' && !canEditPrediction(match)) || isLiveDisplayMatch(match);
-        if (filter === 'done') return match.status === 'finished';
-        if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
-        return match.status !== 'finished';
-      }),
-    [filter, matches, myMap],
-  );
+  const filtered = useMemo(() => {
+    const filteredMatches = matches.filter((match) => {
+      if (filter === 'live') return isLiveDisplayMatch(match);
+      if (filter === 'done') return match.status === 'finished';
+      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
+      return match.status !== 'finished';
+    });
+
+    return sortMatchesForFilter(filteredMatches, filter);
+  }, [filter, matches]);
 
   const grouped = useMemo(() => groupByDay(filtered), [filtered]);
 
