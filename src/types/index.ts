@@ -1,5 +1,5 @@
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
-export type CompetitionCode = 'FL1' | 'PL' | 'PD' | 'CL' | 'WORLD' | 'TEST';
+export type CompetitionCode = 'FL1' | 'PL' | 'PD' | 'CL' | 'EL' | 'UCL' | 'WORLD' | 'TEST';
 
 export interface Team {
   id: string;

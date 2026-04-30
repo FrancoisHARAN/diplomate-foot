@@ -6,6 +6,8 @@ const competitions = [
   { code: 'PL', name: 'Premier League' },
   { code: 'PD', name: 'La Liga' },
   { code: 'CL', name: 'Champions League' },
+  { code: 'EL', name: 'Europa League' },
+  { code: 'UCL', name: 'Conference League' },
 ];
 
 const token = process.env.FOOTBALL_DATA_TOKEN;

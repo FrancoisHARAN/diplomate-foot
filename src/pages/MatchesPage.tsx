@@ -14,6 +14,8 @@ const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'live', label: 'Live' },
   { id: 'done', label: 'Terminés' },
   { id: 'CL', label: 'Champions League' },
+  { id: 'EL', label: 'Europa League' },
+  { id: 'UCL', label: 'Conference League' },
   { id: 'PD', label: 'Liga' },
   { id: 'FL1', label: 'Ligue 1' },
   { id: 'PL', label: 'Premier League' },
@@ -66,7 +68,7 @@ const MatchesPage = () => {
     const filteredMatches = matches.filter((match) => {
       if (filter === 'live') return isLiveDisplayMatch(match);
       if (filter === 'done') return match.status === 'finished';
-      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
+      if (['CL', 'EL', 'UCL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
       return match.status !== 'finished';
     });
 
