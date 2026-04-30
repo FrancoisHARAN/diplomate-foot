@@ -7,11 +7,9 @@
     "FL1",
     "PL",
     "PD",
-    "CL",
-    "EL",
-    "UCL"
+    "CL"
   ],
-  "message": "Certaines compétitions n'ont pas répondu: EL: 403 {\"message\":\"The resource you are looking for is restricted and apparently not within your permissions. Please check your subscription.\",\"errorCode\":403} | UCL: 403 {\"message\":\"The resource you are looking for is restricted and apparently not within your permissions. Please check your subscription.\",\"errorCode\":403}",
+  "message": null,
   "matches": [
     {
       "id": "fd-552092",

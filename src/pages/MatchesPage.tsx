@@ -6,7 +6,6 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { isLiveDisplayMatch } from '../utils/date';
-import { getLiveDataNotice } from '../utils/liveDataNotice';
 
 type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
 
@@ -15,8 +14,6 @@ const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'live', label: 'Live' },
   { id: 'done', label: 'Terminés' },
   { id: 'CL', label: 'Champions League' },
-  { id: 'EL', label: 'Europa League' },
-  { id: 'UCL', label: 'Conference League' },
   { id: 'PD', label: 'Liga' },
   { id: 'FL1', label: 'Ligue 1' },
   { id: 'PL', label: 'Premier League' },
@@ -59,18 +56,17 @@ const sortMatchesForFilter = (matches: Match[], filter: FilterKey): Match[] =>
 
 const MatchesPage = () => {
   const { player } = usePlayerSession();
-  const { matches, isFallback, message } = useLiveMatches();
+  const { matches, isFallback } = useLiveMatches();
   const [filter, setFilter] = useState<FilterKey>('all');
   const predictions = getStoredPredictions();
   const myPredictions = getPredictionsForPlayer(player?.id, predictions);
   const myMap = new Map(myPredictions.map((prediction) => [prediction.matchId, prediction]));
-  const liveDataNotice = getLiveDataNotice(message);
 
   const filtered = useMemo(() => {
     const filteredMatches = matches.filter((match) => {
       if (filter === 'live') return isLiveDisplayMatch(match);
       if (filter === 'done') return match.status === 'finished';
-      if (['CL', 'EL', 'UCL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
+      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
       return match.status !== 'finished';
     });
 
@@ -91,13 +87,6 @@ const MatchesPage = () => {
         <section className="notice-panel compact">
           <strong>Mode test actif</strong>
           <p>Ajoute une clé API dans GitHub pour remplacer ces matchs par les données live.</p>
-        </section>
-      ) : null}
-
-      {liveDataNotice && !isFallback ? (
-        <section className="notice-panel compact">
-          <strong>Données foot partielles</strong>
-          <p>{liveDataNotice}</p>
         </section>
       ) : null}
 
