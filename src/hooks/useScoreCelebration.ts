@@ -46,7 +46,7 @@ const pickGif = (playerId: string, totalPoints: number, gainedPoints: number): s
   return `${import.meta.env.BASE_URL}celebrations/${fileName}`;
 };
 
-export const useScoreCelebration = (player: CurrentPlayer | null, matches: Match[]) => {
+export const useScoreCelebration = (player: CurrentPlayer | null, matches: Match[], isReady = true) => {
   const [celebration, setCelebration] = useState<ScoreCelebration | null>(null);
   const totalPoints = useMemo(() => (player ? getUserPointsMock(matches) : 0), [matches, player]);
 
@@ -55,6 +55,8 @@ export const useScoreCelebration = (player: CurrentPlayer | null, matches: Match
       setCelebration(null);
       return;
     }
+
+    if (!isReady) return;
 
     const playerId = canonicalPlayerId(player.id) || player.id;
     const snapshots = readSnapshots();
@@ -68,9 +70,9 @@ export const useScoreCelebration = (player: CurrentPlayer | null, matches: Match
       });
     }
 
-    snapshots[playerId] = { points: totalPoints, seenAt: new Date().toISOString() };
+    snapshots[playerId] = { points: Math.max(previousPoints, totalPoints), seenAt: new Date().toISOString() };
     writeSnapshots(snapshots);
-  }, [player, totalPoints]);
+  }, [isReady, player, totalPoints]);
 
   return {
     celebration,

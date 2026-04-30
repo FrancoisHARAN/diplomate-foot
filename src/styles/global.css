@@ -8,7 +8,7 @@
   --panel: #ffffff;
   --panel-soft: #f2f5ff;
   --panel-blue: #1c46f5;
-  --deep: #053b46;
+  --deep: #1c46f5;
   --line: #dbe4ff;
   --line-strong: #1c46f5;
   --text: #131313;
@@ -295,7 +295,7 @@ small {
   border: 2px solid var(--blue);
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(135deg, var(--blue), var(--aqua));
+  background: linear-gradient(135deg, var(--blue), var(--lime));
   font-weight: 900;
   object-fit: cover;
 }
@@ -896,7 +896,8 @@ small {
 
 .status-pill.open,
 .status-pill.success {
-  background: var(--aqua);
+  color: var(--ink);
+  background: var(--lime);
 }
 
 .status-pill.warning {
@@ -1005,7 +1006,7 @@ small {
   border: 2px solid var(--blue);
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(135deg, var(--blue), var(--aqua));
+  background: linear-gradient(135deg, var(--blue), var(--lime));
   font-size: 0.74rem;
   font-weight: 950;
 }
@@ -1059,6 +1060,11 @@ small {
   background: #dcffe9;
 }
 
+.match-prediction-card.exact {
+  border-color: var(--lime);
+  box-shadow: inset 0 0 0 2px rgba(210, 255, 82, 0.72);
+}
+
 .match-prediction-card.lost {
   border-color: var(--red);
   background: #ffe1e5;
@@ -1070,6 +1076,26 @@ small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.match-prediction-card .prediction-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  overflow: visible;
+}
+
+.match-prediction-card .prediction-label span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exact-flame {
+  flex: 0 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 2px 0 rgba(28, 70, 245, 0.24));
 }
 
 .match-prediction-card strong {

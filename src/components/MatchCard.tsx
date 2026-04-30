@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
 import { canEditPrediction, formatKickoffDay, formatKickoffTime, formatLastUpdated, getMinutesBeforeLock, isLiveDisplayMatch } from '../utils/date';
-import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 
 interface MatchCardProps {
   match: Match;
@@ -52,10 +52,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
           ? 'Pronostiquer'
           : 'Voir';
 
+  const basePoints =
+    prediction && match.status === 'finished' && hasScore
+      ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore ?? 0, match.awayScore ?? 0)
+      : null;
   const points =
-    prediction && match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+    prediction && match.status === 'finished' && hasScore
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
+  const exactPrediction = basePoints === 3;
   const predictionTone = getPredictionTone(prediction, points);
 
   const click = () => {
@@ -109,8 +114,11 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
         <strong>{actionLabel}</strong>
       </div>
 
-      <div className={`match-prediction-card ${predictionTone}`}>
-        <span>{prediction ? 'Ton prono' : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}</span>
+      <div className={`match-prediction-card ${predictionTone} ${exactPrediction ? 'exact' : ''}`}>
+        <span className="prediction-label">
+          <span>{prediction ? 'Ton prono' : editable ? 'Aucun prono saisi' : 'Pronostics verrouillés'}</span>
+          {exactPrediction ? <span className="exact-flame" role="img" aria-label="Score parfait">🔥</span> : null}
+        </span>
         <strong>{prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'À jouer'}</strong>
         {points !== null ? <small>{points} pts</small> : null}
       </div>

@@ -6,8 +6,8 @@ import { useScoreCelebration } from '../hooks/useScoreCelebration';
 const ScoreCelebrationStory = () => {
   const navigate = useNavigate();
   const { player } = usePlayerSession();
-  const { matches } = useLiveMatches();
-  const { celebration, dismissCelebration } = useScoreCelebration(player, matches);
+  const { matches, isFallback } = useLiveMatches();
+  const { celebration, dismissCelebration } = useScoreCelebration(player, matches, !isFallback);
 
   if (!celebration) return null;
 
