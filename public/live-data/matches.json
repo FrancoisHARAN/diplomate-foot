@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T09:28:20.514Z",
+  "generatedAt": "2026-04-30T11:14:05.216Z",
   "source": "football-data.org",
   "dateFrom": "2026-04-29",
   "dateTo": "2026-05-21",
@@ -18,7 +18,7 @@
       "competitionName": "Champions League",
       "homeTeam": {
         "id": "78",
-        "name": "Atletico Madrid",
+        "name": "Atleti",
         "shortName": "ATL",
         "crest": "https://crests.football-data.org/78.png"
       },
@@ -35,7 +35,7 @@
       "minute": null,
       "matchday": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T21:04:10Z"
+      "lastUpdated": "2026-04-30T00:21:09Z"
     },
     {
       "id": "fd-538131",
@@ -746,7 +746,7 @@
       },
       "awayTeam": {
         "id": "78",
-        "name": "Atletico Madrid",
+        "name": "Atleti",
         "shortName": "ATL",
         "crest": "https://crests.football-data.org/78.png"
       },
@@ -755,7 +755,7 @@
       "minute": null,
       "matchday": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-16T08:25:11Z"
+      "lastUpdated": "2026-04-29T01:32:03Z"
     },
     {
       "id": "fd-552094",
@@ -779,7 +779,7 @@
       "minute": null,
       "matchday": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-16T08:25:11Z"
+      "lastUpdated": "2026-04-30T01:32:03Z"
     },
     {
       "id": "fd-542700",
