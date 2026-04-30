@@ -10,6 +10,7 @@ import { useRankingMovements } from '../hooks/useRankingMovements';
 import type { Match } from '../types';
 import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
+import { getLiveDataNotice } from '../utils/liveDataNotice';
 
 const localDayKey = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -51,10 +52,11 @@ const selectHomeMatches = (matches: Match[]): Match[] => {
 
 const HomePage = () => {
   const { player } = usePlayerSession();
-  const { matches } = useLiveMatches();
+  const { matches, isFallback, message } = useLiveMatches();
   const predictions = getStoredPredictions();
   const standings = buildStandings(mockPlayers, predictions, matches);
   const movements = useRankingMovements(standings);
+  const liveDataNotice = getLiveDataNotice(message);
   const nextMatches = selectHomeMatches(matches);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
@@ -80,6 +82,13 @@ const HomePage = () => {
         <section className="intro-panel">
           <strong>Entre dans la compétition</strong>
           <p>Connecte-toi avec ton pseudo, pronostique les matchs ouverts et marque des points dès le score final.</p>
+        </section>
+      ) : null}
+
+      {liveDataNotice && !isFallback ? (
+        <section className="notice-panel compact">
+          <strong>Données foot partielles</strong>
+          <p>{liveDataNotice}</p>
         </section>
       ) : null}
 

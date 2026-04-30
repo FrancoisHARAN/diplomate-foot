@@ -6,6 +6,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { isLiveDisplayMatch } from '../utils/date';
+import { getLiveDataNotice } from '../utils/liveDataNotice';
 
 type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
 
@@ -58,11 +59,12 @@ const sortMatchesForFilter = (matches: Match[], filter: FilterKey): Match[] =>
 
 const MatchesPage = () => {
   const { player } = usePlayerSession();
-  const { matches, isFallback } = useLiveMatches();
+  const { matches, isFallback, message } = useLiveMatches();
   const [filter, setFilter] = useState<FilterKey>('all');
   const predictions = getStoredPredictions();
   const myPredictions = getPredictionsForPlayer(player?.id, predictions);
   const myMap = new Map(myPredictions.map((prediction) => [prediction.matchId, prediction]));
+  const liveDataNotice = getLiveDataNotice(message);
 
   const filtered = useMemo(() => {
     const filteredMatches = matches.filter((match) => {
@@ -89,6 +91,13 @@ const MatchesPage = () => {
         <section className="notice-panel compact">
           <strong>Mode test actif</strong>
           <p>Ajoute une clé API dans GitHub pour remplacer ces matchs par les données live.</p>
+        </section>
+      ) : null}
+
+      {liveDataNotice && !isFallback ? (
+        <section className="notice-panel compact">
+          <strong>Données foot partielles</strong>
+          <p>{liveDataNotice}</p>
         </section>
       ) : null}
 
