@@ -3,9 +3,12 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
+import type { Match } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
 import { canEditPrediction, formatKickoffLong, formatLastUpdated, formatTimeUntilKickoff, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+
+const SWIPE_HINT_KEY = 'diplomate.matchSwipeHintSeen.v1';
 
 const MatchDetailPage = () => {
   const { matchId } = useParams();
@@ -19,15 +22,77 @@ const MatchDetailPage = () => {
   const [awayScore, setAwayScore] = useState(0);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const dirtyRef = useRef(false);
+  const latestDraft = useRef<{
+    match: Match | null;
+    homeScore: number;
+    awayScore: number;
+    playerReady: boolean;
+    editable: boolean;
+  }>({ match: null, homeScore: 0, awayScore: 0, playerReady: false, editable: false });
+  const persistDraftRef = useRef<(silent?: boolean) => boolean>(() => true);
 
   const match = matches.find((item) => item.id === matchId);
-  const playableMatches = matches.filter((item) => item.status !== 'finished');
+  const playableMatches = useMemo(
+    () =>
+      matches
+        .filter((item) => item.status !== 'finished')
+        .sort((left, right) => new Date(left.kickoff).getTime() - new Date(right.kickoff).getTime()),
+    [matches],
+  );
   const currentIndex = match ? playableMatches.findIndex((item) => item.id === match.id) : -1;
   const canStep = currentIndex >= 0 && playableMatches.length > 1;
-  const nextMatch = canStep ? playableMatches[currentIndex + 1] ?? playableMatches[0] : null;
-  const previousMatch = canStep ? playableMatches[currentIndex - 1] ?? playableMatches[playableMatches.length - 1] : null;
+  const nextMatch = canStep ? playableMatches[currentIndex + 1] ?? null : null;
+  const previousMatch = canStep ? playableMatches[currentIndex - 1] ?? null : null;
   const prediction = useMemo(() => (match ? getPredictionForMatch(match.id) : undefined), [match, refresh]);
+  const editable = Boolean(match && canEditPrediction(match, new Date(clock)) && match.status === 'upcoming');
+
+  const persistDraft = (silent = true): boolean => {
+    const draft = latestDraft.current;
+    if (!dirtyRef.current || !draft.match || !draft.playerReady || !draft.editable) return true;
+
+    try {
+      savePrediction(draft.match, draft.homeScore, draft.awayScore);
+      dirtyRef.current = false;
+      if (!silent) {
+        setRefresh((value) => value + 1);
+        setMessage('Ton prono a bien été pris en compte.');
+      }
+      return true;
+    } catch (draftError) {
+      if (!silent) {
+        setError(draftError instanceof Error ? draftError.message : "Impossible d'enregistrer ce prono.");
+        setClock(Date.now());
+      }
+      return false;
+    }
+  };
+
+  persistDraftRef.current = persistDraft;
+
+  useEffect(() => {
+    latestDraft.current = {
+      match: match ?? null,
+      homeScore,
+      awayScore,
+      playerReady: Boolean(player),
+      editable,
+    };
+  }, [awayScore, editable, homeScore, match, player]);
+
+  useEffect(() => {
+    const saveBeforeUnload = () => {
+      persistDraftRef.current(true);
+    };
+
+    window.addEventListener('beforeunload', saveBeforeUnload);
+    return () => {
+      saveBeforeUnload();
+      window.removeEventListener('beforeunload', saveBeforeUnload);
+    };
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setClock(Date.now()), 15_000);
@@ -42,9 +107,28 @@ const MatchDetailPage = () => {
       setHomeScore(0);
       setAwayScore(0);
     }
+    dirtyRef.current = false;
     setMessage('');
     setError('');
   }, [match?.id, prediction]);
+
+  useEffect(() => {
+    if (!match || !editable) {
+      setShowSwipeHint(false);
+      return;
+    }
+
+    try {
+      if (localStorage.getItem(SWIPE_HINT_KEY)) return;
+      localStorage.setItem(SWIPE_HINT_KEY, '1');
+    } catch {
+      // If localStorage is unavailable, the hint can still play for this visit.
+    }
+
+    setShowSwipeHint(true);
+    const timer = window.setTimeout(() => setShowSwipeHint(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [editable, match?.id]);
 
   if (!match) {
     return (
@@ -56,7 +140,6 @@ const MatchDetailPage = () => {
     );
   }
 
-  const editable = canEditPrediction(match, new Date(clock)) && match.status === 'upcoming';
   const multiplier = getMatchMultiplier(match);
   const updatedAt = formatLastUpdated(match.lastUpdated);
   const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
@@ -73,6 +156,7 @@ const MatchDetailPage = () => {
 
     try {
       savePrediction(match, homeScore, awayScore);
+      dirtyRef.current = false;
       setRefresh((value) => value + 1);
       setMessage('Ton prono a bien été pris en compte.');
     } catch (submitError) {
@@ -83,6 +167,7 @@ const MatchDetailPage = () => {
 
   const updateScore = (team: 'home' | 'away', delta: number) => {
     const setter = team === 'home' ? setHomeScore : setAwayScore;
+    dirtyRef.current = true;
     setter((value) => Math.max(0, value + delta));
     setMessage('');
     setError('');
@@ -90,6 +175,7 @@ const MatchDetailPage = () => {
 
   const navigateToMatch = (target: typeof match | null) => {
     if (!target) return;
+    persistDraftRef.current(true);
     navigate(`/matchs/${target.id}`);
   };
 
@@ -106,8 +192,8 @@ const MatchDetailPage = () => {
     touchStart.current = null;
 
     if (Math.abs(deltaX) < 70 || Math.abs(deltaY) > 90) return;
-    if (deltaX > 0) navigateToMatch(nextMatch);
-    if (deltaX < 0) navigateToMatch(previousMatch);
+    if (deltaX < 0) navigateToMatch(nextMatch);
+    if (deltaX > 0) navigateToMatch(previousMatch);
   };
 
   return (
@@ -115,6 +201,14 @@ const MatchDetailPage = () => {
       <Link className="back-link" to="/matchs">Retour aux matchs</Link>
 
       <section className={`match-detail-card ${multiplier > 1 ? 'is-boosted' : ''}`}>
+        {showSwipeHint ? (
+          <div className="swipe-hint" aria-hidden="true">
+            <span className="swipe-arrow">‹</span>
+            <span className="swipe-handle" />
+            <span className="swipe-arrow">›</span>
+          </div>
+        ) : null}
+
         <div className="match-detail-kickoff">
           <p className="eyebrow">Coup d'envoi</p>
           <h1>{formatKickoffLong(match.kickoff)}</h1>
@@ -179,7 +273,17 @@ const MatchDetailPage = () => {
                 <strong>{match.homeTeam.name}</strong>
                 <div className="score-stepper">
                   <button type="button" onClick={() => updateScore('home', -1)} aria-label={`Retirer un but à ${match.homeTeam.name}`}>-</button>
-                  <input type="number" min={0} value={homeScore} onChange={(event) => setHomeScore(Math.max(0, Number(event.target.value)))} />
+                  <input
+                    type="number"
+                    min={0}
+                    value={homeScore}
+                    onChange={(event) => {
+                      dirtyRef.current = true;
+                      setMessage('');
+                      setError('');
+                      setHomeScore(Math.max(0, Number(event.target.value)));
+                    }}
+                  />
                   <button type="button" onClick={() => updateScore('home', 1)} aria-label={`Ajouter un but à ${match.homeTeam.name}`}>+</button>
                 </div>
               </div>
@@ -190,7 +294,17 @@ const MatchDetailPage = () => {
                 <strong>{match.awayTeam.name}</strong>
                 <div className="score-stepper">
                   <button type="button" onClick={() => updateScore('away', -1)} aria-label={`Retirer un but à ${match.awayTeam.name}`}>-</button>
-                  <input type="number" min={0} value={awayScore} onChange={(event) => setAwayScore(Math.max(0, Number(event.target.value)))} />
+                  <input
+                    type="number"
+                    min={0}
+                    value={awayScore}
+                    onChange={(event) => {
+                      dirtyRef.current = true;
+                      setMessage('');
+                      setError('');
+                      setAwayScore(Math.max(0, Number(event.target.value)));
+                    }}
+                  />
                   <button type="button" onClick={() => updateScore('away', 1)} aria-label={`Ajouter un but à ${match.awayTeam.name}`}>+</button>
                 </div>
               </div>
