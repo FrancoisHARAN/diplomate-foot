@@ -35,7 +35,7 @@ const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
           disabled={isLoading}
           value={secretCode}
           onChange={(event) => setSecretCode(event.target.value)}
-          placeholder="1234"
+          placeholder="Code à 6 chiffres"
         />
       </label>
       <button className="btn" type="submit" disabled={isLoading}>

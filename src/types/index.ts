@@ -30,7 +30,6 @@ export interface Match {
 export interface Player {
   id: string;
   nickname: string;
-  secretCode?: string;
   avatarUrl?: string;
   points: number;
   exactScores: number;

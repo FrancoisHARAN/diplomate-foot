@@ -1,6 +1,7 @@
 import { createContext, createElement, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { mockMatches } from '../data/mockMatches';
 import type { Match } from '../types';
+import { fetchCloudMatches, syncMatchesToCloud } from '../utils/appState';
 
 interface LiveMatchesPayload {
   generatedAt?: string;
@@ -41,7 +42,16 @@ const hasPlaceholderTeam = (match: Match) => {
 
 const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   const response = await fetch(liveDataUrl(), { cache: 'no-store' });
-  if (!response.ok) return fallbackState;
+  if (!response.ok) {
+    const cloudMatches = await fetchCloudMatches();
+    return cloudMatches.length > 0 ? {
+      matches: cloudMatches,
+      generatedAt: cloudMatches[0]?.lastUpdated ?? null,
+      source: 'supabase-rpc',
+      message: null,
+      isFallback: false,
+    } : fallbackState;
+  }
 
   const payload = (await response.json()) as LiveMatchesPayload;
   const liveMatches = Array.isArray(payload.matches)
@@ -50,6 +60,7 @@ const loadLiveMatches = async (): Promise<LiveMatchesState> => {
         .map((match) => ({ ...match, lastUpdated: payload.generatedAt ?? match.lastUpdated }))
     : [];
   const matches = liveMatches.length > 0 ? liveMatches : mockMatches;
+  void syncMatchesToCloud(matches);
 
   return {
     matches,

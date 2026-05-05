@@ -10,17 +10,21 @@ const LoginPage = () => {
   const [nickname, setNickname] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+    setIsSubmitting(true);
     try {
-      loginPlayer(nickname, code);
+      await loginPlayer(nickname, code);
       refreshPlayer();
       const state = location.state as { redirectTo?: string } | undefined;
       navigate(state?.redirectTo ?? '/mon-compte');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connexion impossible.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -42,7 +46,9 @@ const LoginPage = () => {
           <input value={code} onChange={(event) => setCode(event.target.value)} required inputMode="numeric" autoComplete="off" type="password" minLength={6} placeholder="••••••" />
         </label>
         {error ? <p className="error-msg">{error}</p> : null}
-        <button className="btn primary" type="submit">Entrer dans la compétition</button>
+        <button className="btn primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Connexion...' : 'Entrer dans la compétition'}
+        </button>
       </form>
 
       <section className="notice-panel compact">

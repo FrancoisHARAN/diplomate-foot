@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { getCurrentPlayer, logoutPlayer, type CurrentPlayer } from '../utils/appState';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { getCurrentPlayer, logoutPlayer, syncCloudState, type CurrentPlayer } from '../utils/appState';
 
 interface PlayerSessionContextValue {
   player: CurrentPlayer | null;
@@ -11,9 +11,11 @@ const PlayerSessionContext = createContext<PlayerSessionContextValue | undefined
 
 export const PlayerSessionProvider = ({ children }: { children: ReactNode }) => {
   const [player, setPlayer] = useState<CurrentPlayer | null>(() => getCurrentPlayer());
+  const [syncVersion, setSyncVersion] = useState(0);
 
   const refreshPlayer = useCallback(() => {
     setPlayer(getCurrentPlayer());
+    setSyncVersion((value) => value + 1);
   }, []);
 
   const logout = useCallback(() => {
@@ -21,7 +23,21 @@ export const PlayerSessionProvider = ({ children }: { children: ReactNode }) => 
     setPlayer(null);
   }, []);
 
-  const value = useMemo(() => ({ player, refreshPlayer, logout }), [player, refreshPlayer, logout]);
+  useEffect(() => {
+    let mounted = true;
+
+    void syncCloudState().then((synced) => {
+      if (!mounted || !synced) return;
+      setPlayer(getCurrentPlayer());
+      setSyncVersion((value) => value + 1);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [player?.id]);
+
+  const value = useMemo(() => ({ player, refreshPlayer, logout }), [player, refreshPlayer, logout, syncVersion]);
 
   return <PlayerSessionContext.Provider value={value}>{children}</PlayerSessionContext.Provider>;
 };
