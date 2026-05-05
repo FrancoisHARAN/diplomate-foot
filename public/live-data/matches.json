@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-05T17:57:26.937Z",
+  "generatedAt": "2026-05-05T19:16:50.492Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-04",
   "dateTo": "2026-05-26",
@@ -815,7 +815,7 @@
       "minute": null,
       "matchday": 34,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T00:21:13Z"
+      "lastUpdated": "2026-05-04T21:06:23Z"
     },
     {
       "id": "fd-552095",
@@ -835,11 +835,13 @@
         "crest": "https://crests.football-data.org/78.png"
       },
       "kickoff": "2026-05-05T19:00:00Z",
-      "status": "upcoming",
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
       "minute": null,
       "matchday": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T01:32:03Z"
+      "lastUpdated": "2026-05-05T19:05:13Z"
     },
     {
       "id": "fd-552094",
@@ -911,7 +913,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-03T01:32:01Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-538140",
@@ -959,7 +961,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T01:32:00Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-538135",
@@ -983,7 +985,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538136",
@@ -1007,7 +1009,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538139",
@@ -1055,7 +1057,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T01:32:01Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-538141",
@@ -1079,7 +1081,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-544552",
@@ -1103,7 +1105,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-03T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-544557",
@@ -1127,7 +1129,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-03T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-544555",
@@ -1151,7 +1153,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-04T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-538137",
@@ -1175,7 +1177,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-18T22:25:26Z"
+      "lastUpdated": "2026-04-19T00:21:00Z"
     },
     {
       "id": "fd-538138",
@@ -1199,7 +1201,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-18T22:25:26Z"
+      "lastUpdated": "2026-04-19T00:21:00Z"
     },
     {
       "id": "fd-538142",
@@ -1247,7 +1249,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-04T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-538144",
@@ -1295,7 +1297,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-04T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-542694",
@@ -1511,7 +1513,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T00:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:07Z"
     },
     {
       "id": "fd-538143",
@@ -1535,7 +1537,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-544560",
@@ -1559,7 +1561,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T01:32:02Z"
+      "lastUpdated": "2026-04-20T15:21:11Z"
     },
     {
       "id": "fd-544563",
@@ -1871,247 +1873,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T00:21:13Z"
-    },
-    {
-      "id": "fd-544571",
-      "externalId": "544571",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "77",
-        "name": "Athletic",
-        "shortName": "ATH",
-        "crest": "https://crests.football-data.org/77.png"
-      },
-      "awayTeam": {
-        "id": "558",
-        "name": "Celta",
-        "shortName": "CEL",
-        "crest": "https://crests.football-data.org/558.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544572",
-      "externalId": "544572",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "78",
-        "name": "Atleti",
-        "shortName": "ATL",
-        "crest": "https://crests.football-data.org/78.png"
-      },
-      "awayTeam": {
-        "id": "298",
-        "name": "Girona",
-        "shortName": "GIR",
-        "crest": "https://crests.football-data.org/298.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-08-29T05:20:57Z"
-    },
-    {
-      "id": "fd-544573",
-      "externalId": "544573",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "81",
-        "name": "Barça",
-        "shortName": "FCB",
-        "crest": "https://crests.football-data.org/81.png"
-      },
-      "awayTeam": {
-        "id": "90",
-        "name": "Real Betis",
-        "shortName": "BET",
-        "crest": "https://crests.football-data.org/90.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-08-29T05:20:57Z"
-    },
-    {
-      "id": "fd-544574",
-      "externalId": "544574",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "285",
-        "name": "Elche",
-        "shortName": "ELC",
-        "crest": "https://crests.football-data.org/285.png"
-      },
-      "awayTeam": {
-        "id": "82",
-        "name": "Getafe",
-        "shortName": "GET",
-        "crest": "https://crests.football-data.org/82.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544575",
-      "externalId": "544575",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "88",
-        "name": "Levante",
-        "shortName": "LEV",
-        "crest": "https://crests.football-data.org/88.png"
-      },
-      "awayTeam": {
-        "id": "89",
-        "name": "Mallorca",
-        "shortName": "MAL",
-        "crest": "https://crests.football-data.org/89.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544576",
-      "externalId": "544576",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "87",
-        "name": "Rayo Vallecano",
-        "shortName": "RAY",
-        "crest": "https://crests.football-data.org/87.png"
-      },
-      "awayTeam": {
-        "id": "94",
-        "name": "Villarreal",
-        "shortName": "VIL",
-        "crest": "https://crests.football-data.org/94.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544577",
-      "externalId": "544577",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "92",
-        "name": "Real Sociedad",
-        "shortName": "RSO",
-        "crest": "https://crests.football-data.org/92.png"
-      },
-      "awayTeam": {
-        "id": "95",
-        "name": "Valencia",
-        "shortName": "VAL",
-        "crest": "https://crests.football-data.org/95.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544578",
-      "externalId": "544578",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "1048",
-        "name": "Real Oviedo",
-        "shortName": "OVI",
-        "crest": "https://crests.football-data.org/1048.png"
-      },
-      "awayTeam": {
-        "id": "263",
-        "name": "Alavés",
-        "shortName": "ALA",
-        "crest": "https://crests.football-data.org/263.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544579",
-      "externalId": "544579",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "79",
-        "name": "Osasuna",
-        "shortName": "OSA",
-        "crest": "https://crests.football-data.org/79.png"
-      },
-      "awayTeam": {
-        "id": "80",
-        "name": "Espanyol",
-        "shortName": "ESP",
-        "crest": "https://crests.football-data.org/80.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2025-07-04T12:10:40Z"
-    },
-    {
-      "id": "fd-544580",
-      "externalId": "544580",
-      "competitionCode": "PD",
-      "competitionName": "La Liga",
-      "homeTeam": {
-        "id": "559",
-        "name": "Sevilla",
-        "shortName": "SEV",
-        "crest": "https://crests.football-data.org/559.png"
-      },
-      "awayTeam": {
-        "id": "86",
-        "name": "Real Madrid",
-        "shortName": "RMA",
-        "crest": "https://crests.football-data.org/86.png"
-      },
-      "kickoff": "2026-05-17T00:00:00Z",
-      "status": "upcoming",
-      "minute": null,
-      "matchday": 37,
-      "source": "football-data.org",
-      "lastUpdated": "2026-05-05T00:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:07Z"
     },
     {
       "id": "fd-538146",
@@ -2231,7 +1993,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538154",
@@ -2255,7 +2017,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538153",
@@ -2280,6 +2042,246 @@
       "matchday": 37,
       "source": "football-data.org",
       "lastUpdated": "2026-04-29T13:25:33Z"
+    },
+    {
+      "id": "fd-544571",
+      "externalId": "544571",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "77",
+        "name": "Athletic",
+        "shortName": "ATH",
+        "crest": "https://crests.football-data.org/77.png"
+      },
+      "awayTeam": {
+        "id": "558",
+        "name": "Celta",
+        "shortName": "CEL",
+        "crest": "https://crests.football-data.org/558.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:20Z"
+    },
+    {
+      "id": "fd-544572",
+      "externalId": "544572",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "78",
+        "name": "Atleti",
+        "shortName": "ATL",
+        "crest": "https://crests.football-data.org/78.png"
+      },
+      "awayTeam": {
+        "id": "298",
+        "name": "Girona",
+        "shortName": "GIR",
+        "crest": "https://crests.football-data.org/298.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:20Z"
+    },
+    {
+      "id": "fd-544573",
+      "externalId": "544573",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "81",
+        "name": "Barça",
+        "shortName": "FCB",
+        "crest": "https://crests.football-data.org/81.png"
+      },
+      "awayTeam": {
+        "id": "90",
+        "name": "Real Betis",
+        "shortName": "BET",
+        "crest": "https://crests.football-data.org/90.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544574",
+      "externalId": "544574",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "285",
+        "name": "Elche",
+        "shortName": "ELC",
+        "crest": "https://crests.football-data.org/285.png"
+      },
+      "awayTeam": {
+        "id": "82",
+        "name": "Getafe",
+        "shortName": "GET",
+        "crest": "https://crests.football-data.org/82.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544575",
+      "externalId": "544575",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "88",
+        "name": "Levante",
+        "shortName": "LEV",
+        "crest": "https://crests.football-data.org/88.png"
+      },
+      "awayTeam": {
+        "id": "89",
+        "name": "Mallorca",
+        "shortName": "MAL",
+        "crest": "https://crests.football-data.org/89.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544576",
+      "externalId": "544576",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "87",
+        "name": "Rayo Vallecano",
+        "shortName": "RAY",
+        "crest": "https://crests.football-data.org/87.png"
+      },
+      "awayTeam": {
+        "id": "94",
+        "name": "Villarreal",
+        "shortName": "VIL",
+        "crest": "https://crests.football-data.org/94.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544577",
+      "externalId": "544577",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "92",
+        "name": "Real Sociedad",
+        "shortName": "RSO",
+        "crest": "https://crests.football-data.org/92.png"
+      },
+      "awayTeam": {
+        "id": "95",
+        "name": "Valencia",
+        "shortName": "VAL",
+        "crest": "https://crests.football-data.org/95.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544578",
+      "externalId": "544578",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "1048",
+        "name": "Real Oviedo",
+        "shortName": "OVI",
+        "crest": "https://crests.football-data.org/1048.png"
+      },
+      "awayTeam": {
+        "id": "263",
+        "name": "Alavés",
+        "shortName": "ALA",
+        "crest": "https://crests.football-data.org/263.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544579",
+      "externalId": "544579",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "79",
+        "name": "Osasuna",
+        "shortName": "OSA",
+        "crest": "https://crests.football-data.org/79.png"
+      },
+      "awayTeam": {
+        "id": "80",
+        "name": "Espanyol",
+        "shortName": "ESP",
+        "crest": "https://crests.football-data.org/80.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
+    },
+    {
+      "id": "fd-544580",
+      "externalId": "544580",
+      "competitionCode": "PD",
+      "competitionName": "La Liga",
+      "homeTeam": {
+        "id": "559",
+        "name": "Sevilla",
+        "shortName": "SEV",
+        "crest": "https://crests.football-data.org/559.png"
+      },
+      "awayTeam": {
+        "id": "86",
+        "name": "Real Madrid",
+        "shortName": "RMA",
+        "crest": "https://crests.football-data.org/86.png"
+      },
+      "kickoff": "2026-05-17T17:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": 37,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-05T18:25:21Z"
     },
     {
       "id": "fd-542703",
@@ -2735,7 +2737,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-05T00:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:07Z"
     },
     {
       "id": "fd-544588",
@@ -2855,7 +2857,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538157",
@@ -2903,7 +2905,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538159",
@@ -2975,7 +2977,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     },
     {
       "id": "fd-538162",
@@ -3047,7 +3049,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-04-21T05:21:08Z"
     }
   ]
 }
