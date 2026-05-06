@@ -31,10 +31,13 @@ html,
 body {
   margin: 0;
   min-width: 320px;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior-y: contain;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
   scroll-behavior: auto;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.08) 1px, transparent 1px),
     linear-gradient(rgba(28, 70, 245, 0.08) 1px, transparent 1px),
@@ -43,7 +46,7 @@ body {
 }
 
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 a {
@@ -103,21 +106,21 @@ small {
 }
 
 .app-viewport {
-  height: 100dvh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  /* Keep the document scrollable: Android/Samsung browsers can lock nested 100vh scrollers. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: visible;
   overflow-anchor: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-app-shell {
   position: relative;
   max-width: 520px;
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
-  overflow-x: hidden;
-  overflow-y: visible;
-  overscroll-behavior-y: contain;
+  overflow: visible;
+  overscroll-behavior-y: auto;
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.045) 1px, transparent 1px),
     linear-gradient(rgba(28, 70, 245, 0.045) 1px, transparent 1px),
@@ -129,7 +132,10 @@ small {
 
 .app-main {
   min-height: calc(100vh - 152px);
-  padding: 0.9rem 0.85rem 6.8rem;
+  min-height: calc(100dvh - 152px);
+  padding: 0.9rem 0.85rem calc(7.25rem + env(safe-area-inset-bottom));
+  overflow: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 .celebration-story {
@@ -361,6 +367,7 @@ small {
   background: rgba(255, 255, 255, 0.96);
   border-top: 2px solid var(--blue);
   backdrop-filter: blur(16px);
+  pointer-events: none;
 }
 
 .bottom-link {
@@ -374,6 +381,7 @@ small {
   color: var(--muted);
   font-size: 0.62rem;
   font-weight: 850;
+  pointer-events: auto;
 }
 
 .bottom-link.active {
@@ -775,6 +783,9 @@ small {
   margin-inline: -0.85rem;
   padding: 0.1rem 0.85rem 0.2rem;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
   scrollbar-width: none;
 }
 
@@ -1903,6 +1914,7 @@ button.action-row {
 
   .mobile-app-shell {
     min-height: calc(100vh - 2.4rem);
+    min-height: calc(100dvh - 2.4rem);
     border-radius: 18px;
   }
 
