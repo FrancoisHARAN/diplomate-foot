@@ -66,6 +66,16 @@ const ReglementPage = () => (
         <p>1er : 20 € de conso au bar. 2e : une pizza. 3e : un saucisson.</p>
       </article>
     </section>
+
+    <section className="technical-warning-card" aria-labelledby="technical-warning-title">
+      <h2 id="technical-warning-title">⚠️ Important — problème technique</h2>
+      <p>
+        Le jeu de pronostics est une animation gratuite proposée par le bar Le Diplomate. En cas de problème technique important, de bug, de perte de données, d’erreur de classement, d’indisponibilité du site ou de défaillance liée aux scores/matchs, l’organisation se réserve le droit de corriger, suspendre ou arrêter le jeu à tout moment.
+      </p>
+      <p>
+        Le lot final est attribué uniquement si le jeu peut aller normalement jusqu’à la fin de la compétition et si le classement final est considéré comme fiable.
+      </p>
+    </section>
   </div>
 );
 

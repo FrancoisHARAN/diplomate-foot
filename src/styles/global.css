@@ -1810,6 +1810,33 @@ button.action-row {
   background: var(--blue-soft);
 }
 
+.technical-warning-card {
+  display: grid;
+  gap: 0.58rem;
+  padding: 0.9rem;
+  border: 2px solid rgba(255, 79, 94, 0.88);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    #b91f2c;
+  background-size: 18px 18px;
+  box-shadow: 0 14px 32px rgba(185, 31, 44, 0.18);
+}
+
+.technical-warning-card h2 {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+.technical-warning-card p {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.9rem;
+  font-weight: 680;
+  line-height: 1.35;
+}
+
 .rules-strip span,
 .rule-tile {
   min-height: 4.2rem;
