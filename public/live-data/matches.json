@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T22:35:51.394Z",
+  "generatedAt": "2026-05-07T23:30:57.096Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-06",
   "dateTo": "2026-05-28",
@@ -867,7 +867,7 @@
       "minute": null,
       "matchday": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-06T21:05:18Z"
+      "lastUpdated": "2026-05-07T00:21:08Z"
     },
     {
       "id": "fd-542700",
@@ -891,7 +891,7 @@
       "minute": null,
       "matchday": 33,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-20T15:21:11Z"
+      "lastUpdated": "2026-04-20T13:25:23Z"
     },
     {
       "id": "fd-544554",
@@ -939,7 +939,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-02T15:21:07Z"
+      "lastUpdated": "2026-05-03T01:32:02Z"
     },
     {
       "id": "fd-544556",
@@ -987,7 +987,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538136",
@@ -1011,7 +1011,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538139",
@@ -1035,7 +1035,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2025-12-29T15:20:57Z"
+      "lastUpdated": "2026-05-05T01:32:00Z"
     },
     {
       "id": "fd-544558",
@@ -1083,7 +1083,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-544552",
@@ -1179,7 +1179,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-18T22:25:26Z"
+      "lastUpdated": "2026-05-05T01:32:01Z"
     },
     {
       "id": "fd-538138",
@@ -1203,7 +1203,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-18T22:25:26Z"
+      "lastUpdated": "2026-05-04T01:32:02Z"
     },
     {
       "id": "fd-538142",
@@ -1227,7 +1227,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-02T15:21:07Z"
+      "lastUpdated": "2026-05-04T01:32:02Z"
     },
     {
       "id": "fd-544551",
@@ -1275,7 +1275,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-02T15:21:07Z"
+      "lastUpdated": "2026-05-04T01:32:02Z"
     },
     {
       "id": "fd-544559",
@@ -1539,7 +1539,7 @@
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-544560",
@@ -1659,7 +1659,7 @@
       "minute": null,
       "matchday": 29,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-20T15:21:11Z"
+      "lastUpdated": "2026-04-20T13:25:23Z"
     },
     {
       "id": "fd-544566",
@@ -1731,7 +1731,7 @@
       "minute": null,
       "matchday": 29,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-20T15:21:11Z"
+      "lastUpdated": "2026-04-20T13:25:23Z"
     },
     {
       "id": "fd-538091",
@@ -1755,7 +1755,7 @@
       "minute": null,
       "matchday": 31,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-28T18:25:28Z"
+      "lastUpdated": "2026-05-07T01:32:02Z"
     },
     {
       "id": "fd-544561",
@@ -1899,7 +1899,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-04-29T15:21:22Z"
     },
     {
       "id": "fd-538152",
@@ -1923,7 +1923,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538148",
@@ -1995,7 +1995,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538154",
@@ -2019,7 +2019,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538153",
@@ -2043,7 +2043,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-04-29T15:21:22Z"
     },
     {
       "id": "fd-544571",
@@ -2523,7 +2523,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-04-29T15:21:22Z"
     },
     {
       "id": "fd-538145",
@@ -2547,7 +2547,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538149",
@@ -2571,7 +2571,7 @@
       "minute": null,
       "matchday": 37,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-29T13:25:33Z"
+      "lastUpdated": "2026-04-29T15:21:22Z"
     },
     {
       "id": "fd-544581",
@@ -2859,7 +2859,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538157",
@@ -2907,7 +2907,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538159",
@@ -2979,7 +2979,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     },
     {
       "id": "fd-538162",
@@ -3051,7 +3051,7 @@
       "minute": null,
       "matchday": 38,
       "source": "football-data.org",
-      "lastUpdated": "2026-04-11T10:21:13Z"
+      "lastUpdated": "2026-05-07T00:21:09Z"
     }
   ]
 }
