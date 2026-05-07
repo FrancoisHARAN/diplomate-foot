@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-07T11:20:10.375Z",
+  "generatedAt": "2026-05-07T13:11:09.789Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-06",
   "dateTo": "2026-05-28",
@@ -867,7 +867,7 @@
       "minute": null,
       "matchday": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-06T21:05:18Z"
+      "lastUpdated": "2026-05-07T00:21:08Z"
     },
     {
       "id": "fd-542700",
