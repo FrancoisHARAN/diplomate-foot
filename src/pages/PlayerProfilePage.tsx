@@ -1,85 +1,107 @@
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
 import TeamBadge from '../components/TeamBadge';
-import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import { buildStandings, getPlayerAvatarUrl, getPredictionsForPlayer, getStoredPredictions, samePlayerId } from '../utils/appState';
-import { formatKickoffDay } from '../utils/date';
-import { calculatePredictionPointsForMatch } from '../utils/points';
+import type { PublicPlayerProfile } from '../types';
+import { fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
+import { formatKickoffDay, getMatchStatusLabel } from '../utils/date';
 
 const PlayerProfilePage = () => {
   const { playerId } = useParams();
   const { matches } = useLiveMatches();
-  const player = mockPlayers.find((item) => samePlayerId(item.id, playerId));
+  const [profile, setProfile] = useState<PublicPlayerProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!player) {
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+
+    void fetchPublicPlayerProfile(playerId, matches, getStoredPredictions()).then((nextProfile) => {
+      if (!mounted) return;
+      setProfile(nextProfile);
+      setLoading(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [matches, playerId]);
+
+  if (loading) {
     return (
       <section className="empty-state">
-        <strong>Joueur introuvable</strong>
-        <p>Ce profil n'est pas disponible.</p>
-        <Link className="btn secondary" to="/classement">Retour au classement</Link>
+        <strong>Chargement du profil</strong>
+        <p>On récupère les pronostics visibles de ce joueur.</p>
       </section>
     );
   }
 
-  const allPredictions = getStoredPredictions();
-  const predictions = getPredictionsForPlayer(player.id, allPredictions);
-  const standings = buildStandings(mockPlayers, allPredictions, matches);
-  const standing = standings.find((row) => samePlayerId(row.playerId, player.id));
-  const finishedRows = predictions
-    .map((prediction) => {
-      const match = matches.find((item) => item.id === prediction.matchId);
-      if (!match || match.status !== 'finished' || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return null;
-      return { prediction, match, points: calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) };
-    })
-    .filter(Boolean);
+  if (!profile) {
+    return (
+      <section className="empty-state">
+        <strong>Joueur introuvable</strong>
+        <p>Ce profil n'est pas disponible.</p>
+        <Link className="btn secondary" to="/classement">← Retour au classement</Link>
+      </section>
+    );
+  }
 
   return (
     <div className="screen-stack">
-      <Link className="back-link" to="/classement">Retour au classement</Link>
+      <Link className="back-link" to="/classement">← Retour au classement</Link>
 
-      <section className="profile-panel social-profile">
-        <PlayerAvatar nickname={player.nickname} avatarUrl={getPlayerAvatarUrl(player.id) ?? player.avatarUrl} size="xlarge" />
+      <section className="profile-panel social-profile public-profile-card">
+        <PlayerAvatar nickname={profile.nickname} avatarUrl={profile.avatarUrl} size="xlarge" />
         <div>
           <p className="eyebrow">Profil joueur</p>
-          <h1>{player.nickname}</h1>
-          <p>{standing?.points ?? player.points} pts · rang #{standing?.position ?? '-'}</p>
+          <h1>{profile.nickname}</h1>
+          <p>{profile.stats.points} pts · rang #{profile.stats.rank ?? '-'}</p>
         </div>
-        <span className="social-badge">{standing?.exactScores ?? player.exactScores} scores exacts</span>
+        <div className="public-profile-stats" aria-label="Statistiques publiques">
+          <span><strong>{profile.stats.exactScores}</strong> scores exacts</span>
+          <span><strong>{profile.stats.twoPointResults}</strong> bons écarts</span>
+          <span><strong>{profile.stats.onePointResults}</strong> bons vainqueurs</span>
+        </div>
       </section>
 
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Historique</p>
-            <h2>Pronos terminés</h2>
+            <p className="eyebrow">Pronostics publics</p>
+            <h2>Historique visible</h2>
           </div>
         </div>
 
         <div className="prediction-list">
-          {finishedRows.length > 0 ? (
-            finishedRows.map((row) =>
-              row ? (
-                <article className="social-prono-row" key={row.prediction.id}>
-                  <div className="social-prono-teams">
-                    <TeamBadge team={row.match.homeTeam} competitionCode={row.match.competitionCode} />
-                    <span>
-                      <strong>{row.match.homeTeam.shortName} - {row.match.awayTeam.shortName}</strong>
-                      <small>{formatKickoffDay(row.match.kickoff)}</small>
-                    </span>
-                    <TeamBadge team={row.match.awayTeam} competitionCode={row.match.competitionCode} />
-                  </div>
-                  <div className="social-prono-score">
-                    <span>Prono {row.prediction.homeScore} - {row.prediction.awayScore}</span>
-                    <strong>{row.points} pts</strong>
-                  </div>
-                </article>
-              ) : null,
-            )
+          {profile.predictions.length > 0 ? (
+            profile.predictions.map(({ id, prediction, match, points }) => (
+              <article className="social-prono-row public-prono-row" key={id}>
+                <div className="social-prono-teams">
+                  <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
+                  <span>
+                    <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
+                    <small>{formatKickoffDay(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
+                  </span>
+                  <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
+                </div>
+                <div className="public-prono-details">
+                  <span>Prono : {prediction.homeScore} - {prediction.awayScore}</span>
+                  {match.status === 'finished' ? (
+                    <>
+                      <span>Score final : {match.homeScore} - {match.awayScore}</span>
+                      <strong>+{points ?? 0} pts</strong>
+                    </>
+                  ) : (
+                    <strong>Pronostic verrouillé</strong>
+                  )}
+                </div>
+              </article>
+            ))
           ) : (
             <div className="empty-state inline">
-              <strong>Aucun prono terminé</strong>
-              <p>Les pronos de ce joueur apparaîtront ici une fois les matchs finis.</p>
+              <strong>Ce joueur n’a pas encore de pronostics visibles.</strong>
+              <p>Les pronostics restent cachés tant que les matchs sont encore ouverts.</p>
             </div>
           )}
         </div>

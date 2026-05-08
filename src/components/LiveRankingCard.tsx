@@ -6,11 +6,11 @@ const LiveRankingCard = ({ standings, userRank }: { standings: Standing[]; userR
     <h2>Classement en direct</h2>
     <div className="top-three-grid">
       {standings.slice(0, 3).map((entry) => (
-        <article key={entry.playerId} className={`mini-rank-card ${entry.position === 1 ? 'first' : ''}`}>
+        <Link key={entry.playerId} to={`/joueurs/${entry.playerId}`} className={`mini-rank-card player-link-card ${entry.position === 1 ? 'first' : ''}`}>
           <p>#{entry.position}</p>
           <strong>{entry.nickname}</strong>
           <p>{entry.points} pts</p>
-        </article>
+        </Link>
       ))}
     </div>
     {userRank ? <p>Ton rang actuel : {userRank.position} · {userRank.points} pts</p> : null}

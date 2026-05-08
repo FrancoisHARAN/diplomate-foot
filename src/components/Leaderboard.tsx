@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { Standing } from '../types';
 
 interface LeaderboardProps {
@@ -9,11 +10,11 @@ const Leaderboard = ({ standings }: LeaderboardProps) => (
     <h2>Classement</h2>
     <div className="leaderboard">
       {standings.map((row) => (
-        <article key={row.playerId} className={row.position === 1 ? 'leader first' : 'leader'}>
+        <Link key={row.playerId} to={`/joueurs/${row.playerId}`} className={row.position === 1 ? 'leader first player-link-card' : 'leader player-link-card'}>
           <p>#{row.position} — <strong>{row.nickname}</strong></p>
           <p>{row.points} pts</p>
           <small>{row.exactScores} scores exacts • {row.correctResults} bons résultats</small>
-        </article>
+        </Link>
       ))}
     </div>
   </section>

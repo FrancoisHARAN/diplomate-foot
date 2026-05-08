@@ -2,9 +2,12 @@ import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
 import { isSupabaseConfigured, supabaseRpc } from '../lib/supabaseClient';
-import type { Match, Player, Prediction, Standing, Team } from '../types';
+import type { ExactPredictionHighlight, Match, Player, Prediction, PublicPlayerProfile, PublicPrediction, Standing, Team } from '../types';
 import { canEditPrediction } from './date';
-import { applyMatchMultiplier, calculatePredictionPoints } from './points';
+import { getRecentExactPredictionHighlights } from './exactPredictions';
+import { sortLeaderboardEntries } from './leaderboard';
+import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch } from './points';
+import { isPredictionPublic } from './predictionVisibility';
 
 const STORAGE_KEYS = {
   currentPlayer: 'diplomate.currentPlayer',
@@ -59,7 +62,9 @@ interface RpcLeaderboardRow {
   avatar_url?: string | null;
   points: number;
   exact_scores: number;
+  two_point_results?: number | null;
   correct_results: number;
+  first_prediction_at?: string | null;
   rank: number;
 }
 
@@ -80,6 +85,35 @@ interface RpcMatchRow {
   points_multiplier?: number | null;
   source?: string | null;
   last_updated?: string | null;
+}
+
+interface RpcPublicPredictionRow extends RpcPredictionRow {
+  points?: number | null;
+  match?: RpcMatchRow | null;
+}
+
+interface RpcPublicPlayerProfile {
+  player: RpcPlayerSummary & {
+    two_point_results?: number | null;
+    one_point_results?: number | null;
+    first_prediction_at?: string | null;
+  };
+  predictions: RpcPublicPredictionRow[];
+}
+
+interface RpcExactPredictionWinner {
+  player_id: string;
+  nickname: string;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  home_score: number;
+  away_score: number;
+}
+
+interface RpcExactPredictionHighlight {
+  match_id: string;
+  match: RpcMatchRow;
+  winners: RpcExactPredictionWinner[];
 }
 
 const readJson = <T>(key: string, fallback: T): T => {
@@ -104,6 +138,9 @@ const normalizeIdentity = (value: string): string =>
     .replace(/[\u0300-\u036f]/g, '');
 
 const normalizeNickname = (nickname: string): string => normalizeIdentity(nickname);
+
+const isUuid = (value?: string | null): boolean =>
+  Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value));
 
 export const canonicalPlayerId = (playerId?: string | null): string => {
   if (!playerId) return '';
@@ -435,8 +472,13 @@ export const countUserPredictions = (): number => {
 
 const calculateFinishedStats = (playerId: string, predictions: Prediction[], matches: Match[]) => {
   const finishedById = new Map(matches.filter((match) => match.status === 'finished').map((match) => [match.id, match]));
+  const playerPredictions = getPredictionsForPlayer(playerId, predictions);
+  const firstPredictionAt = playerPredictions
+    .map((prediction) => prediction.updatedAt)
+    .filter(Boolean)
+    .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0] ?? null;
 
-  return getPredictionsForPlayer(playerId, predictions)
+  return playerPredictions
     .reduce(
       (stats, prediction) => {
         const match = finishedById.get(prediction.matchId);
@@ -445,10 +487,13 @@ const calculateFinishedStats = (playerId: string, predictions: Prediction[], mat
         return {
           points: stats.points + applyMatchMultiplier(basePoints, match),
           exactScores: stats.exactScores + (basePoints === 3 ? 1 : 0),
+          twoPointResults: stats.twoPointResults + (basePoints === 2 ? 1 : 0),
+          onePointResults: stats.onePointResults + (basePoints === 1 ? 1 : 0),
           correctResults: stats.correctResults + (basePoints > 0 ? 1 : 0),
+          firstPredictionAt,
         };
       },
-      { points: 0, exactScores: 0, correctResults: 0 },
+      { points: 0, exactScores: 0, twoPointResults: 0, onePointResults: 0, correctResults: 0, firstPredictionAt },
     );
 };
 
@@ -536,18 +581,22 @@ const buildPlayerPool = (players: Player[], predictions: Prediction[]): Player[]
 export const buildStandings = (players: Player[], predictions: Prediction[], matches: Match[]): Standing[] => {
   const cloudLeaderboard = getCloudLeaderboard();
   if (isSupabaseConfigured && cloudLeaderboard.length > 0) {
-    return cloudLeaderboard.map((entry) => ({
-      position: entry.rank,
-      playerId: entry.player_id,
-      nickname: entry.display_name ?? entry.nickname,
-      avatarUrl: entry.avatar_url ?? getPlayerAvatarUrl(entry.player_id),
-      points: entry.points,
-      exactScores: entry.exact_scores,
-      correctResults: entry.correct_results,
-    }));
+    return sortLeaderboardEntries(
+      cloudLeaderboard.map((entry) => ({
+        position: 0,
+        playerId: entry.player_id,
+        nickname: entry.display_name ?? entry.nickname,
+        avatarUrl: entry.avatar_url ?? getPlayerAvatarUrl(entry.player_id),
+        points: entry.points,
+        exactScores: entry.exact_scores,
+        twoPointResults: entry.two_point_results ?? 0,
+        correctResults: entry.correct_results,
+        firstPredictionAt: entry.first_prediction_at ?? null,
+      })),
+    );
   }
 
-  return buildPlayerPool(players, predictions)
+  return sortLeaderboardEntries(buildPlayerPool(players, predictions)
     .map((player) => {
       const computed = calculateFinishedStats(player.id, predictions, matches);
       return {
@@ -557,11 +606,11 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
         avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl,
         points: Math.max(player.points, computed.points),
         exactScores: Math.max(player.exactScores, computed.exactScores),
+        twoPointResults: Math.max(player.twoPointResults ?? 0, computed.twoPointResults),
         correctResults: Math.max(player.correctResults, computed.correctResults),
+        firstPredictionAt: computed.firstPredictionAt ?? player.firstPredictionAt ?? null,
       };
-    })
-    .sort((a, b) => b.points - a.points)
-    .map((entry, index) => ({ ...entry, position: index + 1 }));
+    }));
 };
 
 export const getUserRank = (standings: Standing[], playerId?: string) => standings.find((entry) => samePlayerId(entry.playerId, playerId));
@@ -624,4 +673,138 @@ export const fetchCloudMatches = async (): Promise<Match[]> => {
     console.warn('Cloud matches unavailable.', error);
     return [];
   }
+};
+
+const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): PublicPrediction | null => {
+  const match = row.match ? fromRpcMatch(row.match) : matches.find((item) => item.id === row.match_id);
+  if (!match) return null;
+
+  return {
+    id: row.id ?? `public-${row.player_id}-${row.match_id}`,
+    match,
+    prediction: fromRpcPrediction(row),
+    points: match.status === 'finished' ? row.points ?? 0 : null,
+  };
+};
+
+const fromRpcPublicProfile = (payload: RpcPublicPlayerProfile, matches: Match[]): PublicPlayerProfile => ({
+  id: payload.player.player_id,
+  nickname: payload.player.display_name ?? payload.player.nickname,
+  avatarUrl: payload.player.avatar_url ?? getPlayerAvatarUrl(payload.player.player_id),
+  stats: {
+    points: payload.player.points ?? 0,
+    exactScores: payload.player.exact_scores ?? 0,
+    twoPointResults: payload.player.two_point_results ?? 0,
+    onePointResults: payload.player.one_point_results ?? 0,
+    correctResults: payload.player.correct_results ?? 0,
+    rank: payload.player.rank ?? undefined,
+  },
+  predictions: payload.predictions
+    .map((prediction) => toPublicPrediction(prediction, matches))
+    .filter((prediction): prediction is PublicPrediction => Boolean(prediction)),
+});
+
+export const buildLocalPublicPlayerProfile = (
+  playerId: string | undefined,
+  players: Player[],
+  predictions: Prediction[],
+  matches: Match[],
+): PublicPlayerProfile | null => {
+  if (!playerId) return null;
+
+  const standings = buildStandings(players, predictions, matches);
+  const standing = standings.find((entry) => samePlayerId(entry.playerId, playerId) || entry.playerId === playerId);
+  const player = players.find((entry) => samePlayerId(entry.id, playerId)) ?? (standing ? {
+    id: standing.playerId,
+    nickname: standing.nickname,
+    avatarUrl: standing.avatarUrl,
+    points: standing.points,
+    exactScores: standing.exactScores,
+    correctResults: standing.correctResults,
+    twoPointResults: standing.twoPointResults,
+    firstPredictionAt: standing.firstPredictionAt,
+  } : null);
+
+  if (!player) return null;
+
+  const playerPredictions = getPredictionsForPlayer(player.id, predictions)
+    .map((prediction): PublicPrediction | null => {
+      const match = matches.find((item) => item.id === prediction.matchId);
+      if (!match || !isPredictionPublic(match)) return null;
+      return {
+        id: prediction.id,
+        match,
+        prediction,
+        points: match.status === 'finished' ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
+      };
+    })
+    .filter((prediction): prediction is PublicPrediction => Boolean(prediction))
+    .sort((left, right) => new Date(right.match.kickoff).getTime() - new Date(left.match.kickoff).getTime());
+
+  const stats = calculateFinishedStats(player.id, predictions, matches);
+  const correctResults = Math.max(player.correctResults, stats.correctResults);
+  const exactScores = Math.max(player.exactScores, stats.exactScores);
+  const twoPointResults = Math.max(player.twoPointResults ?? 0, stats.twoPointResults);
+
+  return {
+    id: player.id,
+    nickname: player.nickname,
+    avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl,
+    stats: {
+      points: standing?.points ?? Math.max(player.points, stats.points),
+      exactScores: standing?.exactScores ?? exactScores,
+      twoPointResults: standing?.twoPointResults ?? twoPointResults,
+      onePointResults: Math.max(0, correctResults - exactScores - twoPointResults),
+      correctResults,
+      rank: standing?.position,
+    },
+    predictions: playerPredictions,
+  };
+};
+
+export const fetchPublicPlayerProfile = async (
+  playerId: string | undefined,
+  matches: Match[],
+  predictions: Prediction[] = getStoredPredictions(),
+): Promise<PublicPlayerProfile | null> => {
+  const localProfile = buildLocalPublicPlayerProfile(playerId, mockPlayers, predictions, matches);
+
+  if (!isSupabaseConfigured || !isUuid(playerId)) return localProfile;
+
+  try {
+    const payload = await supabaseRpc<RpcPublicPlayerProfile>('app_get_public_player_profile', { p_player_id: playerId });
+    return payload?.player ? fromRpcPublicProfile(payload, matches) : localProfile;
+  } catch (error) {
+    console.warn('Public player profile unavailable, using local cache.', error);
+    return localProfile;
+  }
+};
+
+const fromRpcExactHighlight = (row: RpcExactPredictionHighlight): ExactPredictionHighlight => ({
+  matchId: row.match_id,
+  match: fromRpcMatch(row.match),
+  winners: row.winners.map((winner) => ({
+    playerId: winner.player_id,
+    nickname: winner.display_name ?? winner.nickname,
+    avatarUrl: winner.avatar_url ?? getPlayerAvatarUrl(winner.player_id),
+    homeScore: winner.home_score,
+    awayScore: winner.away_score,
+  })),
+});
+
+export const fetchRecentExactPredictionHighlights = async (
+  matches: Match[],
+  predictions: Prediction[] = getStoredPredictions(),
+  standings: Standing[] = buildStandings(mockPlayers, predictions, matches),
+): Promise<ExactPredictionHighlight[]> => {
+  if (isSupabaseConfigured) {
+    try {
+      const rows = await supabaseRpc<RpcExactPredictionHighlight[]>('app_get_recent_exact_predictions');
+      return rows.map(fromRpcExactHighlight);
+    } catch (error) {
+      console.warn('Recent exact predictions unavailable, using local cache.', error);
+    }
+  }
+
+  return getRecentExactPredictionHighlights(matches, predictions, [...mockPlayers, ...standings]);
 };

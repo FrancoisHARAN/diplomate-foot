@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import PlayerAvatar from '../components/PlayerAvatar';
@@ -7,8 +8,8 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useRankingMovements } from '../hooks/useRankingMovements';
-import type { Match } from '../types';
-import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
+import type { ExactPredictionHighlight, Match } from '../types';
+import { buildStandings, countUserPredictions, fetchRecentExactPredictionHighlights, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 
 const localDayKey = (date: Date): string =>
@@ -52,14 +53,27 @@ const selectHomeMatches = (matches: Match[]): Match[] => {
 const HomePage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
-  const predictions = getStoredPredictions();
-  const standings = buildStandings(mockPlayers, predictions, matches);
+  const predictions = useMemo(() => getStoredPredictions(), [matches, player?.id]);
+  const standings = useMemo(() => buildStandings(mockPlayers, predictions, matches), [matches, predictions]);
   const movements = useRankingMovements(standings);
+  const [exactHighlights, setExactHighlights] = useState<ExactPredictionHighlight[]>([]);
   const nextMatches = selectHomeMatches(matches);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
   const openMatches = matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
   const liveMatches = matches.filter((match) => isLiveDisplayMatch(match)).length;
+
+  useEffect(() => {
+    let mounted = true;
+
+    void fetchRecentExactPredictionHighlights(matches, predictions, standings).then((items) => {
+      if (mounted) setExactHighlights(items);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [matches, predictions, standings]);
 
   return (
     <div className="screen-stack">
@@ -178,6 +192,40 @@ const HomePage = () => {
           </div>
         </div>
         <PrizePanel />
+      </section>
+
+      <section className="section-block exact-history-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Historique</p>
+            <h2>Derniers scores exacts</h2>
+          </div>
+        </div>
+
+        <div className="exact-history-list">
+          {exactHighlights.length > 0 ? (
+            exactHighlights.map((highlight) => (
+              <article className="exact-history-card" key={highlight.matchId}>
+                <span className="exact-history-badge">Score exact 🎯</span>
+                <strong>
+                  {highlight.match.homeTeam.name} {highlight.match.homeScore} - {highlight.match.awayScore} {highlight.match.awayTeam.name}
+                </strong>
+                <small>{homeDayTitle(highlight.match.kickoff)}</small>
+                <div className="exact-history-winners">
+                  {highlight.winners.map((winner) => (
+                    <span key={`${highlight.matchId}-${winner.playerId}`}>
+                      {winner.nickname} — prono {winner.homeScore} - {winner.awayScore}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="empty-state inline exact-history-empty">
+              <strong>Pas encore de score exact trouvé.</strong>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
