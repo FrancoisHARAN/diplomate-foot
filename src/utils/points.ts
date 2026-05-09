@@ -1,4 +1,4 @@
-import type { Match } from '../types';
+import type { Match, PredictionResultType } from '../types';
 
 export const calculatePredictionPoints = (
   predictedHome: number,
@@ -19,6 +19,21 @@ export const calculatePredictionPoints = (
   if (sameOutcome) return 1;
 
   return 0;
+};
+
+export const getPredictionResultType = (
+  predictedHome: number,
+  predictedAway: number,
+  actualHome?: number | null,
+  actualAway?: number | null,
+): PredictionResultType => {
+  if (typeof actualHome !== 'number' || typeof actualAway !== 'number') return 'pending';
+
+  const points = calculatePredictionPoints(predictedHome, predictedAway, actualHome, actualAway);
+  if (points === 3) return 'exact';
+  if (points === 2) return 'two-point';
+  if (points === 1) return 'winner';
+  return 'lost';
 };
 
 const hasTeam = (match: Match, terms: string[]): boolean => {

@@ -82,7 +82,10 @@ export interface PublicPrediction {
   match: Match;
   prediction: Prediction;
   points?: number | null;
+  resultType: PredictionResultType;
 }
+
+export type PredictionResultType = 'exact' | 'two-point' | 'winner' | 'lost' | 'pending';
 
 export interface ExactPredictionWinner {
   playerId: string;

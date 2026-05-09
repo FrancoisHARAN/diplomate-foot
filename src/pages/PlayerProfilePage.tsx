@@ -1,17 +1,56 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
 import TeamBadge from '../components/TeamBadge';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { PublicPlayerProfile } from '../types';
+import type { PredictionResultType, PublicPlayerProfile, PublicPrediction } from '../types';
 import { fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
-import { formatKickoffDay, getMatchStatusLabel } from '../utils/date';
+import { formatKickoff, getMatchStatusLabel } from '../utils/date';
+
+type ProfileFilter = 'all' | 'finished' | 'locked' | 'won' | PredictionResultType;
+
+const profileFilters: Array<{ id: ProfileFilter; label: string }> = [
+  { id: 'all', label: 'Tous' },
+  { id: 'finished', label: 'Terminés' },
+  { id: 'locked', label: 'En cours / verrouillés' },
+  { id: 'won', label: 'Gagnés' },
+  { id: 'exact', label: 'Score exact' },
+  { id: 'two-point', label: 'Bon écart' },
+  { id: 'winner', label: 'Bon gagnant' },
+  { id: 'lost', label: 'Perdus' },
+];
+
+const resultLabels: Record<PredictionResultType, string> = {
+  exact: 'Score exact',
+  'two-point': 'Bon écart',
+  winner: 'Bon gagnant',
+  lost: 'Perdu',
+  pending: 'En attente',
+};
+
+const resultClassName: Record<PredictionResultType, string> = {
+  exact: 'exact',
+  'two-point': 'two-point',
+  winner: 'winner',
+  lost: 'lost',
+  pending: 'pending',
+};
+
+const filterPrediction = (item: PublicPrediction, filter: ProfileFilter): boolean => {
+  if (filter === 'all') return true;
+  if (filter === 'finished') return item.match.status === 'finished';
+  if (filter === 'locked') return item.match.status !== 'finished';
+  if (filter === 'won') return item.match.status === 'finished' && (item.points ?? 0) > 0;
+  if (filter === 'lost') return item.match.status === 'finished' && item.resultType === 'lost';
+  return item.match.status === 'finished' && item.resultType === filter;
+};
 
 const PlayerProfilePage = () => {
   const { playerId } = useParams();
   const { matches } = useLiveMatches();
   const [profile, setProfile] = useState<PublicPlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<ProfileFilter>('all');
 
   useEffect(() => {
     let mounted = true;
@@ -27,6 +66,11 @@ const PlayerProfilePage = () => {
       mounted = false;
     };
   }, [matches, playerId]);
+
+  const filteredPredictions = useMemo(
+    () => profile?.predictions.filter((item) => filterPrediction(item, filter)) ?? [],
+    [filter, profile],
+  );
 
   if (loading) {
     return (
@@ -62,6 +106,7 @@ const PlayerProfilePage = () => {
           <span><strong>{profile.stats.exactScores}</strong> scores exacts</span>
           <span><strong>{profile.stats.twoPointResults}</strong> bons écarts</span>
           <span><strong>{profile.stats.onePointResults}</strong> bons vainqueurs</span>
+          <span><strong>{profile.predictions.length}</strong> pronos visibles</span>
         </div>
       </section>
 
@@ -73,34 +118,43 @@ const PlayerProfilePage = () => {
           </div>
         </div>
 
+        <div className="filter-row public-profile-filters" role="tablist" aria-label="Filtres des pronostics publics">
+          {profileFilters.map((item) => (
+            <button key={item.id} type="button" className={`pill ${filter === item.id ? 'active' : ''}`} onClick={() => setFilter(item.id)}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+
         <div className="prediction-list">
-          {profile.predictions.length > 0 ? (
-            profile.predictions.map(({ id, prediction, match, points }) => (
+          {filteredPredictions.length > 0 ? (
+            filteredPredictions.map(({ id, prediction, match, points, resultType }) => (
               <article className="social-prono-row public-prono-row" key={id}>
                 <div className="social-prono-teams">
                   <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
                   <span>
                     <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
-                    <small>{formatKickoffDay(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
+                    <small>{match.competitionName ?? match.competitionCode ?? 'Match'} · {formatKickoff(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
                   </span>
                   <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
                 </div>
+                <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>
                 <div className="public-prono-details">
                   <span>Prono : {prediction.homeScore} - {prediction.awayScore}</span>
                   {match.status === 'finished' ? (
                     <>
                       <span>Score final : {match.homeScore} - {match.awayScore}</span>
-                      <strong>+{points ?? 0} pts</strong>
+                      <strong>+{points ?? 0} pts — {resultLabels[resultType]}</strong>
                     </>
                   ) : (
-                    <strong>Pronostic verrouillé</strong>
+                    <strong>Points en attente · pronostic verrouillé</strong>
                   )}
                 </div>
               </article>
             ))
           ) : (
             <div className="empty-state inline">
-              <strong>Ce joueur n’a pas encore de pronostics visibles.</strong>
+              <strong>{profile.predictions.length > 0 ? 'Aucun prono dans ce filtre.' : 'Ce joueur n’a pas encore de pronostic visible.'}</strong>
               <p>Les pronostics restent cachés tant que les matchs sont encore ouverts.</p>
             </div>
           )}

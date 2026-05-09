@@ -2,11 +2,11 @@ import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
 import { isSupabaseConfigured, supabaseRpc } from '../lib/supabaseClient';
-import type { ExactPredictionHighlight, Match, Player, Prediction, PublicPlayerProfile, PublicPrediction, Standing, Team } from '../types';
+import type { ExactPredictionHighlight, Match, Player, Prediction, PredictionResultType, PublicPlayerProfile, PublicPrediction, Standing, Team } from '../types';
 import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
 import { sortLeaderboardEntries } from './leaderboard';
-import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch } from './points';
+import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultType } from './points';
 import { isPredictionPublic } from './predictionVisibility';
 
 const STORAGE_KEYS = {
@@ -90,6 +90,7 @@ interface RpcMatchRow {
 interface RpcPublicPredictionRow extends RpcPredictionRow {
   points?: number | null;
   match?: RpcMatchRow | null;
+  result_type?: PredictionResultType | null;
 }
 
 interface RpcPublicPlayerProfile {
@@ -684,6 +685,9 @@ const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): Publ
     match,
     prediction: fromRpcPrediction(row),
     points: match.status === 'finished' ? row.points ?? 0 : null,
+    resultType: match.status === 'finished'
+      ? row.result_type ?? getPredictionResultType(row.home_score, row.away_score, match.homeScore, match.awayScore)
+      : 'pending',
   };
 };
 
@@ -701,7 +705,8 @@ const fromRpcPublicProfile = (payload: RpcPublicPlayerProfile, matches: Match[])
   },
   predictions: payload.predictions
     .map((prediction) => toPublicPrediction(prediction, matches))
-    .filter((prediction): prediction is PublicPrediction => Boolean(prediction)),
+    .filter((prediction): prediction is PublicPrediction => Boolean(prediction))
+    .sort((left, right) => new Date(right.match.kickoff).getTime() - new Date(left.match.kickoff).getTime()),
 });
 
 export const buildLocalPublicPlayerProfile = (
@@ -736,6 +741,9 @@ export const buildLocalPublicPlayerProfile = (
         match,
         prediction,
         points: match.status === 'finished' ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
+        resultType: match.status === 'finished'
+          ? getPredictionResultType(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+          : 'pending',
       };
     })
     .filter((prediction): prediction is PublicPrediction => Boolean(prediction))

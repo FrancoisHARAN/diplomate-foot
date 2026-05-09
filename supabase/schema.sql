@@ -232,7 +232,7 @@ returns boolean
 language sql
 stable
 as $$
-  select p_status in ('live', 'finished')
+  select lower(coalesce(p_status, '')) in ('live', 'finished', 'locked')
     or p_kickoff <= now() + interval '1 hour';
 $$;
 
@@ -496,6 +496,13 @@ as $$
           'home_score', pr.home_score,
           'away_score', pr.away_score,
           'points', case when m.status = 'finished' then coalesce(sp.points, 0) else null end,
+          'result_type', case
+            when m.status <> 'finished' then 'pending'
+            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
+            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
+            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
+            else 'lost'
+          end,
           'updated_at', pr.updated_at,
           'match', jsonb_build_object(
             'id', m.id,

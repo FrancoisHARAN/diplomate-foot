@@ -105,6 +105,15 @@ Le schema cree notamment:
 
 Les tables ont RLS activee. Les ecritures joueurs/pronostics passent par fonctions RPC `security definer`.
 
+## Profils publics joueurs
+
+La route `/joueurs/:playerId` utilise `app_get_public_player_profile` quand Supabase est configure.
+
+- les pronostics des matchs encore ouverts restent caches;
+- les pronostics deviennent visibles quand le match est verrouille, en live, termine, ou a moins d'une heure du coup d'envoi;
+- les matchs termines affichent le score final, les points et le type de resultat;
+- les matchs live/verrouilles affichent le prono avec les points en attente.
+
 ## Historique hebdomadaire du classement
 
 Le classement live peut bouger pendant la semaine. Pour suivre l'evolution dans le temps, Supabase peut figer un snapshot hebdomadaire du classement.
