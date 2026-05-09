@@ -89,6 +89,23 @@ create table if not exists public.app_rpc_predictions (
   unique(player_id, match_id)
 );
 
+create table if not exists public.app_rpc_leaderboard_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  period_type text not null default 'weekly',
+  period_label text not null,
+  week_start timestamptz,
+  week_end timestamptz,
+  snapshot_at timestamptz not null default now(),
+  player_id uuid not null references public.app_rpc_players(id) on delete cascade,
+  rank int not null,
+  points int not null,
+  exact_scores int not null default 0,
+  two_point_results int not null default 0,
+  first_prediction_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique(period_type, week_start, player_id)
+);
+
 create index if not exists idx_app_rpc_players_nickname_key on public.app_rpc_players(nickname_key);
 create index if not exists idx_app_rpc_sessions_player_id on public.app_rpc_sessions(player_id);
 create index if not exists idx_app_rpc_sessions_expires_at on public.app_rpc_sessions(expires_at);
@@ -97,18 +114,22 @@ create index if not exists idx_app_rpc_matches_status on public.app_rpc_matches(
 create index if not exists idx_app_rpc_predictions_player_id on public.app_rpc_predictions(player_id);
 create index if not exists idx_app_rpc_predictions_match_id on public.app_rpc_predictions(match_id);
 create index if not exists idx_app_rpc_predictions_updated_at on public.app_rpc_predictions(updated_at desc);
+create index if not exists idx_app_rpc_leaderboard_snapshots_week on public.app_rpc_leaderboard_snapshots(period_type, week_start desc);
+create index if not exists idx_app_rpc_leaderboard_snapshots_player on public.app_rpc_leaderboard_snapshots(player_id);
 
 alter table public.app_rpc_players enable row level security;
 alter table public.app_rpc_player_codes enable row level security;
 alter table public.app_rpc_sessions enable row level security;
 alter table public.app_rpc_matches enable row level security;
 alter table public.app_rpc_predictions enable row level security;
+alter table public.app_rpc_leaderboard_snapshots enable row level security;
 
 revoke all on public.app_rpc_players from anon, authenticated;
 revoke all on public.app_rpc_player_codes from anon, authenticated;
 revoke all on public.app_rpc_sessions from anon, authenticated;
 revoke all on public.app_rpc_matches from anon, authenticated;
 revoke all on public.app_rpc_predictions from anon, authenticated;
+revoke all on public.app_rpc_leaderboard_snapshots from anon, authenticated;
 grant usage on schema public to anon, authenticated;
 
 drop policy if exists "app rpc matches public read" on public.app_rpc_matches;
@@ -620,6 +641,147 @@ as $$
   from grouped;
 $$;
 
+create or replace function public.app_create_weekly_leaderboard_snapshot()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_week_start timestamptz := ((date_trunc('week', timezone('Europe/Paris', now())) - interval '7 days') at time zone 'Europe/Paris');
+  v_week_end timestamptz := (date_trunc('week', timezone('Europe/Paris', now())) at time zone 'Europe/Paris');
+  v_period_label text;
+  v_inserted int := 0;
+begin
+  select period_label
+  into v_period_label
+  from public.app_rpc_leaderboard_snapshots
+  where period_type = 'weekly'
+    and week_start = v_week_start
+  limit 1;
+
+  if v_period_label is null then
+    select 'Semaine ' || (count(distinct week_start) + 1)::text
+    into v_period_label
+    from public.app_rpc_leaderboard_snapshots
+    where period_type = 'weekly';
+  end if;
+
+  delete from public.app_rpc_leaderboard_snapshots
+  where period_type = 'weekly'
+    and week_start = v_week_start;
+
+  insert into public.app_rpc_leaderboard_snapshots (
+    period_type,
+    period_label,
+    week_start,
+    week_end,
+    snapshot_at,
+    player_id,
+    rank,
+    points,
+    exact_scores,
+    two_point_results,
+    first_prediction_at
+  )
+  select
+    'weekly',
+    v_period_label,
+    v_week_start,
+    v_week_end,
+    now(),
+    lb.player_id,
+    lb.rank,
+    lb.points,
+    lb.exact_scores,
+    lb.two_point_results,
+    lb.first_prediction_at
+  from public.app_rpc_leaderboard lb
+  order by lb.rank asc;
+
+  get diagnostics v_inserted = row_count;
+
+  return jsonb_build_object(
+    'period_label', v_period_label,
+    'week_start', v_week_start,
+    'week_end', v_week_end,
+    'inserted_count', v_inserted
+  );
+end;
+$$;
+
+drop function if exists public.app_get_leaderboard_history(int);
+
+create or replace function public.app_get_leaderboard_history(p_limit_weeks int default 8)
+returns table (
+  period_label text,
+  snapshot_at timestamptz,
+  player_id uuid,
+  nickname text,
+  display_name text,
+  avatar_url text,
+  rank int,
+  points int,
+  exact_scores int,
+  two_point_results int,
+  first_prediction_at timestamptz,
+  is_current boolean
+)
+language sql
+security definer
+set search_path = public
+as $$
+  with selected_weeks as (
+    select s.week_start
+    from public.app_rpc_leaderboard_snapshots s
+    where s.period_type = 'weekly'
+    group by s.week_start
+    order by s.week_start desc
+    limit greatest(1, coalesce(p_limit_weeks, 8))
+  ),
+  snapshot_rows as (
+    select
+      s.period_label,
+      s.snapshot_at,
+      s.player_id,
+      p.nickname,
+      p.display_name,
+      p.avatar_url,
+      s.rank,
+      s.points,
+      s.exact_scores,
+      s.two_point_results,
+      s.first_prediction_at,
+      false as is_current
+    from public.app_rpc_leaderboard_snapshots s
+    join selected_weeks w on w.week_start = s.week_start
+    join public.app_rpc_players p on p.id = s.player_id
+    where s.period_type = 'weekly'
+  ),
+  current_rows as (
+    select
+      'En cours'::text as period_label,
+      now() as snapshot_at,
+      lb.player_id,
+      lb.nickname,
+      lb.display_name,
+      lb.avatar_url,
+      lb.rank,
+      lb.points,
+      lb.exact_scores,
+      lb.two_point_results,
+      lb.first_prediction_at,
+      true as is_current
+    from public.app_rpc_leaderboard lb
+  )
+  select *
+  from snapshot_rows
+  union all
+  select *
+  from current_rows
+  order by is_current asc, snapshot_at asc, rank asc;
+$$;
+
 create or replace function public.app_private_save_prediction(
   p_player_id uuid,
   p_match_id text,
@@ -865,6 +1027,7 @@ revoke all on function public.app_private_prediction_points(int, int, int, int, 
 revoke all on function public.app_private_prediction_is_public(text, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;
+revoke all on function public.app_create_weekly_leaderboard_snapshot() from public, anon, authenticated;
 
 grant execute on function public.app_login_player(text, text) to anon;
 grant execute on function public.app_get_player_state(uuid) to anon;
@@ -872,6 +1035,7 @@ grant execute on function public.app_get_leaderboard() to anon;
 grant execute on function public.app_get_matches() to anon;
 grant execute on function public.app_get_public_player_profile(uuid) to anon;
 grant execute on function public.app_get_recent_exact_predictions() to anon;
+grant execute on function public.app_get_leaderboard_history(int) to anon;
 grant execute on function public.app_save_prediction_by_session(uuid, text, int, int) to anon;
 grant execute on function public.app_save_prediction(uuid, text, int, int, text) to anon;
 grant execute on function public.app_sync_local_predictions(uuid, jsonb) to anon;

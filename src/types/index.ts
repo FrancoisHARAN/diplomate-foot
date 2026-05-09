@@ -97,3 +97,24 @@ export interface ExactPredictionHighlight {
   match: Match;
   winners: ExactPredictionWinner[];
 }
+
+export interface LeaderboardHistoryEntry {
+  periodLabel: string;
+  snapshotAt: string;
+  playerId: string;
+  nickname: string;
+  avatarUrl?: string;
+  rank: number;
+  points: number;
+  exactScores: number;
+  twoPointResults: number;
+  firstPredictionAt?: string | null;
+  isCurrent: boolean;
+}
+
+export interface LeaderboardHistoryPeriod {
+  label: string;
+  snapshotAt: string;
+  isCurrent: boolean;
+  entries: LeaderboardHistoryEntry[];
+}

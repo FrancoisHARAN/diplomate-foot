@@ -105,6 +105,38 @@ Le schema cree notamment:
 
 Les tables ont RLS activee. Les ecritures joueurs/pronostics passent par fonctions RPC `security definer`.
 
+## Historique hebdomadaire du classement
+
+Le classement live peut bouger pendant la semaine. Pour suivre l'evolution dans le temps, Supabase peut figer un snapshot hebdomadaire du classement.
+
+Principe:
+
+- le classement actuel reste live;
+- une copie hebdomadaire est stockee dans `app_rpc_leaderboard_snapshots`;
+- le graphique de la page Classement affiche les semaines figees plus la colonne `En cours`;
+- le tri utilise les memes departages que le classement live: points, scores exacts, resultats a 2 points, premier prono, puis pseudo.
+
+Recommandation d'exploitation:
+
+- creer le snapshot chaque lundi a 02:00 heure Europe/Paris;
+- au debut, le faire manuellement depuis Supabase SQL Editor;
+- plus tard, planifier la meme requete avec Supabase Scheduler ou `pg_cron`.
+
+Creation manuelle d'un snapshot:
+
+```sql
+select public.app_create_weekly_leaderboard_snapshot();
+```
+
+Pour tester:
+
+1. Executer tout `supabase/schema.sql` dans Supabase SQL Editor.
+2. Executer `select public.app_create_weekly_leaderboard_snapshot();`.
+3. Recharger la page `/classement`.
+4. Verifier la section `Historique du classement`.
+
+Sans Supabase ou si la RPC est indisponible, l'application affiche un historique de demonstration en fallback local.
+
 ## Creer les joueurs
 
 Les vrais codes ne doivent pas etre commites.

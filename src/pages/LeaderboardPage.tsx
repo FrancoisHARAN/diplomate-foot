@@ -1,18 +1,23 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import LeaderboardHistorySection from '../components/LeaderboardHistorySection';
 import PlayerAvatar from '../components/PlayerAvatar';
 import PrizePanel from '../components/PrizePanel';
 import RankingMovementBadge from '../components/RankingMovementBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
+import { useLeaderboardHistory } from '../hooks/useLeaderboardHistory';
 import { useRankingMovements } from '../hooks/useRankingMovements';
 import { buildStandings, getStoredPredictions, samePlayerId } from '../utils/appState';
 
 const LeaderboardPage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
-  const standings = buildStandings(mockPlayers, getStoredPredictions(), matches);
+  const predictions = useMemo(() => getStoredPredictions(), [matches, player?.id]);
+  const standings = useMemo(() => buildStandings(mockPlayers, predictions, matches), [matches, predictions]);
   const movements = useRankingMovements(standings);
+  const history = useLeaderboardHistory(standings);
   const me = standings.find((row) => samePlayerId(row.playerId, player?.id));
 
   return (
@@ -65,6 +70,13 @@ const LeaderboardPage = () => {
           </Link>
         ))}
       </section>
+
+      <LeaderboardHistorySection
+        periods={history.periods}
+        currentPlayerId={player?.id}
+        isFallback={history.isFallback}
+        hasFrozenSnapshots={history.hasFrozenSnapshots}
+      />
     </div>
   );
 };

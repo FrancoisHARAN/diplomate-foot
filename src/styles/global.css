@@ -1255,6 +1255,148 @@ small {
   border-color: var(--blue);
 }
 
+.leaderboard-history-section {
+  overflow: hidden;
+  border-color: var(--blue);
+  color: #fff;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    #102071;
+  background-size: 22px 22px;
+}
+
+.leaderboard-history-section .eyebrow,
+.leaderboard-history-section h2,
+.leaderboard-history-section p {
+  color: #fff;
+}
+
+.history-intro {
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.history-filter-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.history-filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+.history-filter-row .pill {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+.history-note {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.history-note p,
+.history-note strong {
+  color: #fff;
+}
+
+.history-chart-scroll {
+  margin-top: 0.85rem;
+  overflow-x: auto;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(5, 10, 36, 0.5);
+  scrollbar-width: thin;
+}
+
+.history-chart {
+  display: block;
+  min-width: 100%;
+}
+
+.history-grid-line {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+}
+
+.history-period-line {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.history-rank-label,
+.history-period-label,
+.history-points-label {
+  fill: rgba(255, 255, 255, 0.76);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.history-period-label.current {
+  fill: var(--lime);
+}
+
+.history-player-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5;
+  opacity: 0.86;
+}
+
+.history-player-line.is-me {
+  stroke-width: 5;
+  opacity: 1;
+}
+
+.history-player-dot {
+  stroke: #102071;
+  stroke-width: 2;
+}
+
+.history-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+  margin-top: 0.75rem;
+}
+
+.history-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.32rem 0.45rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.history-legend span.is-me {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.history-legend i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+.history-footnote {
+  margin-top: 0.62rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.28;
+}
+
 .notice-panel,
 .empty-state {
   display: grid;
