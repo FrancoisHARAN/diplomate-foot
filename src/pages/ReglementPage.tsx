@@ -15,7 +15,8 @@ const rules = [
     title: 'Bon gagnant',
     points: '1 pt',
     condition: 'Tu trouves seulement la bonne équipe gagnante.',
-    example: 'Exemple : tu joues 1 - 0, ton équipe gagne 3 - 2.',
+    example: 'Exemple : Tu joues 2 - 0, ton équipe gagne 3 - 2.',
+    explanation: 'Tu as le bon gagnant, mais pas le bon écart. prono 2 - 0 = écart +2 ; résultat 3 - 2 = écart +1 ; même vainqueur mais mauvais écart ; donc 1 point.',
   },
   {
     title: 'Prono perdu',
@@ -49,6 +50,7 @@ const ReglementPage = () => (
             <strong>{rule.title}</strong>
             <p>{rule.condition}</p>
             <small>{rule.example}</small>
+            {rule.explanation ? <small className="rule-explanation">{rule.explanation}</small> : null}
           </div>
         </article>
       ))}

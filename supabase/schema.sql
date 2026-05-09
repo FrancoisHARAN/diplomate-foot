@@ -220,9 +220,9 @@ as $$
   select case
     when p_home_score is null or p_away_score is null then 0
     when p_home_prediction = p_home_score and p_away_prediction = p_away_score then 3 * greatest(1, coalesce(p_multiplier, 1))
-    when (p_home_prediction - p_away_prediction) = (p_home_score - p_away_score) then 2 * greatest(1, coalesce(p_multiplier, 1))
     when sign(p_home_prediction - p_away_prediction) = sign(p_home_score - p_away_score)
-      and sign(p_home_score - p_away_score) <> 0 then 1 * greatest(1, coalesce(p_multiplier, 1))
+      and (p_home_prediction - p_away_prediction) = (p_home_score - p_away_score) then 2 * greatest(1, coalesce(p_multiplier, 1))
+    when sign(p_home_prediction - p_away_prediction) = sign(p_home_score - p_away_score) then 1 * greatest(1, coalesce(p_multiplier, 1))
     else 0
   end;
 $$;

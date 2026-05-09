@@ -1930,6 +1930,11 @@ button.action-row {
   line-height: 1.24;
 }
 
+.rule-body .rule-explanation {
+  color: var(--text);
+  font-weight: 760;
+}
+
 .rules-note-grid {
   display: grid;
   gap: 0.65rem;
