@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-09T16:59:42.504Z",
+  "generatedAt": "2026-05-09T17:53:32.820Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-08",
   "dateTo": "2026-05-30",
@@ -1096,12 +1096,12 @@
       },
       "kickoff": "2026-05-09T16:30:00Z",
       "status": "live",
-      "homeScore": 0,
+      "homeScore": 1,
       "awayScore": 0,
       "minute": null,
       "matchday": 36,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-09T16:36:14Z"
+      "lastUpdated": "2026-05-09T17:53:28Z"
     },
     {
       "id": "fd-544552",
@@ -1127,7 +1127,7 @@
       "minute": null,
       "matchday": 35,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-09T16:36:24Z"
+      "lastUpdated": "2026-05-09T17:41:33Z"
     },
     {
       "id": "fd-544557",
@@ -3072,6 +3072,30 @@
       "matchday": 38,
       "source": "football-data.org",
       "lastUpdated": "2026-05-09T00:21:14Z"
+    },
+    {
+      "id": "fd-552096",
+      "externalId": "552096",
+      "competitionCode": "CL",
+      "competitionName": "Champions League",
+      "homeTeam": {
+        "id": "524",
+        "name": "PSG",
+        "shortName": "PSG",
+        "crest": "https://crests.football-data.org/524.png"
+      },
+      "awayTeam": {
+        "id": "57",
+        "name": "Arsenal",
+        "shortName": "ARS",
+        "crest": "https://crests.football-data.org/57.png"
+      },
+      "kickoff": "2026-05-30T16:00:00Z",
+      "status": "upcoming",
+      "minute": null,
+      "matchday": null,
+      "source": "football-data.org",
+      "lastUpdated": "2026-05-09T00:21:13Z"
     }
   ]
 }
