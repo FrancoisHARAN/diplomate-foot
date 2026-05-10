@@ -1,71 +1,108 @@
-const rules = [
+const playSteps = [
+  'Connecte-toi avec ton pseudo et ton code.',
+  'Choisis un match ouvert.',
+  'Entre ton score avant le coup d’envoi.',
+];
+
+const pointRules = [
   {
-    title: 'Score exact',
     points: '3 pts',
-    condition: 'Tu trouves exactement le score final.',
-    example: 'Exemple : tu joues 2 - 1, le match finit 2 - 1.',
+    title: 'Score exact',
+    text: 'Tu trouves exactement le score final.',
+    examples: ['Prono 2 - 1, résultat 2 - 1.'],
   },
   {
-    title: 'Bon écart',
     points: '2 pts',
-    condition: 'Tu trouves le bon écart de buts, même si le score exact est différent.',
-    example: 'Exemples : tu joues 3 - 1 et ça finit 2 - 0, ou tu joues 3 - 3 et ça finit 2 - 2.',
+    title: 'Bon écart',
+    text: 'Tu as le bon gagnant et le bon écart de buts.',
+    detail: 'Un bon écart signifie que la différence de buts est la même.',
+    examples: ['Prono 1 - 0, résultat 3 - 2.', 'Prono 2 - 2, résultat 1 - 1.'],
   },
   {
-    title: 'Bon gagnant',
     points: '1 pt',
-    condition: 'Tu trouves seulement la bonne équipe gagnante.',
-    example: 'Exemple : Tu joues 2 - 0, ton équipe gagne 3 - 2.',
-    explanation: 'Tu as le bon gagnant, mais pas le bon écart. prono 2 - 0 = écart +2 ; résultat 3 - 2 = écart +1 ; même vainqueur mais mauvais écart ; donc 1 point.',
+    title: 'Bon gagnant',
+    text: 'Tu as le bon gagnant, mais pas le bon écart.',
+    examples: ['Prono 2 - 0, résultat 3 - 2.'],
   },
   {
-    title: 'Prono perdu',
     points: '0 pt',
-    condition: 'Le résultat ne correspond pas à ton pari.',
-    example: 'Exemple : tu joues victoire à domicile, mais l’extérieur gagne.',
+    title: 'Prono perdu',
+    text: 'Le résultat ne correspond pas à ton prono.',
+    examples: ['Prono victoire domicile, résultat victoire extérieur.'],
   },
 ];
 
+const prizes = [
+  '1er : 20 € de conso au bar',
+  '2e : une pizza',
+  '3e : un saucisson',
+];
+
 const ReglementPage = () => (
-  <div className="screen-stack">
+  <div className="screen-stack rules-page">
     <section className="page-hero rules-hero">
       <p className="eyebrow">Jeu du bar</p>
       <h1>Règlement</h1>
-      <p>Tu poses un score avant le coup d’envoi. Dès que le match commence, le prono est verrouillé.</p>
+      <p>Fais tes pronos avant le coup d’envoi et marque des points selon la précision de ton score.</p>
     </section>
 
-    <section className="rules-lead-card">
-      <span>Objectif</span>
-      <strong>Marquer le plus de points possible sur les vrais matchs.</strong>
-      <p>Plus ton score est précis, plus tu prends de points au classement du Diplomate.</p>
+    <section className="rules-section">
+      <div className="rules-section-title">
+        <span>01</span>
+        <h2>Comment jouer</h2>
+      </div>
+      <div className="rules-step-list">
+        {playSteps.map((step, index) => (
+          <article className="rules-step-card" key={step}>
+            <strong>{index + 1}</strong>
+            <p>{step}</p>
+          </article>
+        ))}
+      </div>
+      <p className="rules-helper">Les pronostics se ferment automatiquement au coup d’envoi.</p>
     </section>
 
-    <section className="rules-grid">
-      {rules.map((rule) => (
-        <article className="rule-card" key={rule.title}>
-          <div className="rule-points">
-            <span>{rule.points}</span>
-          </div>
-          <div className="rule-body">
-            <strong>{rule.title}</strong>
-            <p>{rule.condition}</p>
-            <small>{rule.example}</small>
-            {rule.explanation ? <small className="rule-explanation">{rule.explanation}</small> : null}
-          </div>
-        </article>
-      ))}
+    <section className="rules-section">
+      <div className="rules-section-title">
+        <span>02</span>
+        <h2>Comment gagner des points</h2>
+      </div>
+      <div className="points-rule-list">
+        {pointRules.map((rule) => (
+          <article className="points-rule-card" key={rule.title}>
+            <div className="points-badge">{rule.points}</div>
+            <div className="points-rule-content">
+              <h3>{rule.title}</h3>
+              <p>{rule.text}</p>
+              {rule.detail ? <small className="points-rule-detail">{rule.detail}</small> : null}
+              <div className="points-examples">
+                {rule.examples.map((example) => (
+                  <small key={example}>{example}</small>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
 
-    <section className="rules-note-grid">
-      <article className="rules-note-card boost-card">
-        <span>Boost</span>
-        <strong>Certains matchs comptent x2 ou plus.</strong>
-        <p>Sur un match boosté x2, un score exact vaut 6 points au lieu de 3.</p>
+    <section className="rules-section rules-info-grid">
+      <article className="rules-info-card boost-card">
+        <span>03</span>
+        <h2>Boosts</h2>
+        <p>Certains matchs peuvent compter x2 ou plus.</p>
+        <strong>Sur un match boosté x2, un score exact vaut 6 points au lieu de 3.</strong>
       </article>
-      <article className="rules-note-card prizes-card">
-        <span>Podium</span>
-        <strong>Les lots finaux</strong>
-        <p>1er : 20 € de conso au bar. 2e : une pizza. 3e : un saucisson.</p>
+
+      <article className="rules-info-card prizes-card">
+        <span>04</span>
+        <h2>Classement et lots</h2>
+        <p>Le classement est mis à jour avec les points gagnés sur les matchs terminés.</p>
+        <ul>
+          {prizes.map((prize) => (
+            <li key={prize}>{prize}</li>
+          ))}
+        </ul>
       </article>
     </section>
 

@@ -55,12 +55,13 @@ if (failures.length > 0) {
 }
 
 const requiredRulesText = [
-  'Tu trouves seulement la bonne équipe gagnante.',
-  'Tu joues 2 - 0, ton équipe gagne 3 - 2.',
+  'Tu trouves exactement le score final.',
+  'Tu as le bon gagnant et le bon écart de buts.',
+  'Un bon écart signifie que la différence de buts est la même.',
+  'Prono 1 - 0, résultat 3 - 2.',
+  'Prono 2 - 2, résultat 1 - 1.',
   'Tu as le bon gagnant, mais pas le bon écart.',
-  'prono 2 - 0 = écart +2',
-  'résultat 3 - 2 = écart +1',
-  'donc 1 point',
+  'Prono 2 - 0, résultat 3 - 2.',
 ];
 
 const missingText = requiredRulesText.filter((text) => !rulesSource.includes(text));
@@ -68,7 +69,7 @@ if (missingText.length > 0) {
   throw new Error(`ReglementPage is missing expected wording:\n${missingText.join('\n')}`);
 }
 
-if (rulesSource.includes('Tu joues 1 - 0, ton équipe gagne 3 - 2.')) {
+if (rulesSource.includes('tu joues 1 - 0, ton équipe gagne 3 - 2')) {
   throw new Error('ReglementPage still contains the old bad 1-point example.');
 }
 
