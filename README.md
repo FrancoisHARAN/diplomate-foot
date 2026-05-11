@@ -233,6 +233,42 @@ Pour activer les vraies donnees football:
 
 Quand Supabase est configure, le frontend synchronise aussi les matchs vers Supabase via RPC afin que le classement cloud puisse calculer les points.
 
+## Coupe du Monde 2026
+
+L'application prepare une categorie **Coupe du Monde 2026** pour la competition finale FIFA World Cup uniquement. Le code football-data.org prevu est `WC` avec la saison `2026` (voir la table officielle des codes de ligues: https://www.football-data.org/documentation/api).
+
+La logique d'affichage est volontairement filtree:
+
+- en phase de groupe, seuls les matchs impliquant une equipe selectionnee sont affiches;
+- a partir des seiziemes / huitiemes / quarts / demies / finale, tous les matchs Coupe du Monde 2026 sont affiches;
+- les matchs amicaux, qualifications et matchs de preparation ne sont pas consideres comme Coupe du Monde 2026;
+- tous les matchs de la France dans cette competition ont un boost automatique x2;
+- les drapeaux viennent uniquement de `public/flags` et ne sont utilises que pour les matchs Coupe du Monde 2026;
+- les matchs de clubs conservent leurs logos de clubs. Un club comme Marseille avec le code `MAR` ne peut donc pas recevoir le drapeau du Maroc.
+
+Equipes selectionnees en phase de groupe:
+
+France, Espagne, Argentine, Angleterre, Portugal, Bresil, Pays-Bas, Maroc, Belgique, Allemagne, Croatie, Italie, Colombie, Senegal.
+
+Les fichiers de configuration principaux sont:
+
+- `src/config/worldCup2026.ts` pour changer la liste des equipes selectionnees, le label et le code competition interne;
+- `src/config/countryFlags.ts` pour mapper les codes pays vers les fichiers vraiment presents dans `public/flags`;
+- `src/utils/worldCupFilters.ts` pour la detection Coupe du Monde, la phase de groupe, l'elimination directe et le boost France.
+
+Le workflow d'update football peut recevoir ces variables GitHub optionnelles:
+
+```txt
+WORLD_CUP_2026_COMPETITION_ID=WC
+WORLD_CUP_2026_SEASON=2026
+WORLD_CUP_2026_DATE_FROM=2026-06-11
+WORLD_CUP_2026_DATE_TO=2026-07-19
+```
+
+Si football-data.org change l'identifiant officiel, modifier `WORLD_CUP_2026_COMPETITION_ID` dans GitHub Actions ou `WORLD_CUP_2026_API_COMPETITION_ID` dans `src/config/worldCup2026.ts` / `scripts/fetch-football-data.mjs`.
+
+Si `supabase/schema.sql` a ete mis a jour, relancer le SQL dans Supabase pour conserver les champs `stage`, `round`, `group_name`, `season` et `source_competition_id` utilises par les filtres.
+
 ## Deploiement GitHub Pages
 
 Le workflow est dans `.github/workflows/deploy.yml`.

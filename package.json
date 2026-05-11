@@ -10,6 +10,7 @@
     "check:profile-mobile": "node scripts/check-player-profile-mobile-css.mjs",
     "check:public-profile": "node scripts/check-public-player-profile.mjs",
     "check:points": "node scripts/check-rules-and-points.mjs",
+    "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",
     "preview": "vite preview",
     "lint": "eslint ."
   },

@@ -7,6 +7,7 @@ import type { Match, Prediction } from '../types';
 import { getPredictionsForPlayer, getUserPointsMock } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch } from '../utils/points';
+import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type PredictionFilter = 'all' | 'live' | 'finished' | 'upcoming' | 'won' | 'lost';
 
@@ -123,7 +124,7 @@ const MyPredictionsPage = () => {
               return (
                 <Link className="prediction-row" key={match.id} to={`/matchs/${match.id}`}>
                   <span>
-                    <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
+                    <strong>{getWorldCupTeamDisplayName(match.homeTeam, match)} - {getWorldCupTeamDisplayName(match.awayTeam, match)}</strong>
                     <small>{state}</small>
                   </span>
                   <span className="prediction-score-chip">{prediction?.homeScore} - {prediction?.awayScore}</span>

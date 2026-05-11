@@ -6,6 +6,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { PredictionResultType, PublicPlayerProfile, PublicPrediction } from '../types';
 import { fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
 import { formatKickoff, getMatchStatusLabel } from '../utils/date';
+import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type ProfileFilter = 'all' | 'finished' | 'locked' | 'won' | PredictionResultType;
 
@@ -138,12 +139,12 @@ const PlayerProfilePage = () => {
             filteredPredictions.map(({ id, prediction, match, points, resultType }) => (
               <article className="social-prono-row public-prono-row" key={id}>
                 <div className="social-prono-teams">
-                  <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
+                  <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
                   <span>
-                    <strong>{match.homeTeam.shortName} - {match.awayTeam.shortName}</strong>
+                    <strong>{getWorldCupTeamDisplayName(match.homeTeam, match)} - {getWorldCupTeamDisplayName(match.awayTeam, match)}</strong>
                     <small>{match.competitionName ?? match.competitionCode ?? 'Match'} · {formatKickoff(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
                   </span>
-                  <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
+                  <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
                 </div>
                 <div className="public-prono-outcome">
                   <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>

@@ -33,6 +33,10 @@ jobs:
       - name: Fetch football data
         env:
           FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+          WORLD_CUP_2026_COMPETITION_ID: ${{ vars.WORLD_CUP_2026_COMPETITION_ID }}
+          WORLD_CUP_2026_SEASON: ${{ vars.WORLD_CUP_2026_SEASON }}
+          WORLD_CUP_2026_DATE_FROM: ${{ vars.WORLD_CUP_2026_DATE_FROM }}
+          WORLD_CUP_2026_DATE_TO: ${{ vars.WORLD_CUP_2026_DATE_TO }}
         run: npm run fetch:football
 
       - name: Commit updated data

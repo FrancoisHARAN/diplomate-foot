@@ -73,11 +73,22 @@ create table if not exists public.app_rpc_matches (
   minute integer,
   venue text,
   matchday integer,
+  stage text,
+  round text,
+  group_name text,
+  season integer,
+  source_competition_id text,
   points_multiplier integer not null default 1 check (points_multiplier between 1 and 10),
   source text,
   last_updated timestamptz,
   updated_at timestamptz not null default now()
 );
+
+alter table public.app_rpc_matches add column if not exists stage text;
+alter table public.app_rpc_matches add column if not exists round text;
+alter table public.app_rpc_matches add column if not exists group_name text;
+alter table public.app_rpc_matches add column if not exists season integer;
+alter table public.app_rpc_matches add column if not exists source_competition_id text;
 
 create table if not exists public.app_rpc_predictions (
   id uuid primary key default gen_random_uuid(),
@@ -112,6 +123,7 @@ create index if not exists idx_app_rpc_sessions_player_id on public.app_rpc_sess
 create index if not exists idx_app_rpc_sessions_expires_at on public.app_rpc_sessions(expires_at);
 create index if not exists idx_app_rpc_matches_kickoff on public.app_rpc_matches(kickoff);
 create index if not exists idx_app_rpc_matches_status on public.app_rpc_matches(status);
+create index if not exists idx_app_rpc_matches_competition_code on public.app_rpc_matches(competition_code);
 create index if not exists idx_app_rpc_predictions_player_id on public.app_rpc_predictions(player_id);
 create index if not exists idx_app_rpc_predictions_match_id on public.app_rpc_predictions(match_id);
 create index if not exists idx_app_rpc_predictions_updated_at on public.app_rpc_predictions(updated_at desc);
@@ -437,6 +449,8 @@ as $$
   order by lb.rank asc, lb.display_name asc;
 $$;
 
+drop function if exists public.app_get_matches();
+
 create or replace function public.app_get_matches()
 returns table (
   id text,
@@ -452,6 +466,11 @@ returns table (
   minute int,
   venue text,
   matchday int,
+  stage text,
+  round text,
+  group_name text,
+  season int,
+  source_competition_id text,
   points_multiplier int,
   source text,
   last_updated timestamptz
@@ -474,6 +493,11 @@ as $$
     m.minute,
     m.venue,
     m.matchday,
+    m.stage,
+    m.round,
+    m.group_name,
+    m.season,
+    m.source_competition_id,
     m.points_multiplier,
     m.source,
     m.last_updated
@@ -568,6 +592,11 @@ as $$
             'minute', m.minute,
             'venue', m.venue,
             'matchday', m.matchday,
+            'stage', m.stage,
+            'round', m.round,
+            'group_name', m.group_name,
+            'season', m.season,
+            'source_competition_id', m.source_competition_id,
             'points_multiplier', m.points_multiplier,
             'source', m.source,
             'last_updated', m.last_updated
@@ -608,6 +637,11 @@ as $$
       m.minute,
       m.venue,
       m.matchday,
+      m.stage,
+      m.round,
+      m.group_name,
+      m.season,
+      m.source_competition_id,
       m.points_multiplier,
       m.source,
       m.last_updated,
@@ -641,6 +675,11 @@ as $$
       minute,
       venue,
       matchday,
+      stage,
+      round,
+      group_name,
+      season,
+      source_competition_id,
       points_multiplier,
       source,
       last_updated,
@@ -667,6 +706,11 @@ as $$
       minute,
       venue,
       matchday,
+      stage,
+      round,
+      group_name,
+      season,
+      source_competition_id,
       points_multiplier,
       source,
       last_updated
@@ -689,6 +733,11 @@ as $$
       'minute', minute,
       'venue', venue,
       'matchday', matchday,
+      'stage', stage,
+      'round', round,
+      'group_name', group_name,
+      'season', season,
+      'source_competition_id', source_competition_id,
       'points_multiplier', points_multiplier,
       'source', source,
       'last_updated', last_updated
@@ -1028,6 +1077,11 @@ begin
       minute,
       venue,
       matchday,
+      stage,
+      round,
+      group_name,
+      season,
+      source_competition_id,
       points_multiplier,
       source,
       last_updated,
@@ -1047,6 +1101,11 @@ begin
       nullif(v_item->>'minute', '')::int,
       nullif(v_item->>'venue', ''),
       nullif(v_item->>'matchday', '')::int,
+      nullif(v_item->>'stage', ''),
+      nullif(v_item->>'round', ''),
+      nullif(v_item->>'group_name', ''),
+      nullif(v_item->>'season', '')::int,
+      nullif(v_item->>'source_competition_id', ''),
       greatest(1, coalesce(nullif(v_item->>'points_multiplier', '')::int, 1)),
       nullif(v_item->>'source', ''),
       nullif(v_item->>'last_updated', '')::timestamptz,
@@ -1065,6 +1124,11 @@ begin
       minute = excluded.minute,
       venue = excluded.venue,
       matchday = excluded.matchday,
+      stage = excluded.stage,
+      round = excluded.round,
+      group_name = excluded.group_name,
+      season = excluded.season,
+      source_competition_id = excluded.source_competition_id,
       points_multiplier = excluded.points_multiplier,
       source = excluded.source,
       last_updated = excluded.last_updated,

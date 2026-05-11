@@ -7,6 +7,7 @@ import type { Match } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
 import { canEditPrediction, formatKickoffLong, formatLastUpdated, formatTimeUntilKickoff, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const SWIPE_HINT_KEY = 'diplomate.matchSwipeHintSeen.v1';
 
@@ -38,7 +39,7 @@ const MatchDetailPage = () => {
   const playableMatches = useMemo(
     () =>
       matches
-        .filter((item) => item.status !== 'finished')
+        .filter((item) => item.status !== 'finished' && shouldShowMatchInApp(item))
         .sort((left, right) => new Date(left.kickoff).getTime() - new Date(right.kickoff).getTime()),
     [matches],
   );
@@ -141,9 +142,14 @@ const MatchDetailPage = () => {
   }
 
   const multiplier = getMatchMultiplier(match);
+  const boostLabel = getWorldCupBoostLabel(match, multiplier);
   const updatedAt = formatLastUpdated(match.lastUpdated);
   const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+  const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
+  const awayName = getWorldCupTeamDisplayName(match.awayTeam, match);
+  const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
+  const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
   const points =
     match.status === 'finished' && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
@@ -218,21 +224,21 @@ const MatchDetailPage = () => {
         {multiplier > 1 ? (
           <div className="booster-panel">
             <strong>Boost x{multiplier}</strong>
-            <span>Les points comptent x{multiplier} sur ce match.</span>
+            <span>{boostLabel}. Les points comptent x{multiplier} sur ce match.</span>
           </div>
         ) : null}
 
         <div className="match-detail-teams">
           <div className="detail-team">
-            <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
-            <strong>{match.homeTeam.name}</strong>
-            <small>{match.homeTeam.shortName}</small>
+            <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
+            <strong>{homeName}</strong>
+            <small>{homeCode}</small>
           </div>
           <span className="detail-versus">{(match.status === 'finished' || isLiveDisplay) && hasScore ? `${match.homeScore} - ${match.awayScore}` : isLiveDisplay ? 'Live' : 'VS'}</span>
           <div className="detail-team">
-            <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
-            <strong>{match.awayTeam.name}</strong>
-            <small>{match.awayTeam.shortName}</small>
+            <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
+            <strong>{awayName}</strong>
+            <small>{awayCode}</small>
           </div>
         </div>
 
@@ -270,9 +276,9 @@ const MatchDetailPage = () => {
 
             <div className="score-editor">
               <div className="score-team">
-                <strong>{match.homeTeam.name}</strong>
+                <strong>{homeName}</strong>
                 <div className="score-stepper">
-                  <button type="button" onClick={() => updateScore('home', -1)} aria-label={`Retirer un but à ${match.homeTeam.name}`}>-</button>
+                  <button type="button" onClick={() => updateScore('home', -1)} aria-label={`Retirer un but à ${homeName}`}>-</button>
                   <input
                     type="number"
                     min={0}
@@ -284,16 +290,16 @@ const MatchDetailPage = () => {
                       setHomeScore(Math.max(0, Number(event.target.value)));
                     }}
                   />
-                  <button type="button" onClick={() => updateScore('home', 1)} aria-label={`Ajouter un but à ${match.homeTeam.name}`}>+</button>
+                  <button type="button" onClick={() => updateScore('home', 1)} aria-label={`Ajouter un but à ${homeName}`}>+</button>
                 </div>
               </div>
 
               <span className="score-separator">-</span>
 
               <div className="score-team">
-                <strong>{match.awayTeam.name}</strong>
+                <strong>{awayName}</strong>
                 <div className="score-stepper">
-                  <button type="button" onClick={() => updateScore('away', -1)} aria-label={`Retirer un but à ${match.awayTeam.name}`}>-</button>
+                  <button type="button" onClick={() => updateScore('away', -1)} aria-label={`Retirer un but à ${awayName}`}>-</button>
                   <input
                     type="number"
                     min={0}
@@ -305,7 +311,7 @@ const MatchDetailPage = () => {
                       setAwayScore(Math.max(0, Number(event.target.value)));
                     }}
                   />
-                  <button type="button" onClick={() => updateScore('away', 1)} aria-label={`Ajouter un but à ${match.awayTeam.name}`}>+</button>
+                  <button type="button" onClick={() => updateScore('away', 1)} aria-label={`Ajouter un but à ${awayName}`}>+</button>
                 </div>
               </div>
             </div>

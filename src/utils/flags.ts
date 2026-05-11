@@ -1,19 +1,5 @@
-import type { CompetitionCode, Team } from '../types';
-
-const FLAG_BY_TEAM: Record<string, string> = {
-  ARG: 'ar',
-  BRA: 'br',
-  CAN: 'ca',
-  ESP: 'es',
-  FRA: 'fr',
-  GER: 'de',
-  JPN: 'jp',
-  MAR: 'ma',
-  MEX: 'mx',
-  POR: 'pt',
-  SEN: 'sn',
-  USA: 'us',
-};
+import type { CompetitionCode, Match, Team } from '../types';
+import { getWorldCupTeamFlagUrl, isWorldCup2026Match } from './worldCupFilters';
 
 const CLUB_ASSET_BY_COMPETITION: Partial<Record<CompetitionCode, string>> = {
   CL: 'CL',
@@ -45,17 +31,17 @@ const CLUB_SLUG_ALIASES: Record<string, string> = {
   newcastle: 'newcastle',
   nottingham: 'nottingham-forest',
   'nottingham forest': 'nottingham-forest',
-  'monaco': 'as-monaco',
+  monaco: 'as-monaco',
   'olympique lyonnais': 'lyon',
   'olympique marseille': 'marseille',
-  'ol': 'lyon',
-  'om': 'marseille',
+  ol: 'lyon',
+  om: 'marseille',
   'paris sg': 'paris-saint-germain',
   'paris saint germain': 'paris-saint-germain',
   'paris saint-germain': 'paris-saint-germain',
-  'psg': 'paris-saint-germain',
+  psg: 'paris-saint-germain',
   'real madrid cf': 'real-madrid',
-  'sevilla': 'sevilla',
+  sevilla: 'sevilla',
   'séville': 'sevilla',
   strasbourg: 'rc-strasbourg-alsace',
   'tottenham hotspur': 'tottenham',
@@ -64,31 +50,16 @@ const CLUB_SLUG_ALIASES: Record<string, string> = {
   wolves: 'wolves',
 };
 
-const NATIONAL_SLUG_ALIASES: Record<string, string> = {
-  arg: 'argentina-national-team',
-  argentina: 'argentina-national-team',
-  bra: 'brazil-national-team',
-  brazil: 'brazil-national-team',
-  brésil: 'brazil-national-team',
-  can: 'canada-national-team',
-  canada: 'canada-national-team',
-  esp: 'spain-national-team',
-  espagne: 'spain-national-team',
-  fra: 'france-national-team',
-  france: 'france-national-team',
-  ger: 'germany-national-team',
-  germany: 'germany-national-team',
-  allemagne: 'germany-national-team',
-  mar: 'morocco-national-team',
-  maroc: 'morocco-national-team',
-  morocco: 'morocco-national-team',
-  por: 'portuguese-football-federation',
-  portugal: 'portuguese-football-federation',
-  sen: 'senegal-national-team',
-  senegal: 'senegal-national-team',
-  sénégal: 'senegal-national-team',
-  usa: 'usa-national-team',
+type CrestContext = Match | {
+  competitionCode?: CompetitionCode;
+  competitionName?: string;
+  season?: number | null;
+  sourceCompetitionId?: string | null;
+  source?: string | null;
 };
+
+const normalizeContext = (context?: CompetitionCode | CrestContext): CrestContext | undefined =>
+  typeof context === 'string' ? { competitionCode: context } : context;
 
 const slugify = (value: string): string =>
   value
@@ -108,36 +79,29 @@ const teamKeys = (team: Team): string[] => [
   slugify(team.name),
 ];
 
-export const getTeamFlagUrl = (shortName: string): string | null => {
-  const code = FLAG_BY_TEAM[shortName];
-  return code ? `${import.meta.env.BASE_URL}flags/${code}.webp` : null;
-};
-
-export const getTeamCrestCandidates = (team: Team, competitionCode?: CompetitionCode): string[] => {
-  const assetCompetition = competitionCode ? CLUB_ASSET_BY_COMPETITION[competitionCode] : null;
+export const getTeamCrestCandidates = (team: Team, context?: CompetitionCode | CrestContext): string[] => {
+  const matchContext = normalizeContext(context);
+  const isWorldCup = isWorldCup2026Match(matchContext);
+  const assetCompetition = !isWorldCup && matchContext?.competitionCode ? CLUB_ASSET_BY_COMPETITION[matchContext.competitionCode] : null;
   const keys = teamKeys(team);
   const urls: string[] = [];
+
+  const flag = getWorldCupTeamFlagUrl(team, matchContext);
+  if (flag) urls.push(flag);
 
   if (assetCompetition) {
     const clubSlug = keys.map((key) => CLUB_SLUG_ALIASES[key]).find(Boolean) ?? slugify(team.name);
     if (clubSlug) urls.push(`${import.meta.env.BASE_URL}team-assets/clubs/${assetCompetition}/${clubSlug}.png`);
   }
 
-  if (competitionCode === 'WORLD' || team.id.startsWith('t-')) {
-    const nationSlug = keys.map((key) => NATIONAL_SLUG_ALIASES[key] ?? null).find(Boolean);
-    if (nationSlug) urls.push(`${import.meta.env.BASE_URL}team-assets/nations/${nationSlug}.png`);
-  }
-
   if (team.crest) urls.push(team.crest);
   if (/^\d+$/.test(team.id)) urls.push(`https://crests.football-data.org/${team.id}.png`);
-  const flag = competitionCode === 'WORLD' || team.id.startsWith('t-') ? getTeamFlagUrl(team.shortName) : null;
-  if (flag) urls.push(flag);
 
   return Array.from(new Set(urls));
 };
 
-export const getTeamCrestUrl = (team: Team, competitionCode?: CompetitionCode): string | null =>
-  getTeamCrestCandidates(team, competitionCode)[0] ?? null;
+export const getTeamCrestUrl = (team: Team, context?: CompetitionCode | CrestContext): string | null =>
+  getTeamCrestCandidates(team, context)[0] ?? null;
 
 export const getTeamInitials = (name: string, shortName: string): string => {
   if (shortName.length <= 4) return shortName;

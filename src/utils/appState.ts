@@ -6,7 +6,7 @@ import type { ExactPredictionHighlight, Match, Player, Prediction, PredictionRes
 import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
 import { sortLeaderboardEntries } from './leaderboard';
-import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultType } from './points';
+import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, getPredictionResultType } from './points';
 import { isPredictionPublic } from './predictionVisibility';
 
 const STORAGE_KEYS = {
@@ -82,6 +82,11 @@ interface RpcMatchRow {
   minute?: number | null;
   venue?: string | null;
   matchday?: number | null;
+  stage?: string | null;
+  round?: string | null;
+  group_name?: string | null;
+  season?: number | null;
+  source_competition_id?: string | null;
   points_multiplier?: number | null;
   source?: string | null;
   last_updated?: string | null;
@@ -641,7 +646,12 @@ const toRpcMatchPayload = (match: Match) => ({
   minute: match.minute,
   venue: match.venue,
   matchday: match.matchday,
-  points_multiplier: match.pointsMultiplier,
+  stage: match.stage,
+  round: match.round,
+  group_name: match.group,
+  season: match.season,
+  source_competition_id: match.sourceCompetitionId,
+  points_multiplier: getMatchMultiplier(match),
   source: match.source,
   last_updated: match.lastUpdated,
 });
@@ -671,6 +681,11 @@ const fromRpcMatch = (row: RpcMatchRow): Match => ({
   minute: row.minute ?? undefined,
   venue: row.venue ?? undefined,
   matchday: row.matchday ?? undefined,
+  stage: row.stage ?? undefined,
+  round: row.round ?? undefined,
+  group: row.group_name ?? undefined,
+  season: row.season ?? undefined,
+  sourceCompetitionId: row.source_competition_id ?? undefined,
   pointsMultiplier: row.points_multiplier ?? undefined,
   source: row.source ?? undefined,
   lastUpdated: row.last_updated ?? undefined,

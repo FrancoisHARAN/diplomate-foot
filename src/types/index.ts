@@ -1,11 +1,13 @@
 export type MatchStatus = 'upcoming' | 'live' | 'finished';
-export type CompetitionCode = 'FL1' | 'PL' | 'PD' | 'CL' | 'WORLD' | 'TEST';
+export type CompetitionCode = 'FL1' | 'PL' | 'PD' | 'CL' | 'WORLD' | 'WC2026' | 'TEST';
 
 export interface Team {
   id: string;
   name: string;
   shortName: string;
   crest?: string;
+  countryCode?: string;
+  flagUrl?: string;
 }
 
 export interface Match {
@@ -22,6 +24,11 @@ export interface Match {
   minute?: number | null;
   venue?: string;
   matchday?: number | null;
+  stage?: string | null;
+  round?: string | null;
+  group?: string | null;
+  season?: number | null;
+  sourceCompetitionId?: string | null;
   pointsMultiplier?: number;
   source?: string;
   lastUpdated?: string;

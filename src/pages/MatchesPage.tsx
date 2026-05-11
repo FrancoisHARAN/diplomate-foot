@@ -6,6 +6,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { isLiveDisplayMatch } from '../utils/date';
+import { isWorldCup2026Match, shouldShowMatchInApp, shouldShowWorldCup2026Match } from '../utils/worldCupFilters';
 
 type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
 
@@ -13,6 +14,7 @@ const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'all', label: 'Tous' },
   { id: 'live', label: 'Live' },
   { id: 'done', label: 'Terminés' },
+  { id: 'WC2026', label: 'Coupe du Monde 2026' },
   { id: 'CL', label: 'Champions League' },
   { id: 'PD', label: 'Liga' },
   { id: 'FL1', label: 'Ligue 1' },
@@ -64,8 +66,10 @@ const MatchesPage = () => {
 
   const filtered = useMemo(() => {
     const filteredMatches = matches.filter((match) => {
+      if (!shouldShowMatchInApp(match)) return false;
       if (filter === 'live') return isLiveDisplayMatch(match);
       if (filter === 'done') return match.status === 'finished';
+      if (filter === 'WC2026') return isWorldCup2026Match(match) && shouldShowWorldCup2026Match(match);
       if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
       return match.status !== 'finished';
     });

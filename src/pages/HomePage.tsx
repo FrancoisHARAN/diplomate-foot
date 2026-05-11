@@ -11,6 +11,7 @@ import { useRankingMovements } from '../hooks/useRankingMovements';
 import type { ExactPredictionHighlight, Match } from '../types';
 import { buildStandings, countUserPredictions, fetchRecentExactPredictionHighlights, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
+import { getWorldCupTeamDisplayName, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const localDayKey = (date: Date): string =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -42,7 +43,7 @@ const groupHomeMatchesByDay = (matches: Match[]) => {
 
 const selectHomeMatches = (matches: Match[]): Match[] => {
   const playableMatches = matches
-    .filter((match) => match.status !== 'finished')
+    .filter((match) => match.status !== 'finished' && shouldShowMatchInApp(match))
     .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
   const todayKey = localDayKey(new Date());
   const todayMatches = playableMatches.filter((match) => dayKey(match.kickoff) === todayKey);
@@ -60,14 +61,15 @@ const HomePage = () => {
   const nextMatches = selectHomeMatches(matches);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
-  const openMatches = matches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
-  const liveMatches = matches.filter((match) => isLiveDisplayMatch(match)).length;
+  const visibleMatches = matches.filter(shouldShowMatchInApp);
+  const openMatches = visibleMatches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
+  const liveMatches = visibleMatches.filter((match) => isLiveDisplayMatch(match)).length;
 
   useEffect(() => {
     let mounted = true;
 
     void fetchRecentExactPredictionHighlights(matches, predictions, standings).then((items) => {
-      if (mounted) setExactHighlights(items);
+      if (mounted) setExactHighlights(items.filter((item) => shouldShowMatchInApp(item.match)));
     });
 
     return () => {
@@ -208,7 +210,7 @@ const HomePage = () => {
               <article className="exact-history-card" key={highlight.matchId}>
                 <span className="exact-history-badge">Score exact 🎯</span>
                 <strong>
-                  {highlight.match.homeTeam.name} {highlight.match.homeScore} - {highlight.match.awayScore} {highlight.match.awayTeam.name}
+                  {getWorldCupTeamDisplayName(highlight.match.homeTeam, highlight.match)} {highlight.match.homeScore} - {highlight.match.awayScore} {getWorldCupTeamDisplayName(highlight.match.awayTeam, highlight.match)}
                 </strong>
                 <small>{homeDayTitle(highlight.match.kickoff)}</small>
                 <div className="exact-history-winners">

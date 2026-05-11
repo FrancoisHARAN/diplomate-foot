@@ -1,4 +1,5 @@
 import type { Match, PredictionResultType } from '../types';
+import { isFranceWorldCup2026Match } from './worldCupFilters';
 
 export const calculatePredictionPoints = (
   predictedHome: number,
@@ -44,11 +45,12 @@ const hasTeam = (match: Match, terms: string[]): boolean => {
 export const getMatchMultiplier = (match: Match): number => {
   if (typeof match.pointsMultiplier === 'number' && match.pointsMultiplier > 1) return match.pointsMultiplier;
 
+  if (isFranceWorldCup2026Match(match)) return 2;
+
   const competition = `${match.competitionName ?? ''} ${match.matchday ?? ''}`.toLowerCase();
   if (competition.includes('finale') || competition.includes('final')) return 5;
 
   if (hasTeam(match, ['psg', 'paris sg', 'paris saint-germain', 'paris saint germain'])) return 2;
-  if (match.competitionCode === 'WORLD' && hasTeam(match, ['france', 'fra'])) return 2;
 
   return 1;
 };

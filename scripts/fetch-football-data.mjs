@@ -1,11 +1,26 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
+const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
+const WORLD_CUP_2026_SEASON = process.env.WORLD_CUP_2026_SEASON || '2026';
+const WORLD_CUP_2026_DATE_FROM = process.env.WORLD_CUP_2026_DATE_FROM || '2026-06-11';
+const WORLD_CUP_2026_DATE_TO = process.env.WORLD_CUP_2026_DATE_TO || '2026-07-19';
+
 const competitions = [
-  { code: 'FL1', name: 'Ligue 1' },
-  { code: 'PL', name: 'Premier League' },
-  { code: 'PD', name: 'La Liga' },
-  { code: 'CL', name: 'Champions League' },
+  { code: 'FL1', apiCode: 'FL1', name: 'Ligue 1' },
+  { code: 'PL', apiCode: 'PL', name: 'Premier League' },
+  { code: 'PD', apiCode: 'PD', name: 'La Liga' },
+  { code: 'CL', apiCode: 'CL', name: 'Champions League' },
+  {
+    code: 'WC2026',
+    apiCode: WORLD_CUP_2026_API_COMPETITION_ID,
+    name: 'Coupe du Monde 2026',
+    season: WORLD_CUP_2026_SEASON,
+    dateFrom: WORLD_CUP_2026_DATE_FROM,
+    dateTo: WORLD_CUP_2026_DATE_TO,
+    sourceCompetitionId: WORLD_CUP_2026_API_COMPETITION_ID,
+    isWorldCup2026: true,
+  },
 ];
 
 const token = process.env.FOOTBALL_DATA_TOKEN;
@@ -44,6 +59,23 @@ const knownFixtureTeams = {
   },
 };
 
+const countryCodeAliases = new Map([
+  ['ARG', 'ARG'], ['ARGENTINA', 'ARG'], ['ARGENTINE', 'ARG'],
+  ['BRA', 'BRA'], ['BRAZIL', 'BRA'], ['BRASIL', 'BRA'], ['BRÉSIL', 'BRA'],
+  ['CAN', 'CAN'], ['CANADA', 'CAN'],
+  ['DEU', 'GER'], ['GER', 'GER'], ['GERMANY', 'GER'], ['ALLEMAGNE', 'GER'],
+  ['ENG', 'ENG'], ['ENGLAND', 'ENG'], ['ANGLETERRE', 'ENG'],
+  ['ESP', 'ESP'], ['SPAIN', 'ESP'], ['ESPAGNE', 'ESP'],
+  ['FRA', 'FRA'], ['FRANCE', 'FRA'],
+  ['JPN', 'JPN'], ['JAPAN', 'JPN'], ['JAPON', 'JPN'],
+  ['MAR', 'MAR'], ['MOROCCO', 'MAR'], ['MAROC', 'MAR'],
+  ['MEX', 'MEX'], ['MEXICO', 'MEX'], ['MEXIQUE', 'MEX'],
+  ['NED', 'NED'], ['NETHERLANDS', 'NED'], ['PAYS-BAS', 'NED'],
+  ['POR', 'POR'], ['PORTUGAL', 'POR'],
+  ['SEN', 'SEN'], ['SENEGAL', 'SEN'], ['SÉNÉGAL', 'SEN'],
+  ['USA', 'USA'], ['UNITED STATES', 'USA'], ['ÉTATS-UNIS', 'USA'],
+]);
+
 const cleanTeamName = (name) =>
   name
     .replace(/\bFC\b/g, '')
@@ -51,6 +83,25 @@ const cleanTeamName = (name) =>
     .replace(/\bAFC\b/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+
+const normalizeLabel = (value) =>
+  String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .trim();
+
+const countryCodeFor = (team) => {
+  const candidates = [team?.tla, team?.countryCode, team?.shortName, team?.name].filter(Boolean);
+  for (const candidate of candidates) {
+    const direct = String(candidate).toUpperCase();
+    if (countryCodeAliases.has(direct)) return countryCodeAliases.get(direct);
+    const normalized = normalizeLabel(candidate);
+    if (countryCodeAliases.has(normalized)) return countryCodeAliases.get(normalized);
+  }
+  return shortNameFor(team ?? {});
+};
 
 const sleep = (ms) => new Promise((resolve) => {
   setTimeout(resolve, ms);
@@ -98,17 +149,23 @@ const hasUsefulTeam = (team) => {
   return Boolean(team.id || team.crest || (label && label !== 'T'));
 };
 
-const normalizeTeam = (team, knownTeam, fallbackId, fallbackName) => {
+const normalizeTeam = (team, knownTeam, fallbackId, fallbackName, isNationalTeam = false) => {
   const apiTeamIsUseful = hasUsefulTeam(team);
   const sourceTeam = apiTeamIsUseful ? team : knownTeam;
   const displayName = apiTeamIsUseful ? sourceTeam?.shortName ?? sourceTeam?.name : knownTeam?.name;
 
-  return {
+  const normalized = {
     id: String(sourceTeam?.id ?? fallbackId),
     name: cleanTeamName(displayName ?? fallbackName),
     shortName: shortNameFor(sourceTeam ?? {}),
     crest: sourceTeam?.crest ?? undefined,
   };
+
+  if (isNationalTeam) {
+    normalized.countryCode = countryCodeFor(sourceTeam ?? { name: fallbackName });
+  }
+
+  return normalized;
 };
 
 const isPlaceholderTeam = (team) => team.id.startsWith('home-') || team.id.startsWith('away-');
@@ -130,14 +187,21 @@ const readArchivedFinishedMatches = async () => {
 
 const normalizeMatch = (match, competition) => {
   const knownFixture = knownFixtureTeams[String(match.id)] ?? {};
+  const isWorldCup2026 = Boolean(competition.isWorldCup2026);
+  const homeTeam = normalizeTeam(match.homeTeam, knownFixture.homeTeam, `home-${match.id}`, 'Home team', isWorldCup2026);
+  const awayTeam = normalizeTeam(match.awayTeam, knownFixture.awayTeam, `away-${match.id}`, 'Away team', isWorldCup2026);
+  const pointsMultiplier =
+    isWorldCup2026 && [homeTeam.countryCode, awayTeam.countryCode].includes('FRA')
+      ? 2
+      : 1;
 
   return {
     id: `fd-${match.id}`,
     externalId: String(match.id),
     competitionCode: competition.code,
     competitionName: competition.name,
-    homeTeam: normalizeTeam(match.homeTeam, knownFixture.homeTeam, `home-${match.id}`, 'Home team'),
-    awayTeam: normalizeTeam(match.awayTeam, knownFixture.awayTeam, `away-${match.id}`, 'Away team'),
+    homeTeam,
+    awayTeam,
     kickoff: match.utcDate,
     status: statusMap[match.status] ?? 'upcoming',
     homeScore: match.score?.fullTime?.home ?? match.score?.halfTime?.home ?? undefined,
@@ -145,15 +209,22 @@ const normalizeMatch = (match, competition) => {
     minute: typeof match.minute === 'number' ? match.minute : null,
     venue: match.venue ?? undefined,
     matchday: match.matchday ?? null,
+    stage: match.stage ?? null,
+    round: match.stage ?? match.group ?? null,
+    group: match.group ?? null,
+    season: competition.season ? Number(competition.season) : undefined,
+    sourceCompetitionId: competition.sourceCompetitionId ?? competition.apiCode ?? competition.code,
+    pointsMultiplier,
     source: 'football-data.org',
     lastUpdated: match.lastUpdated ?? undefined,
   };
 };
 
 const fetchCompetition = async (competition) => {
-  const url = new URL(`https://api.football-data.org/v4/competitions/${competition.code}/matches`);
-  url.searchParams.set('dateFrom', dateFrom);
-  url.searchParams.set('dateTo', dateTo);
+  const url = new URL(`https://api.football-data.org/v4/competitions/${competition.apiCode ?? competition.code}/matches`);
+  url.searchParams.set('dateFrom', competition.dateFrom ?? dateFrom);
+  url.searchParams.set('dateTo', competition.dateTo ?? dateTo);
+  if (competition.season) url.searchParams.set('season', competition.season);
 
   const response = await fetch(url, {
     headers: { 'X-Auth-Token': token },

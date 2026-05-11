@@ -3,6 +3,7 @@ import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
 import { canEditPrediction, formatKickoffDay, formatKickoffTime, formatLastUpdated, getMinutesBeforeLock, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode } from '../utils/worldCupFilters';
 
 interface MatchCardProps {
   match: Match;
@@ -31,9 +32,14 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const editable = canEditPrediction(match);
   const state = getMatchState(match, editable);
   const multiplier = getMatchMultiplier(match);
+  const boostLabel = getWorldCupBoostLabel(match, multiplier);
   const updatedAt = formatLastUpdated(match.lastUpdated);
   const isLiveDisplay = isLiveDisplayMatch(match);
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+  const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
+  const awayName = getWorldCupTeamDisplayName(match.awayTeam, match);
+  const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
+  const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
 
   const scoreLabel =
     (match.status === 'finished' || isLiveDisplay) && hasScore
@@ -84,7 +90,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
           {multiplier > 1 ? (
             <span className="booster-pill">
               <strong>Boost x{multiplier}</strong>
-              <small>Points x{multiplier}</small>
+              <small>{boostLabel}</small>
             </span>
           ) : null}
         </div>
@@ -97,15 +103,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
 
       <div className="match-teams">
         <span className="team-block">
-          <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} />
-          <strong>{match.homeTeam.name}</strong>
-          <small>{match.homeTeam.shortName}</small>
+          <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
+          <strong>{homeName}</strong>
+          <small>{homeCode}</small>
         </span>
         <span className="versus-pill">{scoreLabel}</span>
         <span className="team-block">
-          <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
-          <strong>{match.awayTeam.name}</strong>
-          <small>{match.awayTeam.shortName}</small>
+          <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
+          <strong>{awayName}</strong>
+          <small>{awayCode}</small>
         </span>
       </div>
 

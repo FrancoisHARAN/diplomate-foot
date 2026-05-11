@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react';
-import type { CompetitionCode, Team } from '../types';
+import type { CompetitionCode, Match, Team } from '../types';
 import { getTeamCrestCandidates, getTeamInitials } from '../utils/flags';
 
 interface TeamBadgeProps {
   team: Team;
   competitionCode?: CompetitionCode;
+  match?: Match;
   className?: string;
 }
 
-const TeamBadge = ({ team, competitionCode, className = '' }: TeamBadgeProps) => {
+const TeamBadge = ({ team, competitionCode, match, className = '' }: TeamBadgeProps) => {
   const [index, setIndex] = useState(0);
-  const crests = getTeamCrestCandidates(team, competitionCode);
+  const crests = getTeamCrestCandidates(team, match ?? competitionCode);
   const crest = crests[index] ?? null;
 
   useEffect(() => {
     setIndex(0);
-  }, [team.id, competitionCode]);
+  }, [team.id, competitionCode, match?.id]);
 
   if (crest) {
     return (
