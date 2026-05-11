@@ -36,6 +36,12 @@ const resultClassName: Record<PredictionResultType, string> = {
   pending: 'pending',
 };
 
+const getResultSummary = (resultType: PredictionResultType, points?: number | null): string => {
+  if (resultType === 'pending') return 'En attente - prono verrouillé';
+  if (resultType === 'lost') return 'Pronostic perdu';
+  return `+${points ?? 0} pts - ${resultLabels[resultType]}`;
+};
+
 const filterPrediction = (item: PublicPrediction, filter: ProfileFilter): boolean => {
   if (filter === 'all') return true;
   if (filter === 'finished') return item.match.status === 'finished';
@@ -110,11 +116,12 @@ const PlayerProfilePage = () => {
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block public-profile-history">
         <div className="section-heading">
           <div>
             <p className="eyebrow">Pronostics publics</p>
             <h2>Historique visible</h2>
+            <p className="section-subtitle">Seuls les pronos des matchs fermés, live ou terminés sont visibles.</p>
           </div>
         </div>
 
@@ -138,17 +145,23 @@ const PlayerProfilePage = () => {
                   </span>
                   <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} />
                 </div>
-                <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>
-                <div className="public-prono-details">
-                  <span>Prono : {prediction.homeScore} - {prediction.awayScore}</span>
+                <div className="public-prono-outcome">
+                  <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>
+                </div>
+                <div className="public-prono-details" aria-label="Détail du pronostic">
+                  <span className="public-detail-item">
+                    <small>Prono</small>
+                    <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
+                  </span>
                   {match.status === 'finished' ? (
-                    <>
-                      <span>Score final : {match.homeScore} - {match.awayScore}</span>
-                      <strong>+{points ?? 0} pts — {resultLabels[resultType]}</strong>
-                    </>
-                  ) : (
-                    <strong>Points en attente · pronostic verrouillé</strong>
-                  )}
+                    <span className="public-detail-item">
+                      <small>Score final</small>
+                      <strong>{match.homeScore} - {match.awayScore}</strong>
+                    </span>
+                  ) : null}
+                </div>
+                <div className={`public-result-summary ${resultClassName[resultType]}`}>
+                  {getResultSummary(resultType, points)}
                 </div>
               </article>
             ))

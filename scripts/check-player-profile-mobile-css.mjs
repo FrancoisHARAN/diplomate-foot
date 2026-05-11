@@ -43,10 +43,19 @@ const requireSource = (snippet) => {
   }
 };
 
+const forbidSource = (snippet) => {
+  if (pageSource.includes(snippet)) {
+    throw new Error(`PlayerProfilePage still contains forbidden markup: ${snippet}`);
+  }
+};
+
 requireSource('className="filter-row public-profile-filters"');
 requireSource('className="social-prono-row public-prono-row"');
 requireSource('className="social-prono-teams"');
 requireSource('className="public-prono-details"');
+requireSource('className="public-detail-item"');
+requireSource('public-result-summary');
+forbidSource('+{points ?? 0} pts');
 
 requireDeclarations('.app-main', [
   'width: 100%',
@@ -78,7 +87,7 @@ requireDeclarations('.public-profile-filters', [
   'max-width: 100%',
   'min-width: 0',
   'margin-inline: 0',
-  'padding-inline: 0',
+  'box-sizing: border-box',
 ]);
 
 requireDeclarations('.public-prono-row', [
@@ -124,18 +133,25 @@ requireDeclarations('.public-result-badge', [
 ]);
 
 requireDeclarations('.public-prono-details', [
+  'grid-template-columns: repeat(2, minmax(0, 1fr))',
   'width: 100%',
   'max-width: 100%',
   'min-width: 0',
   'overflow: hidden',
 ]);
 
-requireDeclarations('.public-prono-details span', [
+requireDeclarations('.public-detail-item', [
+  'display: grid',
   'min-width: 0',
   'overflow-wrap: anywhere',
 ]);
 
-requireDeclarations('.public-prono-details strong', [
+requireDeclarations('.public-detail-item strong', [
+  'min-width: 0',
+  'overflow-wrap: anywhere',
+]);
+
+requireDeclarations('.public-result-summary', [
   'min-width: 0',
   'overflow-wrap: anywhere',
 ]);
