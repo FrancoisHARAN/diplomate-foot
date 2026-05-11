@@ -131,10 +131,13 @@ small {
 }
 
 .app-main {
+  width: 100%;
+  max-width: 100%;
   min-height: calc(100vh - 152px);
   min-height: calc(100dvh - 152px);
   padding: 0.9rem 0.85rem calc(7.25rem + env(safe-area-inset-bottom));
   overflow: visible;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -241,6 +244,9 @@ small {
 .rules-grid {
   display: grid;
   gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .app-header {
@@ -648,6 +654,9 @@ small {
 .section-block,
 .prediction-panel,
 .auth-panel {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
   padding: 0.85rem;
   background: #fff;
 }
@@ -780,12 +789,16 @@ small {
 .filter-row {
   display: flex;
   gap: 0.45rem;
+  width: calc(100% + 1.7rem);
+  max-width: calc(100% + 1.7rem);
+  min-width: 0;
   margin-inline: -0.85rem;
   padding: 0.1rem 0.85rem 0.2rem;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -2048,6 +2061,19 @@ button.action-row {
 
 .public-profile-card {
   gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.public-profile-card > div {
+  min-width: 0;
+}
+
+.public-profile-card h1,
+.public-profile-card p {
+  overflow-wrap: anywhere;
 }
 
 .public-profile-stats {
@@ -2061,6 +2087,7 @@ button.action-row {
 .public-profile-stats span {
   display: grid;
   gap: 0.12rem;
+  min-width: 0;
   min-height: 3.6rem;
   padding: 0.55rem;
   border: 1px solid var(--line);
@@ -2069,6 +2096,7 @@ button.action-row {
   background: #fff;
   font-size: 0.72rem;
   font-weight: 780;
+  overflow-wrap: anywhere;
 }
 
 .public-profile-stats strong {
@@ -2097,12 +2125,27 @@ button.action-row {
   background: #fff;
 }
 
+.public-prono-row {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .public-profile-filters {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: 0;
   margin-bottom: 0.7rem;
+  padding-inline: 0;
+  box-sizing: border-box;
 }
 
 .public-result-badge {
   justify-self: start;
+  max-width: 100%;
   padding: 0.32rem 0.56rem;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -2110,7 +2153,10 @@ button.action-row {
   background: #fff;
   font-size: 0.74rem;
   font-weight: 950;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
   text-transform: uppercase;
+  white-space: normal;
 }
 
 .public-result-badge.exact,
@@ -2138,7 +2184,6 @@ button.action-row {
   border-color: var(--line);
 }
 
-.social-prono-teams,
 .social-prono-score {
   display: flex;
   align-items: center;
@@ -2147,9 +2192,48 @@ button.action-row {
   min-width: 0;
 }
 
+.social-prono-teams {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.social-prono-teams .team-crest,
+.social-prono-teams .club-badge {
+  width: 2.35rem;
+  height: 2.35rem;
+}
+
 .social-prono-teams span {
+  display: grid;
+  gap: 0.16rem;
+  max-width: 100%;
   min-width: 0;
   text-align: center;
+}
+
+.social-prono-teams strong,
+.social-prono-teams small {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.social-prono-teams strong {
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.12;
+}
+
+.social-prono-teams small {
+  font-size: 0.72rem;
+  font-weight: 760;
+  line-height: 1.24;
 }
 
 .social-prono-score strong {
@@ -2159,18 +2243,28 @@ button.action-row {
 .public-prono-details {
   display: grid;
   gap: 0.32rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 0.62rem;
+  overflow: hidden;
   border-radius: 8px;
   background: var(--blue-soft);
 }
 
 .public-prono-details span {
+  min-width: 0;
   color: var(--text);
   font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .public-prono-details strong {
+  min-width: 0;
   color: var(--blue);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .exact-history-section {

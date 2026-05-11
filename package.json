@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "fetch:football": "node scripts/fetch-football-data.mjs",
+    "check:profile-mobile": "node scripts/check-player-profile-mobile-css.mjs",
     "check:points": "node scripts/check-rules-and-points.mjs",
     "preview": "vite preview",
     "lint": "eslint ."
