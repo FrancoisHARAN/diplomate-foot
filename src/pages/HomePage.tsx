@@ -9,8 +9,9 @@ import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useRankingMovements } from '../hooks/useRankingMovements';
 import type { ExactPredictionHighlight, Match } from '../types';
-import { buildStandings, countUserPredictions, fetchRecentExactPredictionHighlights, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
+import { buildStandings, fetchRecentExactPredictionHighlights, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
+import { selectExactPredictionsForHomePage } from '../utils/exactPredictions';
 import { getWorldCupTeamDisplayName, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const localDayKey = (date: Date): string =>
@@ -69,7 +70,8 @@ const HomePage = () => {
     let mounted = true;
 
     void fetchRecentExactPredictionHighlights(matches, predictions, standings).then((items) => {
-      if (mounted) setExactHighlights(items.filter((item) => shouldShowMatchInApp(item.match)));
+      const visibleItems = items.filter((item) => shouldShowMatchInApp(item.match));
+      if (mounted) setExactHighlights(selectExactPredictionsForHomePage(visibleItems));
     });
 
     return () => {
@@ -164,38 +166,6 @@ const HomePage = () => {
         <Link className="btn secondary home-match-cta" to="/matchs">Voir tous les matchs</Link>
       </section>
 
-      <section className="account-panel">
-        {player ? (
-          <>
-            <PlayerAvatar nickname={player.nickname} avatarUrl={player.avatarUrl} size="large" />
-            <div>
-              <h2>{player.nickname}</h2>
-              <p>{countUserPredictions()} pronostics enregistrés · {getUserPointsMock(matches)} pts</p>
-            </div>
-            <Link className="btn primary" to="/mes-pronos">Mes pronos</Link>
-          </>
-        ) : (
-          <>
-            <PlayerAvatar nickname="?" size="large" />
-            <div>
-              <h2>Prêt à jouer ?</h2>
-              <p>Demande ton code au comptoir et rejoins la ligue du bar.</p>
-            </div>
-            <Link className="btn primary" to="/connexion">Connexion</Link>
-          </>
-        )}
-      </section>
-
-      <section className="section-block prize-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">À gagner</p>
-            <h2>Lots du podium</h2>
-          </div>
-        </div>
-        <PrizePanel />
-      </section>
-
       <section className="section-block exact-history-section">
         <div className="section-heading">
           <div>
@@ -224,10 +194,20 @@ const HomePage = () => {
             ))
           ) : (
             <div className="empty-state inline exact-history-empty">
-              <strong>Pas encore de score exact trouvé.</strong>
+              <strong>Aucun score exact pour le moment.</strong>
             </div>
           )}
         </div>
+      </section>
+
+      <section className="section-block prize-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">À gagner</p>
+            <h2>Lots du podium</h2>
+          </div>
+        </div>
+        <PrizePanel />
       </section>
     </div>
   );
