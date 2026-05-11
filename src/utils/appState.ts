@@ -88,9 +88,18 @@ interface RpcMatchRow {
 }
 
 interface RpcPublicPredictionRow extends RpcPredictionRow {
+  prediction_id?: string | null;
+  predicted_home_score?: number | null;
+  predicted_away_score?: number | null;
+  final_home_score?: number | null;
+  final_away_score?: number | null;
+  created_at?: string | null;
   points?: number | null;
   match?: RpcMatchRow | null;
   result_type?: PredictionResultType | null;
+  is_finished?: boolean | null;
+  is_live?: boolean | null;
+  is_locked?: boolean | null;
 }
 
 interface RpcPublicPlayerProfile {
@@ -98,8 +107,10 @@ interface RpcPublicPlayerProfile {
     two_point_results?: number | null;
     one_point_results?: number | null;
     first_prediction_at?: string | null;
+    visible_predictions_count?: number | null;
   };
   predictions: RpcPublicPredictionRow[];
+  visible_predictions_count?: number | null;
 }
 
 interface RpcExactPredictionWinner {
@@ -676,17 +687,46 @@ export const fetchCloudMatches = async (): Promise<Match[]> => {
   }
 };
 
-const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): PublicPrediction | null => {
-  const match = row.match ? fromRpcMatch(row.match) : matches.find((item) => item.id === row.match_id);
-  if (!match) return null;
+const normalizeRpcPublicPrediction = (row: RpcPublicPredictionRow): RpcPredictionRow | null => {
+  const homeScore = row.home_score ?? row.predicted_home_score;
+  const awayScore = row.away_score ?? row.predicted_away_score;
+
+  if (typeof homeScore !== 'number' || typeof awayScore !== 'number') return null;
 
   return {
-    id: row.id ?? `public-${row.player_id}-${row.match_id}`,
+    id: row.id ?? row.prediction_id ?? null,
+    player_id: row.player_id,
+    match_id: row.match_id,
+    home_score: homeScore,
+    away_score: awayScore,
+    points: row.points,
+    updated_at: row.updated_at,
+  };
+};
+
+const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): PublicPrediction | null => {
+  const normalizedPrediction = normalizeRpcPublicPrediction(row);
+  if (!normalizedPrediction) return null;
+
+  const rpcMatch = row.match
+    ? {
+      ...row.match,
+      home_score: row.match.home_score ?? row.final_home_score,
+      away_score: row.match.away_score ?? row.final_away_score,
+    }
+    : null;
+  const match = rpcMatch ? fromRpcMatch(rpcMatch) : matches.find((item) => item.id === row.match_id);
+  if (!match) return null;
+
+  const isFinished = row.is_finished ?? match.status === 'finished';
+
+  return {
+    id: row.id ?? row.prediction_id ?? `public-${row.player_id}-${row.match_id}`,
     match,
-    prediction: fromRpcPrediction(row),
-    points: match.status === 'finished' ? row.points ?? 0 : null,
-    resultType: match.status === 'finished'
-      ? row.result_type ?? getPredictionResultType(row.home_score, row.away_score, match.homeScore, match.awayScore)
+    prediction: fromRpcPrediction(normalizedPrediction),
+    points: isFinished ? row.points ?? calculatePredictionPointsForMatch(normalizedPrediction.home_score, normalizedPrediction.away_score, match) : null,
+    resultType: isFinished
+      ? row.result_type ?? getPredictionResultType(normalizedPrediction.home_score, normalizedPrediction.away_score, match.homeScore, match.awayScore)
       : 'pending',
   };
 };

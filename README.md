@@ -114,6 +114,42 @@ La route `/joueurs/:playerId` utilise `app_get_public_player_profile` quand Supa
 - les matchs termines affichent le score final, les points et le type de resultat;
 - les matchs live/verrouilles affichent le prono avec les points en attente.
 
+Si le profil affiche un joueur avec des points mais aucun prono visible, verifier d'abord que `supabase/schema.sql` a bien ete reexecute dans Supabase SQL Editor. Une erreur `PGRST202` sur `app_get_public_player_profile` signifie que la fonction RPC n'est pas disponible dans le cache PostgREST: relancer le schema complet, puis recharger le site.
+
+## Debug profils joueurs
+
+Ces requetes aident a comparer les points du classement, les pronostics bruts et les pronostics publics renvoyes par la RPC.
+
+```sql
+-- A. Verifier le joueur
+select *
+from public.app_rpc_players
+where id = '2ac7ee88-fbe2-4217-914b-e00aa9bae8be';
+
+-- B. Verifier ses pronostics bruts
+select *
+from public.app_rpc_predictions
+where player_id = '2ac7ee88-fbe2-4217-914b-e00aa9bae8be'
+order by created_at desc;
+
+-- C. Verifier ses pronostics avec matchs
+select
+  p.*,
+  m.*
+from public.app_rpc_predictions p
+left join public.app_rpc_matches m on m.id = p.match_id
+where p.player_id = '2ac7ee88-fbe2-4217-914b-e00aa9bae8be'
+order by m.kickoff desc nulls last, p.created_at desc;
+
+-- D. Tester la RPC profil
+select *
+from public.app_get_public_player_profile('2ac7ee88-fbe2-4217-914b-e00aa9bae8be');
+
+-- E. Tester le classement
+select *
+from public.app_get_leaderboard();
+```
+
 ## Historique hebdomadaire du classement
 
 Le classement live peut bouger pendant la semaine. Pour suivre l'evolution dans le temps, Supabase peut figer un snapshot hebdomadaire du classement.

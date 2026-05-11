@@ -85,6 +85,7 @@ create table if not exists public.app_rpc_predictions (
   match_id text not null,
   home_score integer not null check (home_score between 0 and 30),
   away_score integer not null check (away_score between 0 and 30),
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique(player_id, match_id)
 );
@@ -123,6 +124,9 @@ alter table public.app_rpc_sessions enable row level security;
 alter table public.app_rpc_matches enable row level security;
 alter table public.app_rpc_predictions enable row level security;
 alter table public.app_rpc_leaderboard_snapshots enable row level security;
+
+alter table public.app_rpc_predictions
+  add column if not exists created_at timestamptz not null default now();
 
 revoke all on public.app_rpc_players from anon, authenticated;
 revoke all on public.app_rpc_player_codes from anon, authenticated;
@@ -232,7 +236,17 @@ returns boolean
 language sql
 stable
 as $$
-  select lower(coalesce(p_status, '')) in ('live', 'finished', 'locked')
+  select lower(coalesce(p_status, '')) in (
+      'live',
+      'finished',
+      'locked',
+      'closed',
+      'in_progress',
+      'in-progress',
+      'inplay',
+      'in_play',
+      'started'
+    )
     or p_kickoff <= now() + interval '1 hour';
 $$;
 
@@ -485,24 +499,60 @@ as $$
       'one_point_results', coalesce(lb.one_point_results, 0),
       'correct_results', coalesce(lb.correct_results, 0),
       'first_prediction_at', lb.first_prediction_at,
-      'rank', lb.rank
+      'rank', lb.rank,
+      'visible_predictions_count', coalesce(
+        (
+          select count(*)::int
+          from public.app_rpc_predictions pr_count
+          join public.app_rpc_matches m_count on m_count.id = pr_count.match_id
+          where pr_count.player_id = p.id
+            and public.app_private_prediction_is_public(m_count.status, m_count.kickoff)
+        ),
+        0
+      )
+    ),
+    'visible_predictions_count', coalesce(
+      (
+        select count(*)::int
+        from public.app_rpc_predictions pr_count
+        join public.app_rpc_matches m_count on m_count.id = pr_count.match_id
+        where pr_count.player_id = p.id
+          and public.app_private_prediction_is_public(m_count.status, m_count.kickoff)
+      ),
+      0
     ),
     'predictions', coalesce(
       (
         select jsonb_agg(jsonb_build_object(
           'id', pr.id,
+          'prediction_id', pr.id,
           'player_id', pr.player_id,
           'match_id', pr.match_id,
           'home_score', pr.home_score,
           'away_score', pr.away_score,
-          'points', case when m.status = 'finished' then coalesce(sp.points, 0) else null end,
+          'predicted_home_score', pr.home_score,
+          'predicted_away_score', pr.away_score,
+          'final_home_score', m.home_score,
+          'final_away_score', m.away_score,
+          'points', case
+            when lower(coalesce(m.status, '')) = 'finished'
+              or (m.home_score is not null and m.away_score is not null and m.kickoff <= now())
+            then coalesce(sp.points, app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, m.points_multiplier), 0)
+            else null
+          end,
           'result_type', case
-            when m.status <> 'finished' then 'pending'
+            when lower(coalesce(m.status, '')) <> 'finished'
+              and not (m.home_score is not null and m.away_score is not null and m.kickoff <= now()) then 'pending'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
             else 'lost'
           end,
+          'is_finished', lower(coalesce(m.status, '')) = 'finished'
+            or (m.home_score is not null and m.away_score is not null and m.kickoff <= now()),
+          'is_live', lower(coalesce(m.status, '')) in ('live', 'in_progress', 'in-progress', 'inplay', 'in_play'),
+          'is_locked', public.app_private_prediction_is_public(m.status, m.kickoff),
+          'created_at', pr.created_at,
           'updated_at', pr.updated_at,
           'match', jsonb_build_object(
             'id', m.id,
@@ -1048,3 +1098,5 @@ grant execute on function public.app_save_prediction(uuid, text, int, int, text)
 grant execute on function public.app_sync_local_predictions(uuid, jsonb) to anon;
 grant execute on function public.app_update_player_avatar(uuid, text) to anon;
 grant execute on function public.app_sync_matches(jsonb) to anon;
+
+select pg_notify('pgrst', 'reload schema');
