@@ -13,6 +13,7 @@ import type { ExactPredictionHighlight, FlashChallenge, FlashPrediction, Match, 
 import { buildStandings, fetchActiveFlashChallenges, fetchPlayerFlashPredictions, fetchRecentExactPredictionHighlights, fetchWorldCupWinnerPrediction, getFlashPredictionForChallenge, getPredictionsForPlayer, getStoredFlashPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock, saveFlashPrediction, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { selectExactPredictionsForHomePage } from '../utils/exactPredictions';
+import { shouldShowFlashOnHome } from '../utils/flashChallenges';
 import { getWorldCupTeamDisplayName, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const localDayKey = (date: Date): string =>
@@ -69,6 +70,11 @@ const HomePage = () => {
   const visibleMatches = matches.filter(shouldShowMatchInApp);
   const openMatches = visibleMatches.filter((match) => match.status === 'upcoming' && canEditPrediction(match)).length;
   const liveMatches = visibleMatches.filter((match) => isLiveDisplayMatch(match)).length;
+  const getFlashPrediction = (challenge: FlashChallenge) =>
+    flashPredictions.find((item) => item.flashId === challenge.id) ?? getFlashPredictionForChallenge(challenge.id, player?.id);
+  const unansweredFlashChallenges = player
+    ? flashChallenges.filter((challenge) => shouldShowFlashOnHome(challenge, player.id, getFlashPrediction(challenge)))
+    : [];
 
   useEffect(() => {
     let mounted = true;
@@ -161,14 +167,14 @@ const HomePage = () => {
         </section>
       ) : null}
 
-      {flashChallenges.length > 0 ? (
+      {unansweredFlashChallenges.length > 0 ? (
         <section className="flash-home-list">
-          {flashChallenges.map((challenge) => (
+          {unansweredFlashChallenges.map((challenge) => (
             <FlashChallengeCard
               key={challenge.id}
               challenge={challenge}
               player={player}
-              prediction={flashPredictions.find((item) => item.flashId === challenge.id) ?? getFlashPredictionForChallenge(challenge.id, player?.id)}
+              prediction={getFlashPrediction(challenge)}
               onAnswer={handleFlashAnswer}
             />
           ))}

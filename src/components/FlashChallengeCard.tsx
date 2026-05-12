@@ -1,7 +1,15 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import DeadlineBadge from './DeadlineBadge';
 import type { CurrentPlayer } from '../utils/appState';
 import type { FlashChallenge, FlashPrediction } from '../types';
-import { calculateFlashPredictionPoints, getFlashOption, isFlashChallengeOpen } from '../utils/flashChallenges';
+import {
+  calculateFlashPredictionPoints,
+  canEditFlashPrediction,
+  getFlashOption,
+  getShortFlashAnswerLabel,
+  getShortFlashOptionLabel,
+} from '../utils/flashChallenges';
 
 interface FlashChallengeCardProps {
   challenge: FlashChallenge;
@@ -11,25 +19,43 @@ interface FlashChallengeCardProps {
   compact?: boolean;
 }
 
-const formatFlashDeadline = (iso: string): string =>
-  new Intl.DateTimeFormat('fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(iso));
-
 const FlashChallengeCard = ({ challenge, player, prediction, onAnswer, compact = false }: FlashChallengeCardProps) => {
-  const open = isFlashChallengeOpen(challenge);
+  const open = canEditFlashPrediction(challenge);
   const selectedOption = getFlashOption(challenge, prediction?.optionId);
+  const resultOption = getFlashOption(challenge, challenge.resultOptionId);
   const flashPoints = calculateFlashPredictionPoints(challenge, prediction);
+  const [draftOptionId, setDraftOptionId] = useState(prediction?.optionId ?? '');
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [saveError, setSaveError] = useState('');
+
+  useEffect(() => {
+    setDraftOptionId(prediction?.optionId ?? '');
+    setSaveError('');
+  }, [prediction?.optionId]);
+
+  const canSave = Boolean(player && onAnswer && open && draftOptionId && draftOptionId !== prediction?.optionId);
+  const statusLabel = open ? 'Modifiable' : challenge.status === 'resolved' ? 'Terminé' : 'En attente';
+  const closedLabel = challenge.status === 'resolved' ? 'Terminé' : 'Fermé';
+  const resultLabel = useMemo(() => getShortFlashAnswerLabel(resultOption), [resultOption]);
+
+  const save = async () => {
+    if (!canSave) return;
+    setSaveState('saving');
+    setSaveError('');
+    try {
+      await onAnswer?.(challenge, draftOptionId);
+      setSaveState('saved');
+    } catch (error) {
+      setSaveState('idle');
+      setSaveError(error instanceof Error ? error.message : 'Enregistrement impossible.');
+    }
+  };
 
   return (
-    <article className={`flash-card ${compact ? 'compact' : ''} ${challenge.status}`}>
+    <article className={`flash-card ${compact ? 'compact' : ''} ${challenge.status} ${open ? 'is-open' : 'is-locked'}`}>
       <div className="flash-card-header">
-        <span className="flash-badge">⚡ Flash</span>
-        <small>{open ? `Ferme ${formatFlashDeadline(challenge.closesAt)}` : challenge.status === 'resolved' ? 'Résolu' : 'Fermé'}</small>
+        <span className="flash-badge">Flash</span>
+        <DeadlineBadge deadline={challenge.closesAt} closed={!open} closedLabel={closedLabel} label="Ferme dans" />
       </div>
 
       <div className="flash-card-copy">
@@ -45,35 +71,58 @@ const FlashChallengeCard = ({ challenge, player, prediction, onAnswer, compact =
         </div>
       ) : (
         <>
-          <div className="flash-options" role="group" aria-label={challenge.title}>
-            {challenge.options.map((option) => {
-              const selected = prediction?.optionId === option.id;
-              const winner = challenge.resultOptionId === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  className={`flash-option ${selected ? 'selected' : ''} ${winner && challenge.status === 'resolved' ? 'winner' : ''}`}
-                  disabled={!open || !onAnswer}
-                  onClick={() => void onAnswer?.(challenge, option.id)}
-                >
-                  <span>{option.label}</span>
-                  <strong>+{option.pointsIfCorrect} pts</strong>
-                </button>
-              );
-            })}
+          <div className="flash-summary">
+            <span className={`flash-state ${open ? 'open' : challenge.status}`}>{statusLabel}</span>
+            {prediction ? (
+              <p>
+                Ta réponse : <strong>{getShortFlashAnswerLabel(selectedOption)}</strong>
+              </p>
+            ) : (
+              <p>Choisis une réponse avant la fermeture.</p>
+            )}
+            {challenge.status === 'resolved' ? (
+              <p>
+                Résultat : <strong>{resultLabel}</strong>
+              </p>
+            ) : !open && prediction ? (
+              <p>Résultat en attente.</p>
+            ) : null}
+            {flashPoints !== null ? (
+              flashPoints > 0 ? <strong className="flash-result won">+{flashPoints} pts</strong> : <span className="flash-result lost">Perdu</span>
+            ) : null}
           </div>
 
-          {prediction ? (
-            <p className="flash-response">
-              Réponse enregistrée : <strong>{selectedOption?.label ?? 'Option'}</strong>
-              {flashPoints === null ? ' · points en attente' : flashPoints > 0 ? ` · +${flashPoints} pts` : ' · perdu'}
-            </p>
-          ) : open ? (
-            <p className="flash-response muted">Choisis une réponse avant la fermeture du flash.</p>
-          ) : (
-            <p className="flash-response muted">Flash fermé.</p>
-          )}
+          {open && onAnswer ? (
+            <>
+              <div className="flash-options" role="group" aria-label={challenge.title}>
+                {challenge.options.map((option) => {
+                  const selected = draftOptionId === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`flash-option ${selected ? 'selected' : ''}`}
+                      onClick={() => {
+                        setDraftOptionId(option.id);
+                        setSaveState('idle');
+                        setSaveError('');
+                      }}
+                    >
+                      <span>{getShortFlashOptionLabel(option)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="flash-hint">Points accordés uniquement si la prédiction est correcte.</p>
+              <div className="flash-save-row">
+                <button className="btn primary" type="button" disabled={!canSave || saveState === 'saving'} onClick={() => void save()}>
+                  {saveState === 'saving' ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+                {saveState === 'saved' ? <span className="flash-confirmation">Réponse enregistrée.</span> : null}
+              </div>
+              {saveError ? <p className="form-error">{saveError}</p> : null}
+            </>
+          ) : null}
         </>
       )}
     </article>

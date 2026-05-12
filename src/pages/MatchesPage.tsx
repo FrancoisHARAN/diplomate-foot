@@ -97,7 +97,7 @@ const MatchesPage = () => {
       <Link className="tournament-entry-card" to="/tournoi">
         <span className="mini-badge">Coupe du Monde 2026</span>
         <strong>Arbre du tournoi</strong>
-        <p>Groupes, classements et phases finales de la Coupe du Monde.</p>
+        <p>Groupes et phases finales.</p>
         <span className="mini-link">Voir le tournoi</span>
       </Link>
 

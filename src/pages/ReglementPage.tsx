@@ -38,6 +38,14 @@ const prizes = [
   '3e : un saucisson',
 ];
 
+const boosts = [
+  'France : x2',
+  'Huitièmes : x2',
+  'Quarts : x3',
+  'Demies : x4',
+  'Finale : x5',
+];
+
 const ReglementPage = () => (
   <div className="screen-stack rules-page">
     <section className="page-hero rules-hero">
@@ -90,22 +98,20 @@ const ReglementPage = () => (
       <article className="rules-info-card boost-card">
         <span>03</span>
         <h2>Boosts</h2>
-        <p>Certains matchs rapportent plus de points. Le boost le plus fort s’applique, les boosts ne se cumulent pas.</p>
+        <p>Certains matchs multiplient les points.</p>
         <ul>
-          <li>Matchs de la France : x2</li>
-          <li>Huitièmes : x2</li>
-          <li>Quarts : x3</li>
-          <li>Demi-finales : x4</li>
-          <li>Finale : x5</li>
+          {boosts.map((boost) => (
+            <li key={boost}>{boost}</li>
+          ))}
         </ul>
-        <strong>France en demi-finale : x4, pas x8.</strong>
+        <strong>Les boosts ne se cumulent pas : le plus fort s’applique.</strong>
       </article>
 
       <article className="rules-info-card">
         <span>04</span>
         <h2>Paris flash</h2>
-        <p>Des défis flash peuvent apparaître pendant quelques jours sur les gros matchs.</p>
-        <strong>Ils se ferment au coup d’envoi et rapportent des points bonus si ta réponse est correcte.</strong>
+        <p>Des défis flash peuvent apparaître sur certains gros matchs.</p>
+        <strong>Ils ferment au coup d’envoi. Points accordés uniquement si ta réponse est correcte.</strong>
       </article>
     </section>
 
@@ -113,14 +119,14 @@ const ReglementPage = () => (
       <article className="rules-info-card">
         <span>05</span>
         <h2>Prédiction champion du monde</h2>
-        <p>Dans ton compte, classe tes 3 favoris pour devenir champion du monde.</p>
-        <strong>Champion placé 1er : 20 pts. Placé 2e : 15 pts. Placé 3e : 10 pts.</strong>
+        <p>Classe tes 3 favoris.</p>
+        <strong>Si le champion est dans ton top 3 : 20, 15 ou 10 pts.</strong>
       </article>
 
       <article className="rules-info-card prizes-card">
         <span>06</span>
         <h2>Classement et lots</h2>
-        <p>Le classement est mis à jour avec les points gagnés sur les matchs terminés.</p>
+        <p>Le classement suit les points validés.</p>
         <ul>
           {prizes.map((prize) => (
             <li key={prize}>{prize}</li>

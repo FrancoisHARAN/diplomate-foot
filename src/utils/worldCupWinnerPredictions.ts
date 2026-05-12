@@ -1,5 +1,6 @@
 import { WORLD_CUP_TOP_THREE_LOCKS_AT, WORLD_CUP_WINNER_COUNTRIES, WORLD_CUP_WINNER_POINTS_BY_POSITION } from '../config/worldCupWinnerPredictions';
 import type { WorldCupWinnerPrediction } from '../types';
+import { formatRemainingTime } from './deadlineTimer';
 
 const validCountryCodes = new Set(WORLD_CUP_WINNER_COUNTRIES.map((country) => country.code));
 
@@ -30,13 +31,7 @@ export const formatWorldCupTopThreeLockDate = (): string =>
 export const getWorldCupTopThreeRemainingLabel = (now: Date = new Date()): string => {
   const remainingMs = new Date(WORLD_CUP_TOP_THREE_LOCKS_AT).getTime() - now.getTime();
   if (remainingMs <= 0) return 'Prédiction verrouillée';
-  const totalMinutes = Math.ceil(remainingMs / (1000 * 60));
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes - days * 60 * 24) / 60);
-  const minutes = totalMinutes % 60;
-  if (days > 0) return `Modifiable encore : ${days} j ${hours} h`;
-  if (hours > 0) return `Modifiable encore : ${hours} h ${minutes} min`;
-  return `Modifiable encore : ${minutes} min`;
+  return formatRemainingTime(WORLD_CUP_TOP_THREE_LOCKS_AT, now);
 };
 
 export const calculateWorldCupWinnerPredictionPoints = (

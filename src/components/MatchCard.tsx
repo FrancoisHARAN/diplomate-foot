@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+import DeadlineBadge from './DeadlineBadge';
 import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoffDay, formatKickoffTime, formatLastUpdated, getMinutesBeforeLock, isLiveDisplayMatch } from '../utils/date';
+import { canEditPrediction, formatKickoffDay, formatKickoffTime, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode } from '../utils/worldCupFilters';
 
@@ -17,7 +18,6 @@ const getMatchState = (match: Match, editable: boolean) => {
   if (match.status === 'finished') return { label: 'Terminé', tone: 'done' };
   if (isLiveDisplayMatch(match)) return { label: 'Match en live', tone: 'live' };
   if (!editable) return { label: 'Fermé', tone: 'closed' };
-  if (getMinutesBeforeLock(match) <= 60) return { label: 'Ferme bientôt', tone: 'warning' };
   return { label: 'Ouvert', tone: 'open' };
 };
 
@@ -33,7 +33,6 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const state = getMatchState(match, editable);
   const multiplier = getMatchMultiplier(match);
   const boostLabel = getWorldCupBoostLabel(match, multiplier);
-  const updatedAt = formatLastUpdated(match.lastUpdated);
   const isLiveDisplay = isLiveDisplayMatch(match);
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
   const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
@@ -82,11 +81,15 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
       {isLiveDisplay ? (
         <div className="live-update-alert match-card-live-alert">
           <span>Live</span>
-          <small>Dernière actu : {updatedAt ?? 'en cours'}</small>
+          <small>Score en cours</small>
         </div>
       ) : (
         <div className="match-card-topline">
-          <span className={`status-pill ${state.tone}`}>{state.label}</span>
+          {editable ? (
+            <DeadlineBadge deadline={match.kickoff} label="Ferme dans" />
+          ) : (
+            <span className={`status-pill ${state.tone}`}>{state.label}</span>
+          )}
           {multiplier > 1 ? (
             <span className="booster-pill">
               <strong>Boost x{multiplier}</strong>

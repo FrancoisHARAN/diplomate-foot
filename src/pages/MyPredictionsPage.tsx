@@ -5,8 +5,9 @@ import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { FlashChallenge, FlashPrediction, Match, Prediction } from '../types';
-import { fetchPlayerFlashPredictions, getFlashPredictionsForPlayer, getPredictionsForPlayer, getStoredFlashChallenges, getUserPointsMock } from '../utils/appState';
+import { fetchPlayerFlashPredictions, getFlashPredictionsForPlayer, getPredictionsForPlayer, getStoredFlashChallenges, getUserPointsMock, saveFlashPrediction, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
+import { flashMatchesPredictionFilter, isFlashChallengeOpen } from '../utils/flashChallenges';
 import { calculatePredictionPointsForMatch } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -73,7 +74,14 @@ const MyPredictionsPage = () => {
   const myFlashRows = flashPredictions
     .filter((prediction) => prediction.playerId === player.id || getFlashPredictionsForPlayer(player.id).some((item) => item.id === prediction.id))
     .map((prediction) => ({ prediction, challenge: flashChallengeById.get(prediction.flashId) }))
-    .filter((item): item is { prediction: FlashPrediction; challenge: FlashChallenge } => Boolean(item.challenge));
+    .filter((item): item is { prediction: FlashPrediction; challenge: FlashChallenge } => Boolean(item.challenge))
+    .sort((left, right) => {
+      const leftOpen = isFlashChallengeOpen(left.challenge);
+      const rightOpen = isFlashChallengeOpen(right.challenge);
+      if (leftOpen !== rightOpen) return leftOpen ? -1 : 1;
+      return new Date(left.challenge.closesAt).getTime() - new Date(right.challenge.closesAt).getTime();
+    });
+  const filteredFlashRows = myFlashRows.filter(({ challenge, prediction }) => flashMatchesPredictionFilter(filter, challenge, prediction));
   const predictedMatches = matches
     .filter((match) => predictionByMatch.has(match.id))
     .sort(sortByTemporalProximity(now));
@@ -88,6 +96,15 @@ const MyPredictionsPage = () => {
     if (filter === 'lost') return points !== null && points === 0;
     return true;
   });
+
+  const handleFlashAnswer = async (challenge: FlashChallenge, optionId: string) => {
+    const prediction = await saveFlashPrediction(challenge, optionId);
+    setFlashPredictions((items) => [
+      ...items.filter((item) => !(samePlayerId(item.playerId, prediction.playerId) && item.flashId === prediction.flashId)),
+      prediction,
+    ]);
+    setFlashChallenges(getStoredFlashChallenges());
+  };
 
   return (
     <div className="screen-stack">
@@ -105,42 +122,58 @@ const MyPredictionsPage = () => {
         ))}
       </div>
 
-      {predictedMatches.length > 0 ? (
-        filteredMatches.length > 0 ? (
-          <section className="match-list">
-            {filteredMatches.map((match) => (
-              <MatchCard key={match.id} match={match} prediction={predictionByMatch.get(match.id)} />
-            ))}
-          </section>
-        ) : (
-          <section className="empty-state inline">
-            <strong>Aucun prono dans ce filtre</strong>
-            <p>Change de filtre pour retrouver tes autres matchs.</p>
-          </section>
-        )
-      ) : (
-        <section className="empty-state inline">
-          <strong>Aucun prono pour l'instant</strong>
-          <p>Va dans Matchs et choisis un bloc pour commencer.</p>
-          <Link className="btn secondary" to="/matchs">Voir les matchs</Link>
-        </section>
-      )}
-
-      {myFlashRows.length > 0 ? (
+      {filteredFlashRows.length > 0 ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Bonus</p>
-              <h2>Paris flash</h2>
+              <p className="eyebrow">Priorité</p>
+              <h2>Flashs</h2>
             </div>
           </div>
           <div className="flash-history-list">
-            {myFlashRows.map(({ challenge, prediction }) => (
-              <FlashChallengeCard key={`${challenge.id}-${prediction.id}`} challenge={challenge} player={player} prediction={prediction} compact />
+            {filteredFlashRows.map(({ challenge, prediction }) => (
+              <FlashChallengeCard
+                key={`${challenge.id}-${prediction.id}`}
+                challenge={challenge}
+                player={player}
+                prediction={prediction}
+                onAnswer={handleFlashAnswer}
+                compact
+              />
             ))}
           </div>
         </section>
       ) : null}
+
+      <section className="section-block my-pronos-match-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Classiques</p>
+            <h2>Matchs</h2>
+          </div>
+        </div>
+
+        {predictedMatches.length > 0 ? (
+          filteredMatches.length > 0 ? (
+            <div className="match-list">
+              {filteredMatches.map((match) => (
+                <MatchCard key={match.id} match={match} prediction={predictionByMatch.get(match.id)} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state inline">
+              <strong>Aucun prono dans ce filtre</strong>
+              <p>Change de filtre pour retrouver tes autres matchs.</p>
+            </div>
+          )
+        ) : (
+          <div className="empty-state inline">
+            <strong>Aucun prono pour l'instant</strong>
+            <p>Va dans Matchs et choisis un bloc pour commencer.</p>
+            <Link className="btn secondary" to="/matchs">Voir les matchs</Link>
+          </div>
+        )}
+      </section>
 
       <section className="section-block">
         <div className="section-heading">

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type TouchEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import DeadlineBadge from '../components/DeadlineBadge';
 import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { Match } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
-import { canEditPrediction, formatKickoffLong, formatLastUpdated, formatTimeUntilKickoff, isLiveDisplayMatch } from '../utils/date';
+import { canEditPrediction, formatKickoffLong, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
@@ -143,7 +144,6 @@ const MatchDetailPage = () => {
 
   const multiplier = getMatchMultiplier(match);
   const boostLabel = getWorldCupBoostLabel(match, multiplier);
-  const updatedAt = formatLastUpdated(match.lastUpdated);
   const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
   const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
@@ -218,7 +218,7 @@ const MatchDetailPage = () => {
         <div className="match-detail-kickoff">
           <p className="eyebrow">Coup d'envoi</p>
           <h1>{formatKickoffLong(match.kickoff)}</h1>
-          <span className={`mini-badge ${editable ? 'success' : ''}`}>{editable ? formatTimeUntilKickoff(match, new Date(clock)) : 'Prono fermé'}</span>
+          <DeadlineBadge deadline={match.kickoff} closed={!editable} closedLabel="Fermé" label="Ferme dans" />
         </div>
 
         {multiplier > 1 ? (
@@ -245,7 +245,7 @@ const MatchDetailPage = () => {
         {isLiveDisplay ? (
           <div className="live-update-alert detail-live-alert">
             <span>Match en live</span>
-            <small>Score affiché selon la dernière actu : {updatedAt ?? 'en cours'}</small>
+            <small>Score en cours</small>
           </div>
         ) : null}
 
@@ -253,7 +253,7 @@ const MatchDetailPage = () => {
           <div className="detail-current-prono">
             <span>Ton prono</span>
             <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
-            {points !== null ? <small>{points} pts</small> : <small>{editable ? 'Modifiable jusqu’au coup d’envoi' : 'Enregistré'}</small>}
+            {points !== null ? <small>{points} pts</small> : <small>{editable ? "Modifiable jusqu'au coup d'envoi" : 'Enregistré'}</small>}
           </div>
         ) : null}
 

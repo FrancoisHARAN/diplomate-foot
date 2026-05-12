@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { WORLD_CUP_WINNER_COUNTRIES, WORLD_CUP_WINNER_POINTS_BY_POSITION } from '../config/worldCupWinnerPredictions';
+import DeadlineBadge from './DeadlineBadge';
+import { WORLD_CUP_TOP_THREE_LOCKS_AT, WORLD_CUP_WINNER_COUNTRIES, WORLD_CUP_WINNER_POINTS_BY_POSITION } from '../config/worldCupWinnerPredictions';
 import type { CurrentPlayer } from '../utils/appState';
 import { fetchWorldCupWinnerPrediction, saveWorldCupWinnerPrediction } from '../utils/appState';
-import { formatWorldCupTopThreeLockDate, getWorldCupTopThreeRemainingLabel, isWorldCupTopThreeLocked } from '../utils/worldCupWinnerPredictions';
+import { isWorldCupTopThreeLocked } from '../utils/worldCupWinnerPredictions';
 
 interface WorldCupTopThreeCardProps {
   player: CurrentPlayer | null;
@@ -47,10 +48,10 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
         <div className="section-heading">
           <div>
             <p className="eyebrow">Prédiction champion du monde</p>
-            <h2>Ton top 3 champion du monde</h2>
+            <h2>Champion du monde</h2>
           </div>
         </div>
-        <p className="section-subtitle">Connecte-toi pour enregistrer tes 3 favoris.</p>
+        <p className="section-subtitle">Connecte-toi pour choisir tes 3 favoris.</p>
         <Link className="btn primary" to="/connexion">Connexion</Link>
       </section>
     );
@@ -60,15 +61,15 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
     <section className="section-block worldcup-top3-card" id="top3-coupe-du-monde">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Prédiction champion du monde</p>
-          <h2>Ton top 3 champion du monde</h2>
-          <p className="section-subtitle">Choisis tes 3 favoris pour devenir champion du monde. Si le champion est dans ton top 3, tu marques des points selon sa position.</p>
+          <p className="eyebrow">Top 3</p>
+          <h2>Champion du monde</h2>
+          <p className="section-subtitle">Choisis tes 3 favoris.</p>
         </div>
       </div>
-      <p className={`worldcup-top3-lock ${locked ? 'locked' : ''}`}>
-        {locked ? 'Prédiction verrouillée' : getWorldCupTopThreeRemainingLabel(now)}
-        <small>À compléter avant le {formatWorldCupTopThreeLockDate()}.</small>
-      </p>
+      <div className="worldcup-top3-meta">
+        <p>20 / 15 / 10 pts si le champion est dans ton top 3.</p>
+        <DeadlineBadge deadline={WORLD_CUP_TOP_THREE_LOCKS_AT} closed={locked} closedLabel="Fermé" label="Clôture dans" />
+      </div>
 
       <div className="worldcup-top3-list">
         {choices.map((choice, index) => {
@@ -123,7 +124,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
           }
         }}
       >
-        {locked ? 'Prédiction verrouillée' : saving ? 'Enregistrement...' : 'Enregistrer mon top 3'}
+        {locked ? 'Prédiction verrouillée' : saving ? 'Enregistrement...' : 'Enregistrer'}
       </button>
     </section>
   );

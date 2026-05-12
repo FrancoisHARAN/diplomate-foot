@@ -890,6 +890,7 @@ small {
 .bottom-link:focus-visible,
 .btn:focus-visible,
 .pill:focus-visible,
+.deadline-badge:focus-visible,
 .action-row:focus-visible,
 .prediction-row:focus-visible,
 .ranking-row:focus-visible,
@@ -1548,6 +1549,51 @@ small {
   background: var(--red);
 }
 
+.match-card-topline .deadline-badge {
+  flex: 0 0 auto;
+}
+
+.deadline-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 1.55rem;
+  padding: 0.24rem 0.55rem;
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.deadline-badge strong {
+  color: inherit;
+  font-size: inherit;
+  line-height: 1;
+}
+
+.deadline-badge-label {
+  color: inherit;
+  font-size: 0.68rem;
+  font-weight: 820;
+  opacity: 0.86;
+}
+
+.deadline-badge.urgent {
+  color: #fff;
+  background: var(--red);
+}
+
+.deadline-badge.closed {
+  color: var(--muted);
+  background: #edf1fb;
+}
+
 .mini-link {
   color: var(--blue);
   font-size: 0.78rem;
@@ -1556,11 +1602,11 @@ small {
 
 .tournament-entry-card {
   display: grid;
-  gap: 0.42rem;
+  gap: 0.36rem;
   min-width: 0;
-  padding: 0.9rem;
+  padding: 0.82rem;
   border: 2px solid rgba(28, 70, 245, 0.28);
-  border-radius: 10px;
+  border-radius: 8px;
   color: var(--text);
   background:
     linear-gradient(90deg, rgba(28, 70, 245, 0.05) 1px, transparent 1px),
@@ -1582,7 +1628,7 @@ small {
 .tournament-entry-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   line-height: 1.25;
 }
 
@@ -1817,7 +1863,7 @@ small {
 
 .worldcup-top3-card {
   display: grid;
-  gap: 0.82rem;
+  gap: 0.72rem;
   border-color: var(--blue);
 }
 
@@ -1826,22 +1872,24 @@ small {
   gap: 0.58rem;
 }
 
-.worldcup-top3-lock {
-  display: grid;
-  gap: 0.12rem;
+.worldcup-top3-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.48rem;
   padding: 0.58rem 0.65rem;
   border: 1px solid rgba(28, 70, 245, 0.18);
   border-radius: 8px;
-  color: var(--blue);
   background: var(--blue-soft);
-  font-weight: 900;
-  line-height: 1.25;
 }
 
-.worldcup-top3-lock.locked {
-  color: var(--red);
-  background: #ffe6ea;
-  border-color: rgba(255, 79, 94, 0.28);
+.worldcup-top3-meta p {
+  min-width: 12rem;
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.24;
 }
 
 .worldcup-top3-lock small {
@@ -1927,7 +1975,7 @@ small {
 
 .flash-card {
   display: grid;
-  gap: 0.72rem;
+  gap: 0.68rem;
   padding: 0.82rem;
   border: 2px solid rgba(255, 79, 94, 0.38);
   border-radius: 8px;
@@ -1954,6 +2002,10 @@ small {
   font-size: 0.72rem;
   font-weight: 850;
   text-align: right;
+}
+
+.flash-card-header .deadline-badge {
+  flex: 0 0 auto;
 }
 
 .flash-badge {
@@ -2008,9 +2060,9 @@ small {
 
 .flash-option {
   display: grid;
-  gap: 0.15rem;
+  place-items: center;
   min-width: 0;
-  min-height: 3rem;
+  min-height: 2.82rem;
   padding: 0.55rem 0.5rem;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2023,6 +2075,7 @@ small {
 .flash-option strong {
   min-width: 0;
   overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .flash-option.selected {
@@ -2041,6 +2094,86 @@ small {
   opacity: 0.78;
 }
 
+.flash-summary {
+  display: grid;
+  gap: 0.24rem;
+  min-width: 0;
+  padding: 0.58rem 0.62rem;
+  border-radius: 8px;
+  background: #fff6f7;
+}
+
+.flash-summary p,
+.flash-hint,
+.flash-confirmation {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.flash-summary p {
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 780;
+  line-height: 1.25;
+}
+
+.flash-state,
+.flash-result {
+  width: fit-content;
+  padding: 0.22rem 0.46rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.flash-state.open,
+.flash-result.won {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.flash-state.closed,
+.flash-state.resolved {
+  color: var(--muted);
+  background: #edf1fb;
+}
+
+.flash-result.lost {
+  width: fit-content;
+  color: #fff;
+  background: var(--red);
+}
+
+.flash-state.open {
+  background: var(--lime);
+}
+
+.flash-hint {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 760;
+  line-height: 1.22;
+}
+
+.flash-save-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.flash-save-row .btn {
+  min-height: 2.35rem;
+  padding-inline: 0.75rem;
+}
+
+.flash-confirmation {
+  color: #08723c;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
 .flash-response {
   color: var(--blue);
   font-size: 0.82rem;
@@ -2056,6 +2189,11 @@ small {
 .flash-card-login {
   display: grid;
   gap: 0.55rem;
+}
+
+.my-pronos-match-section {
+  display: grid;
+  gap: 0.68rem;
 }
 
 .match-detail-screen {
@@ -2159,7 +2297,8 @@ small {
   text-transform: uppercase;
 }
 
-.match-detail-kickoff .mini-badge {
+.match-detail-kickoff .mini-badge,
+.match-detail-kickoff .deadline-badge {
   justify-self: start;
   max-width: none;
 }
