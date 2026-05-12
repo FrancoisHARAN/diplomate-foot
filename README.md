@@ -289,6 +289,29 @@ Si football-data.org change l'identifiant officiel, modifier `WORLD_CUP_2026_COM
 
 Si `supabase/schema.sql` a ete mis a jour, relancer le SQL dans Supabase pour conserver les champs `stage`, `round`, `group_name`, `season` et `source_competition_id` utilises par les filtres.
 
+### Arbre du tournoi
+
+La page `/tournoi` affiche une vue informationnelle Coupe du Monde 2026. Elle est accessible depuis une cartouche **Arbre du tournoi** sur la page `/matchs`.
+
+Elle contient:
+
+- les groupes et classements indicatifs;
+- les matchs connus de chaque equipe au clic sur une ligne de groupe;
+- les tours de phase finale sous forme de cartes verticales mobile-first;
+- des liens vers `/matchs/:matchId` quand le match existe dans l'application;
+- des placeholders `À déterminer` quand les affiches ne sont pas encore connues.
+
+Les classements de groupe sont calcules cote frontend dans `src/utils/worldCupStandings.ts`:
+
+- victoire: 3 points;
+- nul: 1 point;
+- defaite: 0 point;
+- tri: points, difference de buts, buts marques, puis ordre alphabetique francais.
+
+Ce classement est indicatif et base uniquement sur les matchs Coupe du Monde connus dans les donnees live ou Supabase. Si aucun resultat n'est connu, les 48 equipes issues de `src/config/worldCupWinnerPredictions.ts` apparaissent avec 0 point.
+
+L'arbre des phases finales se remplit automatiquement avec les matchs detectes comme Coupe du Monde 2026 et phase eliminatoire via `isWorldCup2026Match` / `isKnockoutStageMatch`. Aucun faux match n'est invente.
+
 ## Noms de pays en francais
 
 Les noms de pays affiches dans le contexte selection nationale / Coupe du Monde passent par `src/config/countryFlags.ts` et `src/utils/worldCupFilters.ts`.

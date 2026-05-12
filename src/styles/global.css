@@ -1548,6 +1548,260 @@ small {
   background: var(--red);
 }
 
+.mini-link {
+  color: var(--blue);
+  font-size: 0.78rem;
+  font-weight: 920;
+}
+
+.tournament-entry-card {
+  display: grid;
+  gap: 0.42rem;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 2px solid rgba(28, 70, 245, 0.28);
+  border-radius: 10px;
+  color: var(--text);
+  background:
+    linear-gradient(90deg, rgba(28, 70, 245, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(28, 70, 245, 0.05) 1px, transparent 1px),
+    #fff;
+  background-size: 18px 18px;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(28, 70, 245, 0.1);
+}
+
+.tournament-entry-card strong {
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.42rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.tournament-entry-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.tournament-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.tournament-hero {
+  gap: 0.52rem;
+}
+
+.tournament-group-grid,
+.knockout-round-list,
+.group-standing-list,
+.team-fixture-list,
+.knockout-match-list {
+  display: grid;
+  gap: 0.72rem;
+  min-width: 0;
+}
+
+.tournament-group-card,
+.knockout-round-card {
+  display: grid;
+  gap: 0.72rem;
+  min-width: 0;
+  padding: 0.78rem;
+  border: 2px solid rgba(28, 70, 245, 0.16);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.tournament-group-card h3,
+.knockout-round-card h3 {
+  margin: 0;
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.22rem;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.group-standing-row,
+.team-fixture-row,
+.knockout-match-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.group-standing-row {
+  display: grid;
+  grid-template-columns: 1.5rem 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.48rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(28, 70, 245, 0.12);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--blue-soft);
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-standing-row.active {
+  border-color: var(--blue);
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(28, 70, 245, 0.12);
+}
+
+.group-rank {
+  color: var(--blue);
+  font-weight: 950;
+  text-align: center;
+}
+
+.tournament-flag {
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  border: 1px solid rgba(10, 21, 44, 0.14);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+}
+
+.tournament-flag.fallback {
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  background: var(--blue);
+  font-size: 0.65rem;
+  font-weight: 950;
+}
+
+.group-team-name {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.group-team-name strong,
+.group-team-name small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.group-team-name strong {
+  color: var(--text);
+  font-size: 0.94rem;
+  line-height: 1.08;
+}
+
+.group-team-name small,
+.team-fixtures-heading small,
+.team-fixture-opponent small,
+.knockout-meta small,
+.muted-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.group-points {
+  color: var(--blue);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.team-fixtures-panel {
+  display: grid;
+  gap: 0.62rem;
+  min-width: 0;
+  padding: 0.68rem;
+  border-radius: 10px;
+  background: #f8faff;
+}
+
+.team-fixtures-heading,
+.team-fixture-opponent {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0.48rem;
+}
+
+.team-fixtures-heading > div,
+.team-fixture-opponent span {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.team-fixture-row,
+.knockout-match-card {
+  display: grid;
+  gap: 0.48rem;
+  padding: 0.62rem;
+  border: 1px solid rgba(28, 70, 245, 0.14);
+  border-radius: 8px;
+  color: var(--text);
+  background: #fff;
+  text-decoration: none;
+}
+
+.team-fixture-row.disabled,
+.knockout-match-card.disabled {
+  opacity: 0.72;
+  background: #f4f6fb;
+}
+
+.team-fixture-opponent strong {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.knockout-teams {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.knockout-teams span {
+  display: grid;
+  justify-items: center;
+  gap: 0.24rem;
+  min-width: 0;
+  text-align: center;
+}
+
+.knockout-teams strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.knockout-teams b {
+  color: var(--blue);
+  font-size: 0.94rem;
+  white-space: nowrap;
+}
+
+.knockout-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.52rem;
+  min-width: 0;
+}
+
 .top3-reminder-card {
   border-color: rgba(255, 79, 94, 0.36);
   background: #fff6f7;

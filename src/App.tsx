@@ -11,6 +11,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import PlayerProfilePage from './pages/PlayerProfilePage';
 import PlayerSpacePage from './pages/PlayerSpacePage';
 import ReglementPage from './pages/ReglementPage';
+import TournamentPage from './pages/TournamentPage';
 
 const App = () => (
   <AppLayout>
@@ -18,6 +19,7 @@ const App = () => (
       <Route path="/" element={<HomePage />} />
       <Route path="/matchs" element={<MatchesPage />} />
       <Route path="/matchs/:matchId" element={<MatchDetailPage />} />
+      <Route path="/tournoi" element={<TournamentPage />} />
       <Route path="/classement" element={<LeaderboardPage />} />
       <Route path="/joueurs/:playerId" element={<PlayerProfilePage />} />
       <Route path="/mes-pronos" element={<MyPredictionsPage />} />
