@@ -124,6 +124,11 @@ requireRegex(appStateSource, /matches\.filter\(\(match\) => isMatchFinal\(match\
 requireText(appStateSource, 'points: isMatchFinal(match) ? calculatePredictionPointsForMatch', 'local public profile pending points');
 requireText(appStateSource, "resultType: isMatchFinal(match)", 'local public profile pending result type');
 requireText(appStateSource, 'const isFinished = isMatchFinal(match);', 'RPC public profile defensive final check');
+requireText(
+  appStateSource,
+  "return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };",
+  'RPC public match predictions defensive final check',
+);
 
 requireText(playerProfileSource, 'Points en attente', 'public player profile live display');
 requireText(playerProfileSource, 'Score en cours', 'public player profile live score label');

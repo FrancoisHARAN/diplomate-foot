@@ -6,6 +6,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { CompetitionCode, Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { isLiveDisplayMatch } from '../utils/date';
+import { isMatchFinal } from '../utils/points';
 import { isWorldCup2026Match, shouldShowMatchInApp, shouldShowWorldCup2026Match } from '../utils/worldCupFilters';
 
 type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
@@ -68,10 +69,10 @@ const MatchesPage = () => {
     const filteredMatches = matches.filter((match) => {
       if (!shouldShowMatchInApp(match)) return false;
       if (filter === 'live') return isLiveDisplayMatch(match);
-      if (filter === 'done') return match.status === 'finished';
+      if (filter === 'done') return isMatchFinal(match);
       if (filter === 'WC2026') return isWorldCup2026Match(match) && shouldShowWorldCup2026Match(match);
-      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && match.status !== 'finished';
-      return match.status !== 'finished';
+      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && !isMatchFinal(match);
+      return !isMatchFinal(match);
     });
 
     return sortMatchesForFilter(filteredMatches, filter);

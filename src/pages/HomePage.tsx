@@ -14,6 +14,7 @@ import { buildStandings, fetchActiveFlashChallenges, fetchPlayerFlashPredictions
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { selectExactPredictionsForHomePage } from '../utils/exactPredictions';
 import { shouldShowFlashOnHome } from '../utils/flashChallenges';
+import { isMatchFinal } from '../utils/points';
 import { getWorldCupTeamDisplayName, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const localDayKey = (date: Date): string =>
@@ -46,7 +47,7 @@ const groupHomeMatchesByDay = (matches: Match[]) => {
 
 const selectHomeMatches = (matches: Match[]): Match[] => {
   const playableMatches = matches
-    .filter((match) => match.status !== 'finished' && shouldShowMatchInApp(match))
+    .filter((match) => !isMatchFinal(match) && shouldShowMatchInApp(match))
     .sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
   const todayKey = localDayKey(new Date());
   const todayMatches = playableMatches.filter((match) => dayKey(match.kickoff) === todayKey);

@@ -6,6 +6,7 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { buildStandings, countUserPredictions, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId, setPlayerProfileImage } from '../utils/appState';
+import { isMatchFinal } from '../utils/points';
 
 const resizeImageFile = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -56,7 +57,7 @@ const PlayerSpacePage = () => {
   const predictions = getStoredPredictions();
   const playerStanding = buildStandings(mockPlayers, predictions, matches).find((item) => samePlayerId(item.playerId, player.id));
   const predictionByMatch = new Set(getPredictionsForPlayer(player.id, predictions).map((prediction) => prediction.matchId));
-  const toPredict = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
+  const toPredict = matches.filter((match) => !isMatchFinal(match) && !predictionByMatch.has(match.id)).length;
 
   return (
     <div className="screen-stack">

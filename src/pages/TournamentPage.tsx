@@ -9,12 +9,13 @@ import {
   hasWorldCupKnockoutMatches,
 } from '../utils/worldCupStandings';
 import { formatKickoff, getMatchStatusLabel } from '../utils/date';
+import { isMatchFinal } from '../utils/points';
 
 const recordLabel = (team: WorldCupGroupStanding): string =>
   `${team.played} J · ${team.won} V · ${team.drawn} N · ${team.lost} D · ${team.goalDifference >= 0 ? '+' : ''}${team.goalDifference}`;
 
 const matchScore = (match?: { status?: string; homeScore?: number; awayScore?: number }) => {
-  if (!match || match.status !== 'finished') return 'vs';
+  if (!match || !isMatchFinal(match)) return 'vs';
   if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return 'vs';
   return `${match.homeScore} - ${match.awayScore}`;
 };

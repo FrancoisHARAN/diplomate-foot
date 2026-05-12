@@ -1089,7 +1089,10 @@ export const fetchPublicMatchPredictions = async (
 
   try {
     const rows = await supabaseRpc<RpcPublicMatchPredictionRow[]>('app_get_public_match_predictions', { p_match_id: match.id });
-    return rows.map(fromRpcPublicMatchPrediction);
+    return rows.map((row) => {
+      const item = fromRpcPublicMatchPrediction(row);
+      return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };
+    });
   } catch (error) {
     console.warn('Public match predictions unavailable, using local fallback.', error);
     return fallback;

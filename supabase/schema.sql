@@ -393,7 +393,20 @@ returns boolean
 language sql
 immutable
 as $$
-  select lower(coalesce(p_status, '')) in ('finished', 'ft', 'full_time', 'completed');
+  select lower(replace(replace(coalesce(p_status, ''), '-', '_'), ' ', '_')) in (
+    'finished',
+    'ft',
+    'full_time',
+    'completed',
+    'complete',
+    'termine',
+    'terminé',
+    'final',
+    'ended',
+    'after_extra_time',
+    'aet',
+    'penalties'
+  );
 $$;
 
 create or replace function public.app_private_match_multiplier(
@@ -463,7 +476,9 @@ select
   ), 0) as points
 from public.app_rpc_predictions pr
 left join public.app_rpc_matches m on m.id = pr.match_id
-where public.app_private_match_is_final(m.status);
+where public.app_private_match_is_final(m.status)
+  and m.home_score is not null
+  and m.away_score is not null;
 
 create or replace function public.app_private_world_cup_country_name(p_code text)
 returns text
@@ -854,6 +869,8 @@ as $$
           'final_away_score', m.away_score,
           'points', case
             when public.app_private_match_is_final(m.status)
+              and m.home_score is not null
+              and m.away_score is not null
             then coalesce(sp.points, app_private_prediction_points(
               pr.home_score,
               pr.away_score,
@@ -864,7 +881,9 @@ as $$
             else null
           end,
           'result_type', case
-            when not public.app_private_match_is_final(m.status) then 'pending'
+            when not public.app_private_match_is_final(m.status)
+              or m.home_score is null
+              or m.away_score is null then 'pending'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
@@ -944,9 +963,16 @@ as $$
     pr.away_score as predicted_away_score,
     m.home_score as final_home_score,
     m.away_score as final_away_score,
-    case when public.app_private_match_is_final(m.status) then coalesce(sp.points, 0) else null end as points,
     case
-      when not public.app_private_match_is_final(m.status) then 'pending'
+      when public.app_private_match_is_final(m.status)
+        and m.home_score is not null
+        and m.away_score is not null then coalesce(sp.points, 0)
+      else null
+    end as points,
+    case
+      when not public.app_private_match_is_final(m.status)
+        or m.home_score is null
+        or m.away_score is null then 'pending'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'

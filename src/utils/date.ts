@@ -74,7 +74,7 @@ export const formatTimeUntilKickoff = (match: Match, now = new Date()): string =
 
 export const isLiveDisplayMatch = (match: Match, now = new Date()): boolean => {
   if (match.status === 'live') return true;
-  if (match.status === 'finished') return false;
+  if (isMatchFinal(match)) return false;
 
   const kickoff = new Date(match.kickoff).getTime();
   const elapsed = now.getTime() - kickoff;
