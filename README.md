@@ -233,6 +233,24 @@ Pour activer les vraies donnees football:
 
 Quand Supabase est configure, le frontend synchronise aussi les matchs vers Supabase via RPC afin que le classement cloud puisse calculer les points.
 
+## Actualisation des scores
+
+Le workflow `.github/workflows/update-football-data.yml` peut interroger `football-data.org` toutes les 5 minutes.
+
+L'heure visible dans le header, `Derniere actualisation`, ne change que lorsqu'une donnee utile au jeu change vraiment dans `public/live-data/matches.json`:
+
+- score;
+- statut `upcoming` / `live` / `finished`;
+- minute live;
+- coup d'envoi ou information match visible;
+- multiplicateur de points visible.
+
+Un simple check API sans changement utile ne modifie pas l'heure affichee et ne cree pas de commit supplementaire.
+
+Pour forcer une mise a jour manuelle: GitHub -> Actions -> `Update football data` -> `Run workflow`.
+
+Selon le plan API et la competition, `football-data.org` peut renvoyer des scores avec un leger retard.
+
 ## Coupe du Monde 2026
 
 L'application prepare une categorie **Coupe du Monde 2026** pour la competition finale FIFA World Cup uniquement. Le code football-data.org prevu est `WC` avec la saison `2026` (voir la table officielle des codes de ligues: https://www.football-data.org/documentation/api).
@@ -268,6 +286,78 @@ WORLD_CUP_2026_DATE_TO=2026-07-19
 Si football-data.org change l'identifiant officiel, modifier `WORLD_CUP_2026_COMPETITION_ID` dans GitHub Actions ou `WORLD_CUP_2026_API_COMPETITION_ID` dans `src/config/worldCup2026.ts` / `scripts/fetch-football-data.mjs`.
 
 Si `supabase/schema.sql` a ete mis a jour, relancer le SQL dans Supabase pour conserver les champs `stage`, `round`, `group_name`, `season` et `source_competition_id` utilises par les filtres.
+
+## Noms de pays en francais
+
+Les noms de pays affiches dans le contexte selection nationale / Coupe du Monde passent par `src/config/countryFlags.ts` et `src/utils/worldCupFilters.ts`.
+
+- `Iraq` devient `Irak`;
+- `Egypt` devient `Egypte`;
+- `Germany` devient `Allemagne`;
+- `Spain` devient `Espagne`;
+- `Morocco` devient `Maroc`;
+- `Netherlands` devient `Pays-Bas`.
+
+Cette conversion ne s'applique que si le match est identifie comme une selection nationale / Coupe du Monde. Les clubs restent traites avec leurs logos de clubs: `MAR` peut etre Marseille en club sans devenir Maroc.
+
+## Top 3 vainqueur Coupe du Monde
+
+Dans `/mon-compte`, chaque joueur peut enregistrer ses 3 favoris pour gagner la Coupe du Monde.
+
+Regle de points prevue pour la fin de competition:
+
+- champion place en 1er choix: 20 points;
+- champion place en 2e choix: 15 points;
+- champion place en 3e choix: 10 points;
+- champion absent du top 3: 0 point.
+
+Le calcul utilitaire est dans `src/utils/worldCupWinnerPredictions.ts`. Les choix sont synchronises par RPC Supabase quand la base est configuree, sinon ils restent en fallback localStorage.
+
+## Paris flash
+
+Les paris flash sont des petits defis temporaires crees manuellement par l'organisateur. Ils peuvent etre affiches sur l'accueil, sauvegardes par joueur, puis comptes dans le classement une fois resolus.
+
+Tables/RPC ajoutees par `supabase/schema.sql`:
+
+- `app_rpc_flash_challenges`;
+- `app_rpc_flash_options`;
+- `app_rpc_flash_predictions`;
+- `app_get_active_flash_challenges`;
+- `app_save_flash_prediction_by_session`;
+- `app_get_player_flash_predictions_by_session`;
+- `app_get_public_player_flash_predictions`.
+
+Exemple SQL pour creer un flash:
+
+```sql
+with challenge as (
+  insert into public.app_rpc_flash_challenges (title, description, match_label, closes_at, status)
+  values (
+    'Dembele buteur ?',
+    'Dembele marque-t-il contre Lens ?',
+    'Lens - PSG',
+    '2026-06-12 21:00:00+02',
+    'open'
+  )
+  returning id
+)
+insert into public.app_rpc_flash_options (flash_id, label, points_if_correct, sort_order)
+select id, 'Oui, il marque', 5, 1 from challenge
+union all
+select id, 'Non, il ne marque pas', 2, 2 from challenge;
+```
+
+Exemple SQL pour resoudre le flash:
+
+```sql
+update public.app_rpc_flash_challenges
+set status = 'resolved',
+    result_option_id = '<ID_OPTION_GAGNANTE>',
+    updated_at = now()
+where id = '<ID_FLASH>';
+```
+
+Si `supabase/schema.sql` est modifie ou relance, reexecuter le schema complet dans Supabase SQL Editor pour publier les nouvelles tables et RPC.
 
 ## Deploiement GitHub Pages
 

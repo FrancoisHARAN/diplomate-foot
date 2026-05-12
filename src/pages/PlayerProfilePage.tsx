@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import FlashChallengeCard from '../components/FlashChallengeCard';
 import PlayerAvatar from '../components/PlayerAvatar';
 import TeamBadge from '../components/TeamBadge';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { PredictionResultType, PublicPlayerProfile, PublicPrediction } from '../types';
-import { fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
+import type { PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction } from '../types';
+import { fetchPublicPlayerFlashPredictions, fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
 import { formatKickoff, getMatchStatusLabel } from '../utils/date';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -56,6 +57,7 @@ const PlayerProfilePage = () => {
   const { playerId } = useParams();
   const { matches } = useLiveMatches();
   const [profile, setProfile] = useState<PublicPlayerProfile | null>(null);
+  const [publicFlashPredictions, setPublicFlashPredictions] = useState<PublicFlashPrediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ProfileFilter>('all');
 
@@ -63,9 +65,13 @@ const PlayerProfilePage = () => {
     let mounted = true;
     setLoading(true);
 
-    void fetchPublicPlayerProfile(playerId, matches, getStoredPredictions()).then((nextProfile) => {
+    void Promise.all([
+      fetchPublicPlayerProfile(playerId, matches, getStoredPredictions()),
+      fetchPublicPlayerFlashPredictions(playerId),
+    ]).then(([nextProfile, flashItems]) => {
       if (!mounted) return;
       setProfile(nextProfile);
+      setPublicFlashPredictions(flashItems);
       setLoading(false);
     });
 
@@ -174,6 +180,36 @@ const PlayerProfilePage = () => {
           )}
         </div>
       </section>
+
+      {publicFlashPredictions.length > 0 ? (
+        <section className="section-block public-profile-history">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Bonus publics</p>
+              <h2>Paris flash visibles</h2>
+              <p className="section-subtitle">Les réponses restent cachées tant que le flash est ouvert.</p>
+            </div>
+          </div>
+          <div className="flash-history-list">
+            {publicFlashPredictions.map((item) => (
+              <FlashChallengeCard
+                key={item.id}
+                challenge={item.challenge}
+                player={{ id: profile.id, nickname: profile.nickname }}
+                prediction={{
+                  id: item.id,
+                  flashId: item.challenge.id,
+                  optionId: item.selectedOption.id,
+                  playerId: profile.id,
+                  points: item.points,
+                  updatedAt: item.updatedAt,
+                }}
+                compact
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 };

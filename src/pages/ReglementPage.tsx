@@ -106,6 +106,22 @@ const ReglementPage = () => (
       </article>
     </section>
 
+    <section className="rules-section rules-info-grid">
+      <article className="rules-info-card">
+        <span>05</span>
+        <h2>Top 3 Coupe du Monde</h2>
+        <p>Dans ton compte, classe tes 3 favoris pour gagner la Coupe du Monde.</p>
+        <strong>Champion placé 1er : 20 pts. Placé 2e : 15 pts. Placé 3e : 10 pts.</strong>
+      </article>
+
+      <article className="rules-info-card">
+        <span>06</span>
+        <h2>Paris flash</h2>
+        <p>Certains défis spéciaux peuvent apparaître pendant quelques jours.</p>
+        <strong>Ils se ferment au début du match concerné et peuvent rapporter des points bonus.</strong>
+      </article>
+    </section>
+
     <section className="technical-warning-card" aria-labelledby="technical-warning-title">
       <h2 id="technical-warning-title">⚠️ Important — problème technique</h2>
       <p>

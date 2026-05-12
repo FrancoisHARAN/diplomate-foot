@@ -2,12 +2,14 @@ import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
 import { isSupabaseConfigured, supabaseRpc } from '../lib/supabaseClient';
-import type { ExactPredictionHighlight, Match, Player, Prediction, PredictionResultType, PublicPlayerProfile, PublicPrediction, Standing, Team } from '../types';
+import type { ExactPredictionHighlight, FlashChallenge, FlashOption, FlashPrediction, Match, Player, Prediction, PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction, Standing, Team, WorldCupWinnerPrediction } from '../types';
 import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
+import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResultType, isFlashChallengeOpen } from './flashChallenges';
 import { sortLeaderboardEntries } from './leaderboard';
 import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, getPredictionResultType } from './points';
 import { isPredictionPublic } from './predictionVisibility';
+import { getWorldCupWinnerCountryName, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
 const STORAGE_KEYS = {
   currentPlayer: 'diplomate.currentPlayer',
@@ -15,6 +17,9 @@ const STORAGE_KEYS = {
   profileImages: 'diplomate.profileImages',
   cloudPlayerState: 'diplomate.cloudPlayerState',
   cloudLeaderboard: 'diplomate.cloudLeaderboard',
+  worldCupWinnerPredictions: 'diplomate.worldCupWinnerPredictions',
+  flashChallenges: 'diplomate.flashChallenges',
+  flashPredictions: 'diplomate.flashPredictions',
 };
 
 export interface CurrentPlayer {
@@ -131,6 +136,54 @@ interface RpcExactPredictionHighlight {
   match_id: string;
   match: RpcMatchRow;
   winners: RpcExactPredictionWinner[];
+}
+
+interface RpcWorldCupWinnerPrediction {
+  id: string;
+  player_id: string;
+  first_choice_code: string;
+  second_choice_code: string;
+  third_choice_code: string;
+  first_choice_name?: string | null;
+  second_choice_name?: string | null;
+  third_choice_name?: string | null;
+  locked_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+interface RpcFlashOptionRow {
+  id: string;
+  flash_id?: string | null;
+  label: string;
+  points_if_correct: number;
+  sort_order?: number | null;
+}
+
+interface RpcFlashChallengeRow {
+  id: string;
+  title: string;
+  description?: string | null;
+  match_id?: string | null;
+  match_label?: string | null;
+  closes_at: string;
+  status: FlashChallenge['status'];
+  result_option_id?: string | null;
+  options?: RpcFlashOptionRow[] | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+interface RpcFlashPredictionRow {
+  id: string;
+  flash_id: string;
+  option_id: string;
+  player_id: string;
+  points?: number | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  challenge?: RpcFlashChallengeRow | null;
+  selected_option?: RpcFlashOptionRow | null;
 }
 
 const readJson = <T>(key: string, fallback: T): T => {
@@ -487,6 +540,291 @@ export const countUserPredictions = (): number => {
   return getPredictionsForPlayer(player.id).length;
 };
 
+const fromRpcWorldCupWinnerPrediction = (row: RpcWorldCupWinnerPrediction): WorldCupWinnerPrediction => ({
+  id: row.id,
+  playerId: row.player_id,
+  firstChoiceCode: row.first_choice_code,
+  secondChoiceCode: row.second_choice_code,
+  thirdChoiceCode: row.third_choice_code,
+  firstChoiceName: row.first_choice_name ?? getWorldCupWinnerCountryName(row.first_choice_code),
+  secondChoiceName: row.second_choice_name ?? getWorldCupWinnerCountryName(row.second_choice_code),
+  thirdChoiceName: row.third_choice_name ?? getWorldCupWinnerCountryName(row.third_choice_code),
+  lockedAt: row.locked_at ?? null,
+  createdAt: row.created_at ?? undefined,
+  updatedAt: row.updated_at ?? new Date().toISOString(),
+});
+
+export const getStoredWorldCupWinnerPredictions = (): WorldCupWinnerPrediction[] =>
+  readJson<WorldCupWinnerPrediction[]>(STORAGE_KEYS.worldCupWinnerPredictions, []);
+
+const writeWorldCupWinnerPrediction = (prediction: WorldCupWinnerPrediction): void => {
+  const existing = getStoredWorldCupWinnerPredictions();
+  const next = [
+    ...existing.filter((item) => !samePlayerId(item.playerId, prediction.playerId)),
+    prediction,
+  ];
+  writeJson(STORAGE_KEYS.worldCupWinnerPredictions, next);
+};
+
+export const getWorldCupWinnerPredictionForPlayer = (playerId?: string | null): WorldCupWinnerPrediction | null => {
+  if (!playerId) return null;
+  return getStoredWorldCupWinnerPredictions().find((item) => samePlayerId(item.playerId, playerId)) ?? null;
+};
+
+export const fetchWorldCupWinnerPrediction = async (): Promise<WorldCupWinnerPrediction | null> => {
+  const current = getCurrentPlayer();
+  if (!current) return null;
+
+  if (isSupabaseConfigured && current.sessionToken) {
+    try {
+      const row = await supabaseRpc<RpcWorldCupWinnerPrediction | null>('app_get_world_cup_winner_prediction_by_session', {
+        p_session_token: current.sessionToken,
+      });
+      if (row) {
+        const prediction = fromRpcWorldCupWinnerPrediction(row);
+        writeWorldCupWinnerPrediction(prediction);
+        return prediction;
+      }
+    } catch (error) {
+      console.warn('World Cup top 3 unavailable, using local cache.', error);
+    }
+  }
+
+  return getWorldCupWinnerPredictionForPlayer(current.id);
+};
+
+export const saveWorldCupWinnerPrediction = async (
+  firstChoiceCode: string,
+  secondChoiceCode: string,
+  thirdChoiceCode: string,
+): Promise<WorldCupWinnerPrediction> => {
+  const current = getCurrentPlayer();
+  if (!current) throw new Error('Connecte-toi pour enregistrer ton top 3.');
+
+  const codes = [firstChoiceCode, secondChoiceCode, thirdChoiceCode];
+  const validationError = validateWorldCupWinnerPredictionCodes(codes);
+  if (validationError) throw new Error(validationError);
+
+  const now = new Date().toISOString();
+  const localPrediction: WorldCupWinnerPrediction = {
+    id: `wc-top3-${current.id}`,
+    playerId: current.id,
+    firstChoiceCode,
+    secondChoiceCode,
+    thirdChoiceCode,
+    firstChoiceName: getWorldCupWinnerCountryName(firstChoiceCode),
+    secondChoiceName: getWorldCupWinnerCountryName(secondChoiceCode),
+    thirdChoiceName: getWorldCupWinnerCountryName(thirdChoiceCode),
+    updatedAt: now,
+  };
+  writeWorldCupWinnerPrediction(localPrediction);
+
+  if (isSupabaseConfigured && current.sessionToken) {
+    try {
+      const row = await supabaseRpc<RpcWorldCupWinnerPrediction>('app_save_world_cup_winner_prediction_by_session', {
+        p_session_token: current.sessionToken,
+        p_first_code: firstChoiceCode,
+        p_second_code: secondChoiceCode,
+        p_third_code: thirdChoiceCode,
+      });
+      const cloudPrediction = fromRpcWorldCupWinnerPrediction(row);
+      writeWorldCupWinnerPrediction(cloudPrediction);
+      return cloudPrediction;
+    } catch (error) {
+      console.warn('World Cup top 3 cloud sync failed.', error);
+    }
+  }
+
+  return localPrediction;
+};
+
+const fromRpcFlashOption = (row: RpcFlashOptionRow, fallbackFlashId: string): FlashOption => ({
+  id: row.id,
+  flashId: row.flash_id ?? fallbackFlashId,
+  label: row.label,
+  pointsIfCorrect: row.points_if_correct,
+  sortOrder: row.sort_order ?? 0,
+});
+
+const fromRpcFlashChallenge = (row: RpcFlashChallengeRow): FlashChallenge => ({
+  id: row.id,
+  title: row.title,
+  description: row.description ?? null,
+  matchId: row.match_id ?? null,
+  matchLabel: row.match_label ?? null,
+  closesAt: row.closes_at,
+  status: row.status,
+  resultOptionId: row.result_option_id ?? null,
+  options: (row.options ?? [])
+    .map((option) => fromRpcFlashOption(option, row.id))
+    .sort((left, right) => left.sortOrder - right.sortOrder),
+  createdAt: row.created_at ?? undefined,
+  updatedAt: row.updated_at ?? undefined,
+});
+
+const fromRpcFlashPrediction = (row: RpcFlashPredictionRow): FlashPrediction => ({
+  id: row.id,
+  flashId: row.flash_id,
+  optionId: row.option_id,
+  playerId: row.player_id,
+  points: row.points ?? null,
+  createdAt: row.created_at ?? undefined,
+  updatedAt: row.updated_at ?? new Date().toISOString(),
+});
+
+export const getStoredFlashChallenges = (): FlashChallenge[] =>
+  readJson<FlashChallenge[]>(STORAGE_KEYS.flashChallenges, []);
+
+const writeFlashChallenges = (challenges: FlashChallenge[]): void => {
+  const byId = new Map(getStoredFlashChallenges().map((challenge) => [challenge.id, challenge]));
+  challenges.forEach((challenge) => byId.set(challenge.id, challenge));
+  writeJson(STORAGE_KEYS.flashChallenges, Array.from(byId.values()));
+};
+
+export const getStoredFlashPredictions = (): FlashPrediction[] =>
+  readJson<FlashPrediction[]>(STORAGE_KEYS.flashPredictions, []);
+
+const writeFlashPrediction = (prediction: FlashPrediction): void => {
+  const existing = getStoredFlashPredictions();
+  const next = [
+    ...existing.filter((item) => !(samePlayerId(item.playerId, prediction.playerId) && item.flashId === prediction.flashId)),
+    prediction,
+  ];
+  writeJson(STORAGE_KEYS.flashPredictions, next);
+};
+
+export const getFlashPredictionsForPlayer = (playerId?: string | null): FlashPrediction[] => {
+  if (!playerId) return [];
+  return getStoredFlashPredictions().filter((prediction) => samePlayerId(prediction.playerId, playerId));
+};
+
+export const getFlashPredictionForChallenge = (flashId: string, playerId?: string | null): FlashPrediction | undefined =>
+  getFlashPredictionsForPlayer(playerId ?? getCurrentPlayer()?.id).find((prediction) => prediction.flashId === flashId);
+
+export const fetchActiveFlashChallenges = async (): Promise<FlashChallenge[]> => {
+  const current = getCurrentPlayer();
+  if (isSupabaseConfigured) {
+    try {
+      const rows = await supabaseRpc<RpcFlashChallengeRow[]>('app_get_active_flash_challenges', {
+        p_session_token: current?.sessionToken ?? null,
+      });
+      const challenges = rows.map(fromRpcFlashChallenge);
+      writeFlashChallenges(challenges);
+      return challenges.filter((challenge) => isFlashChallengeOpen(challenge));
+    } catch (error) {
+      console.warn('Flash challenges unavailable, using local cache.', error);
+    }
+  }
+
+  return getStoredFlashChallenges().filter((challenge) => isFlashChallengeOpen(challenge));
+};
+
+export const fetchPlayerFlashPredictions = async (): Promise<FlashPrediction[]> => {
+  const current = getCurrentPlayer();
+  if (!current) return [];
+
+  if (isSupabaseConfigured && current.sessionToken) {
+    try {
+      const rows = await supabaseRpc<RpcFlashPredictionRow[]>('app_get_player_flash_predictions_by_session', {
+        p_session_token: current.sessionToken,
+      });
+      const challenges = rows
+        .map((row) => row.challenge)
+        .filter((challenge): challenge is RpcFlashChallengeRow => Boolean(challenge))
+        .map(fromRpcFlashChallenge);
+      writeFlashChallenges(challenges);
+      const predictions = rows.map(fromRpcFlashPrediction);
+      predictions.forEach(writeFlashPrediction);
+      return getFlashPredictionsForPlayer(current.id);
+    } catch (error) {
+      console.warn('Player flash predictions unavailable, using local cache.', error);
+    }
+  }
+
+  return getFlashPredictionsForPlayer(current.id);
+};
+
+export const saveFlashPrediction = async (challenge: FlashChallenge, optionId: string): Promise<FlashPrediction> => {
+  const current = getCurrentPlayer();
+  if (!current) throw new Error('Connecte-toi pour répondre au flash.');
+  if (!isFlashChallengeOpen(challenge)) throw new Error('Ce flash est fermé.');
+  const option = getFlashOption(challenge, optionId);
+  if (!option) throw new Error('Option de flash introuvable.');
+
+  const now = new Date().toISOString();
+  const localPrediction: FlashPrediction = {
+    id: `flash-${challenge.id}-${current.id}`,
+    flashId: challenge.id,
+    optionId,
+    playerId: current.id,
+    updatedAt: now,
+  };
+  writeFlashChallenges([challenge]);
+  writeFlashPrediction(localPrediction);
+
+  if (isSupabaseConfigured && current.sessionToken) {
+    try {
+      const row = await supabaseRpc<RpcFlashPredictionRow>('app_save_flash_prediction_by_session', {
+        p_session_token: current.sessionToken,
+        p_flash_id: challenge.id,
+        p_option_id: optionId,
+      });
+      const cloudPrediction = fromRpcFlashPrediction(row);
+      writeFlashPrediction(cloudPrediction);
+      await syncCloudState();
+      return cloudPrediction;
+    } catch (error) {
+      console.warn('Flash prediction cloud sync failed.', error);
+    }
+  }
+
+  return localPrediction;
+};
+
+const calculateResolvedFlashStats = (playerId: string) => {
+  const challenges = getStoredFlashChallenges();
+  const byId = new Map(challenges.map((challenge) => [challenge.id, challenge]));
+  return getFlashPredictionsForPlayer(playerId).reduce(
+    (stats, prediction) => {
+      const challenge = byId.get(prediction.flashId);
+      if (!challenge) return stats;
+      const points = calculateFlashPredictionPoints(challenge, prediction);
+      return {
+        points: stats.points + (points ?? 0),
+        firstPredictionAt: stats.firstPredictionAt
+          ? (new Date(prediction.updatedAt).getTime() < new Date(stats.firstPredictionAt).getTime() ? prediction.updatedAt : stats.firstPredictionAt)
+          : prediction.updatedAt,
+      };
+    },
+    { points: 0, firstPredictionAt: null as string | null },
+  );
+};
+
+export const fetchPublicPlayerFlashPredictions = async (playerId?: string): Promise<PublicFlashPrediction[]> => {
+  if (!playerId || !isSupabaseConfigured || !isUuid(playerId)) return [];
+  try {
+    const rows = await supabaseRpc<RpcFlashPredictionRow[]>('app_get_public_player_flash_predictions', { p_player_id: playerId });
+    return rows
+      .map((row): PublicFlashPrediction | null => {
+        if (!row.challenge || !row.selected_option) return null;
+        const challenge = fromRpcFlashChallenge(row.challenge);
+        const selectedOption = fromRpcFlashOption(row.selected_option, challenge.id);
+        return {
+          id: row.id,
+          challenge,
+          selectedOption,
+          points: row.points ?? null,
+          resultType: getFlashPredictionResultType(challenge, { optionId: row.option_id }),
+          updatedAt: row.updated_at ?? new Date().toISOString(),
+        };
+      })
+      .filter((item): item is PublicFlashPrediction => Boolean(item));
+  } catch (error) {
+    console.warn('Public flash predictions unavailable.', error);
+    return [];
+  }
+};
+
 const calculateFinishedStats = (playerId: string, predictions: Prediction[], matches: Match[]) => {
   const finishedById = new Map(matches.filter((match) => match.status === 'finished').map((match) => [match.id, match]));
   const playerPredictions = getPredictionsForPlayer(playerId, predictions);
@@ -522,7 +860,8 @@ export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
 
   const base = mockPlayers.find((entry) => samePlayerId(entry.id, player.id))?.points ?? 0;
   const dynamic = calculateFinishedStats(player.id, getStoredPredictions(), matches).points;
-  return Math.max(base, dynamic);
+  const flash = calculateResolvedFlashStats(player.id).points;
+  return Math.max(base, dynamic) + flash;
 };
 
 export const getUserRankMock = (matches: Match[] = mockMatches): number | null => {
@@ -616,16 +955,20 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
   return sortLeaderboardEntries(buildPlayerPool(players, predictions)
     .map((player) => {
       const computed = calculateFinishedStats(player.id, predictions, matches);
+      const flash = calculateResolvedFlashStats(player.id);
+      const firstPredictionAt = [computed.firstPredictionAt, flash.firstPredictionAt, player.firstPredictionAt]
+        .filter(Boolean)
+        .sort((a, b) => new Date(a as string).getTime() - new Date(b as string).getTime())[0] ?? null;
       return {
         position: 0,
         playerId: player.id,
         nickname: player.nickname,
         avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl,
-        points: Math.max(player.points, computed.points),
+        points: Math.max(player.points, computed.points) + flash.points,
         exactScores: Math.max(player.exactScores, computed.exactScores),
         twoPointResults: Math.max(player.twoPointResults ?? 0, computed.twoPointResults),
         correctResults: Math.max(player.correctResults, computed.correctResults),
-        firstPredictionAt: computed.firstPredictionAt ?? player.firstPredictionAt ?? null,
+        firstPredictionAt,
       };
     }));
 };

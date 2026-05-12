@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import FlashChallengeCard from '../components/FlashChallengeCard';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { Match, Prediction } from '../types';
-import { getPredictionsForPlayer, getUserPointsMock } from '../utils/appState';
+import type { FlashChallenge, FlashPrediction, Match, Prediction } from '../types';
+import { fetchPlayerFlashPredictions, getFlashPredictionsForPlayer, getPredictionsForPlayer, getStoredFlashChallenges, getUserPointsMock } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
@@ -39,6 +40,20 @@ const MyPredictionsPage = () => {
   const { player } = usePlayerSession();
   const { matches } = useLiveMatches();
   const [filter, setFilter] = useState<PredictionFilter>('all');
+  const [flashPredictions, setFlashPredictions] = useState<FlashPrediction[]>([]);
+  const [flashChallenges, setFlashChallenges] = useState<FlashChallenge[]>(getStoredFlashChallenges());
+
+  useEffect(() => {
+    let mounted = true;
+    void fetchPlayerFlashPredictions().then((items) => {
+      if (!mounted) return;
+      setFlashPredictions(items);
+      setFlashChallenges(getStoredFlashChallenges());
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [player?.id]);
 
   if (!player) {
     return (
@@ -54,6 +69,11 @@ const MyPredictionsPage = () => {
   const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
   const remaining = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
   const now = Date.now();
+  const flashChallengeById = new Map(flashChallenges.map((challenge) => [challenge.id, challenge]));
+  const myFlashRows = flashPredictions
+    .filter((prediction) => prediction.playerId === player.id || getFlashPredictionsForPlayer(player.id).some((item) => item.id === prediction.id))
+    .map((prediction) => ({ prediction, challenge: flashChallengeById.get(prediction.flashId) }))
+    .filter((item): item is { prediction: FlashPrediction; challenge: FlashChallenge } => Boolean(item.challenge));
   const predictedMatches = matches
     .filter((match) => predictionByMatch.has(match.id))
     .sort(sortByTemporalProximity(now));
@@ -105,6 +125,22 @@ const MyPredictionsPage = () => {
           <Link className="btn secondary" to="/matchs">Voir les matchs</Link>
         </section>
       )}
+
+      {myFlashRows.length > 0 ? (
+        <section className="section-block">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Bonus</p>
+              <h2>Paris flash</h2>
+            </div>
+          </div>
+          <div className="flash-history-list">
+            {myFlashRows.map(({ challenge, prediction }) => (
+              <FlashChallengeCard key={`${challenge.id}-${prediction.id}`} challenge={challenge} player={player} prediction={prediction} compact />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="section-block">
         <div className="section-heading">

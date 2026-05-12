@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import FlashChallengeCard from '../components/FlashChallengeCard';
 import MatchCard from '../components/MatchCard';
 import PlayerAvatar from '../components/PlayerAvatar';
 import PrizePanel from '../components/PrizePanel';
@@ -8,8 +9,8 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useRankingMovements } from '../hooks/useRankingMovements';
-import type { ExactPredictionHighlight, Match } from '../types';
-import { buildStandings, fetchRecentExactPredictionHighlights, getPredictionsForPlayer, getStoredPredictions, getUserPointsMock, getUserRankMock, samePlayerId } from '../utils/appState';
+import type { ExactPredictionHighlight, FlashChallenge, FlashPrediction, Match, WorldCupWinnerPrediction } from '../types';
+import { buildStandings, fetchActiveFlashChallenges, fetchPlayerFlashPredictions, fetchRecentExactPredictionHighlights, fetchWorldCupWinnerPrediction, getFlashPredictionForChallenge, getPredictionsForPlayer, getStoredFlashPredictions, getStoredPredictions, getUserPointsMock, getUserRankMock, saveFlashPrediction, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { selectExactPredictionsForHomePage } from '../utils/exactPredictions';
 import { getWorldCupTeamDisplayName, shouldShowMatchInApp } from '../utils/worldCupFilters';
@@ -59,6 +60,9 @@ const HomePage = () => {
   const standings = useMemo(() => buildStandings(mockPlayers, predictions, matches), [matches, predictions]);
   const movements = useRankingMovements(standings);
   const [exactHighlights, setExactHighlights] = useState<ExactPredictionHighlight[]>([]);
+  const [worldCupTop3, setWorldCupTop3] = useState<WorldCupWinnerPrediction | null>(null);
+  const [flashChallenges, setFlashChallenges] = useState<FlashChallenge[]>([]);
+  const [flashPredictions, setFlashPredictions] = useState<FlashPrediction[]>(getStoredFlashPredictions());
   const nextMatches = selectHomeMatches(matches);
   const nextMatchGroups = groupHomeMatchesByDay(nextMatches);
   const myMap = new Map(getPredictionsForPlayer(player?.id, predictions).map((prediction) => [prediction.matchId, prediction]));
@@ -78,6 +82,34 @@ const HomePage = () => {
       mounted = false;
     };
   }, [matches, predictions, standings]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    void fetchWorldCupWinnerPrediction().then((prediction) => {
+      if (mounted) setWorldCupTop3(prediction);
+    });
+
+    void fetchActiveFlashChallenges().then((challenges) => {
+      if (mounted) setFlashChallenges(challenges);
+    });
+
+    void fetchPlayerFlashPredictions().then((items) => {
+      if (mounted) setFlashPredictions(items);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, [player?.id]);
+
+  const handleFlashAnswer = async (challenge: FlashChallenge, optionId: string) => {
+    const prediction = await saveFlashPrediction(challenge, optionId);
+    setFlashPredictions((items) => [
+      ...items.filter((item) => !(samePlayerId(item.playerId, prediction.playerId) && item.flashId === prediction.flashId)),
+      prediction,
+    ]);
+  };
 
   return (
     <div className="screen-stack">
@@ -119,6 +151,29 @@ const HomePage = () => {
           <strong>{liveMatches}</strong>
         </article>
       </section>
+
+      {player && !worldCupTop3 ? (
+        <section className="notice-panel top3-reminder-card">
+          <span className="mini-badge danger">À compléter</span>
+          <strong>Top 3 Coupe du Monde à compléter</strong>
+          <p>Choisis tes 3 favoris pour le champion du monde.</p>
+          <Link className="btn primary" to="/mon-compte">Compléter mon top 3</Link>
+        </section>
+      ) : null}
+
+      {flashChallenges.length > 0 ? (
+        <section className="flash-home-list">
+          {flashChallenges.map((challenge) => (
+            <FlashChallengeCard
+              key={challenge.id}
+              challenge={challenge}
+              player={player}
+              prediction={flashPredictions.find((item) => item.flashId === challenge.id) ?? getFlashPredictionForChallenge(challenge.id, player?.id)}
+              onAnswer={handleFlashAnswer}
+            />
+          ))}
+        </section>
+      ) : null}
 
       <section className="section-block home-ranking-section">
         <div className="section-heading">
@@ -170,7 +225,8 @@ const HomePage = () => {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Historique</p>
-            <h2>Derniers scores exacts</h2>
+            <h2>Pronos parfaits</h2>
+            <p className="section-subtitle">Les joueurs qui ont trouvé le score exact.</p>
           </div>
         </div>
 

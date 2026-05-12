@@ -1,4 +1,4 @@
-import { COUNTRY_NAME_BY_CODE, getCountryDisplayName, getCountryFlagUrl } from '../config/countryFlags';
+import { COUNTRY_ALIASES_BY_CODE, COUNTRY_NAME_BY_CODE, getCountryDisplayName, getCountryFlagUrl } from '../config/countryFlags';
 import {
   WORLD_CUP_2026_COMPETITION_CODE,
   WORLD_CUP_2026_FEATURED_TEAMS,
@@ -33,44 +33,9 @@ Object.entries(COUNTRY_NAME_BY_CODE).forEach(([code, displayName]) => {
   addAlias(displayName, code);
 });
 
-[
-  ['AR', 'ARG'],
-  ['Argentina', 'ARG'],
-  ['BR', 'BRA'],
-  ['Brazil', 'BRA'],
-  ['Brasil', 'BRA'],
-  ['CA', 'CAN'],
-  ['Canada', 'CAN'],
-  ['DE', 'GER'],
-  ['DEU', 'GER'],
-  ['Deutschland', 'GER'],
-  ['Germany', 'GER'],
-  ['EN', 'ENG'],
-  ['England', 'ENG'],
-  ['ES', 'ESP'],
-  ['Spain', 'ESP'],
-  ['FR', 'FRA'],
-  ['France', 'FRA'],
-  ['JP', 'JPN'],
-  ['Japan', 'JPN'],
-  ['Japon', 'JPN'],
-  ['MA', 'MAR'],
-  ['Morocco', 'MAR'],
-  ['MX', 'MEX'],
-  ['Mexico', 'MEX'],
-  ['Mexique', 'MEX'],
-  ['NL', 'NED'],
-  ['Nederland', 'NED'],
-  ['Netherlands', 'NED'],
-  ['Holland', 'NED'],
-  ['PT', 'POR'],
-  ['Portugal', 'POR'],
-  ['SN', 'SEN'],
-  ['Senegal', 'SEN'],
-  ['US', 'USA'],
-  ['United States', 'USA'],
-  ['USA', 'USA'],
-].forEach(([alias, code]) => addAlias(alias, code));
+Object.entries(COUNTRY_ALIASES_BY_CODE).forEach(([code, aliases]) => {
+  aliases.forEach((alias) => addAlias(alias, code));
+});
 
 const stageText = (match: Match): string =>
   normalize([

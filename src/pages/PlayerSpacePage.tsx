@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
+import WorldCupTopThreeCard from '../components/WorldCupTopThreeCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { mockPlayers } from '../data/mockPlayers';
 import { useLiveMatches } from '../hooks/useLiveMatches';
@@ -96,6 +97,8 @@ const PlayerSpacePage = () => {
           <strong>{playerStanding?.correctResults ?? 0}</strong>
         </article>
       </section>
+
+      <WorldCupTopThreeCard player={player} />
 
       <section className="action-list">
         <Link className="action-row" to="/mes-pronos">

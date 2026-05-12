@@ -101,6 +101,69 @@ create table if not exists public.app_rpc_predictions (
   unique(player_id, match_id)
 );
 
+create table if not exists public.app_rpc_world_cup_winner_predictions (
+  id uuid primary key default gen_random_uuid(),
+  player_id uuid not null references public.app_rpc_players(id) on delete cascade,
+  first_choice_code text not null,
+  second_choice_code text not null,
+  third_choice_code text not null,
+  first_choice_name text,
+  second_choice_name text,
+  third_choice_name text,
+  locked_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(player_id),
+  check (first_choice_code <> second_choice_code and first_choice_code <> third_choice_code and second_choice_code <> third_choice_code)
+);
+
+create table if not exists public.app_rpc_flash_challenges (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  match_id text,
+  match_label text,
+  closes_at timestamptz not null,
+  status text not null default 'open' check (status in ('open', 'closed', 'resolved')),
+  result_option_id uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.app_rpc_flash_options (
+  id uuid primary key default gen_random_uuid(),
+  flash_id uuid not null references public.app_rpc_flash_challenges(id) on delete cascade,
+  label text not null,
+  points_if_correct int not null check (points_if_correct between 0 and 50),
+  sort_order int not null default 0
+);
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'app_rpc_flash_result_option_fk'
+      and conrelid = 'public.app_rpc_flash_challenges'::regclass
+  ) then
+    alter table public.app_rpc_flash_challenges
+      add constraint app_rpc_flash_result_option_fk
+      foreign key (result_option_id)
+      references public.app_rpc_flash_options(id)
+      deferrable initially deferred;
+  end if;
+end $$;
+
+create table if not exists public.app_rpc_flash_predictions (
+  id uuid primary key default gen_random_uuid(),
+  flash_id uuid not null references public.app_rpc_flash_challenges(id) on delete cascade,
+  option_id uuid not null references public.app_rpc_flash_options(id) on delete cascade,
+  player_id uuid not null references public.app_rpc_players(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique(flash_id, player_id)
+);
+
 create table if not exists public.app_rpc_leaderboard_snapshots (
   id uuid primary key default gen_random_uuid(),
   period_type text not null default 'weekly',
@@ -127,6 +190,11 @@ create index if not exists idx_app_rpc_matches_competition_code on public.app_rp
 create index if not exists idx_app_rpc_predictions_player_id on public.app_rpc_predictions(player_id);
 create index if not exists idx_app_rpc_predictions_match_id on public.app_rpc_predictions(match_id);
 create index if not exists idx_app_rpc_predictions_updated_at on public.app_rpc_predictions(updated_at desc);
+create index if not exists idx_app_rpc_world_cup_winner_player on public.app_rpc_world_cup_winner_predictions(player_id);
+create index if not exists idx_app_rpc_flash_challenges_status on public.app_rpc_flash_challenges(status, closes_at desc);
+create index if not exists idx_app_rpc_flash_options_flash on public.app_rpc_flash_options(flash_id, sort_order);
+create index if not exists idx_app_rpc_flash_predictions_player on public.app_rpc_flash_predictions(player_id);
+create index if not exists idx_app_rpc_flash_predictions_flash on public.app_rpc_flash_predictions(flash_id);
 create index if not exists idx_app_rpc_leaderboard_snapshots_week on public.app_rpc_leaderboard_snapshots(period_type, week_start desc);
 create index if not exists idx_app_rpc_leaderboard_snapshots_player on public.app_rpc_leaderboard_snapshots(player_id);
 
@@ -135,6 +203,10 @@ alter table public.app_rpc_player_codes enable row level security;
 alter table public.app_rpc_sessions enable row level security;
 alter table public.app_rpc_matches enable row level security;
 alter table public.app_rpc_predictions enable row level security;
+alter table public.app_rpc_world_cup_winner_predictions enable row level security;
+alter table public.app_rpc_flash_challenges enable row level security;
+alter table public.app_rpc_flash_options enable row level security;
+alter table public.app_rpc_flash_predictions enable row level security;
 alter table public.app_rpc_leaderboard_snapshots enable row level security;
 
 alter table public.app_rpc_predictions
@@ -145,6 +217,10 @@ revoke all on public.app_rpc_player_codes from anon, authenticated;
 revoke all on public.app_rpc_sessions from anon, authenticated;
 revoke all on public.app_rpc_matches from anon, authenticated;
 revoke all on public.app_rpc_predictions from anon, authenticated;
+revoke all on public.app_rpc_world_cup_winner_predictions from anon, authenticated;
+revoke all on public.app_rpc_flash_challenges from anon, authenticated;
+revoke all on public.app_rpc_flash_options from anon, authenticated;
+revoke all on public.app_rpc_flash_predictions from anon, authenticated;
 revoke all on public.app_rpc_leaderboard_snapshots from anon, authenticated;
 grant usage on schema public to anon, authenticated;
 
@@ -281,6 +357,45 @@ from public.app_rpc_predictions pr
 left join public.app_rpc_matches m on m.id = pr.match_id
 where m.status = 'finished';
 
+create or replace function public.app_private_world_cup_country_name(p_code text)
+returns text
+language sql
+immutable
+as $$
+  select case upper(coalesce(p_code, ''))
+    when 'FRA' then 'France'
+    when 'ESP' then 'Espagne'
+    when 'ARG' then 'Argentine'
+    when 'ENG' then 'Angleterre'
+    when 'POR' then 'Portugal'
+    when 'BRA' then 'Bresil'
+    when 'NED' then 'Pays-Bas'
+    when 'MAR' then 'Maroc'
+    when 'BEL' then 'Belgique'
+    when 'GER' then 'Allemagne'
+    when 'CRO' then 'Croatie'
+    when 'ITA' then 'Italie'
+    when 'COL' then 'Colombie'
+    when 'SEN' then 'Senegal'
+    else upper(coalesce(p_code, ''))
+  end;
+$$;
+
+create or replace view public.app_rpc_flash_scored_predictions as
+select
+  fp.id,
+  fp.player_id,
+  fp.flash_id,
+  fp.option_id,
+  fp.updated_at,
+  case
+    when ch.status = 'resolved' and ch.result_option_id = fp.option_id then opt.points_if_correct
+    else 0
+  end::int as points
+from public.app_rpc_flash_predictions fp
+join public.app_rpc_flash_challenges ch on ch.id = fp.flash_id
+join public.app_rpc_flash_options opt on opt.id = fp.option_id;
+
 create or replace view public.app_rpc_leaderboard as
 select
   (row_number() over (
@@ -307,17 +422,37 @@ from (
     p.nickname,
     p.display_name,
     p.avatar_url,
-    coalesce(sum(sp.points), 0)::int as points,
-    coalesce(sum(case when sp.points = 3 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as exact_scores,
-    coalesce(sum(case when sp.points = 2 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as two_point_results,
-    coalesce(sum(case when sp.points = 1 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as one_point_results,
-    coalesce(sum(case when sp.points > 0 then 1 else 0 end), 0)::int as correct_results,
-    min(pr.updated_at) as first_prediction_at
+    (coalesce(match_stats.points, 0) + coalesce(flash_stats.points, 0))::int as points,
+    coalesce(match_stats.exact_scores, 0)::int as exact_scores,
+    coalesce(match_stats.two_point_results, 0)::int as two_point_results,
+    coalesce(match_stats.one_point_results, 0)::int as one_point_results,
+    coalesce(match_stats.correct_results, 0)::int as correct_results,
+    case
+      when match_stats.first_prediction_at is not null and flash_stats.first_prediction_at is not null
+        then least(match_stats.first_prediction_at, flash_stats.first_prediction_at)
+      else coalesce(match_stats.first_prediction_at, flash_stats.first_prediction_at)
+    end as first_prediction_at
   from public.app_rpc_players p
-  left join public.app_rpc_predictions pr on pr.player_id = p.id
-  left join public.app_rpc_scored_predictions sp on sp.id = pr.id
-  left join public.app_rpc_matches m on m.id = pr.match_id
-  group by p.id, p.nickname, p.display_name, p.avatar_url
+  left join lateral (
+    select
+      coalesce(sum(sp.points), 0)::int as points,
+      coalesce(sum(case when sp.points = 3 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as exact_scores,
+      coalesce(sum(case when sp.points = 2 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as two_point_results,
+      coalesce(sum(case when sp.points = 1 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as one_point_results,
+      coalesce(sum(case when sp.points > 0 then 1 else 0 end), 0)::int as correct_results,
+      min(pr.updated_at) as first_prediction_at
+    from public.app_rpc_predictions pr
+    left join public.app_rpc_scored_predictions sp on sp.id = pr.id
+    left join public.app_rpc_matches m on m.id = pr.match_id
+    where pr.player_id = p.id
+  ) match_stats on true
+  left join lateral (
+    select
+      coalesce(sum(fsp.points), 0)::int as points,
+      min(fsp.updated_at) as first_prediction_at
+    from public.app_rpc_flash_scored_predictions fsp
+    where fsp.player_id = p.id
+  ) flash_stats on true
 ) ranked
 order by rank asc, ranked.display_name asc;
 
@@ -1027,6 +1162,290 @@ begin
 end;
 $$;
 
+create or replace function public.app_get_world_cup_winner_prediction_by_session(p_session_token uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_player_id uuid;
+begin
+  v_player_id := app_private_session_player(p_session_token);
+
+  return (
+    select jsonb_build_object(
+      'id', wp.id,
+      'player_id', wp.player_id,
+      'first_choice_code', wp.first_choice_code,
+      'second_choice_code', wp.second_choice_code,
+      'third_choice_code', wp.third_choice_code,
+      'first_choice_name', wp.first_choice_name,
+      'second_choice_name', wp.second_choice_name,
+      'third_choice_name', wp.third_choice_name,
+      'locked_at', wp.locked_at,
+      'created_at', wp.created_at,
+      'updated_at', wp.updated_at
+    )
+    from public.app_rpc_world_cup_winner_predictions wp
+    where wp.player_id = v_player_id
+  );
+end;
+$$;
+
+create or replace function public.app_save_world_cup_winner_prediction_by_session(
+  p_session_token uuid,
+  p_first_code text,
+  p_second_code text,
+  p_third_code text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_player_id uuid;
+  v_prediction public.app_rpc_world_cup_winner_predictions%rowtype;
+  v_first text := upper(trim(coalesce(p_first_code, '')));
+  v_second text := upper(trim(coalesce(p_second_code, '')));
+  v_third text := upper(trim(coalesce(p_third_code, '')));
+begin
+  v_player_id := app_private_session_player(p_session_token);
+
+  if v_first = '' or v_second = '' or v_third = '' or v_first = v_second or v_first = v_third or v_second = v_third then
+    raise exception 'Top 3 invalide';
+  end if;
+
+  insert into public.app_rpc_world_cup_winner_predictions (
+    player_id,
+    first_choice_code,
+    second_choice_code,
+    third_choice_code,
+    first_choice_name,
+    second_choice_name,
+    third_choice_name,
+    updated_at
+  )
+  values (
+    v_player_id,
+    v_first,
+    v_second,
+    v_third,
+    public.app_private_world_cup_country_name(v_first),
+    public.app_private_world_cup_country_name(v_second),
+    public.app_private_world_cup_country_name(v_third),
+    now()
+  )
+  on conflict (player_id) do update set
+    first_choice_code = excluded.first_choice_code,
+    second_choice_code = excluded.second_choice_code,
+    third_choice_code = excluded.third_choice_code,
+    first_choice_name = excluded.first_choice_name,
+    second_choice_name = excluded.second_choice_name,
+    third_choice_name = excluded.third_choice_name,
+    updated_at = excluded.updated_at
+  where public.app_rpc_world_cup_winner_predictions.locked_at is null
+  returning * into v_prediction;
+
+  if v_prediction.id is null then
+    raise exception 'Top 3 verrouille';
+  end if;
+
+  return jsonb_build_object(
+    'id', v_prediction.id,
+    'player_id', v_prediction.player_id,
+    'first_choice_code', v_prediction.first_choice_code,
+    'second_choice_code', v_prediction.second_choice_code,
+    'third_choice_code', v_prediction.third_choice_code,
+    'first_choice_name', v_prediction.first_choice_name,
+    'second_choice_name', v_prediction.second_choice_name,
+    'third_choice_name', v_prediction.third_choice_name,
+    'locked_at', v_prediction.locked_at,
+    'created_at', v_prediction.created_at,
+    'updated_at', v_prediction.updated_at
+  );
+end;
+$$;
+
+create or replace function public.app_private_flash_options_json(p_flash_id uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id', fo.id,
+    'flash_id', fo.flash_id,
+    'label', fo.label,
+    'points_if_correct', fo.points_if_correct,
+    'sort_order', fo.sort_order
+  ) order by fo.sort_order asc, fo.label asc), '[]'::jsonb)
+  from public.app_rpc_flash_options fo
+  where fo.flash_id = p_flash_id;
+$$;
+
+create or replace function public.app_private_flash_challenge_json(p_flash_id uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select jsonb_build_object(
+    'id', ch.id,
+    'title', ch.title,
+    'description', ch.description,
+    'match_id', ch.match_id,
+    'match_label', ch.match_label,
+    'closes_at', ch.closes_at,
+    'status', ch.status,
+    'result_option_id', ch.result_option_id,
+    'created_at', ch.created_at,
+    'updated_at', ch.updated_at,
+    'options', public.app_private_flash_options_json(ch.id)
+  )
+  from public.app_rpc_flash_challenges ch
+  where ch.id = p_flash_id;
+$$;
+
+create or replace function public.app_get_active_flash_challenges(p_session_token uuid default null)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(jsonb_agg(public.app_private_flash_challenge_json(ch.id) order by ch.closes_at asc), '[]'::jsonb)
+  from public.app_rpc_flash_challenges ch
+  where ch.status = 'open'
+    and ch.closes_at > now();
+$$;
+
+create or replace function public.app_save_flash_prediction_by_session(
+  p_session_token uuid,
+  p_flash_id uuid,
+  p_option_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_player_id uuid;
+  v_challenge public.app_rpc_flash_challenges%rowtype;
+  v_prediction public.app_rpc_flash_predictions%rowtype;
+begin
+  v_player_id := app_private_session_player(p_session_token);
+
+  select *
+  into v_challenge
+  from public.app_rpc_flash_challenges
+  where id = p_flash_id;
+
+  if v_challenge.id is null then
+    raise exception 'Flash introuvable';
+  end if;
+
+  if v_challenge.status <> 'open' or v_challenge.closes_at <= now() then
+    raise exception 'Flash ferme';
+  end if;
+
+  if not exists (
+    select 1
+    from public.app_rpc_flash_options fo
+    where fo.id = p_option_id
+      and fo.flash_id = p_flash_id
+  ) then
+    raise exception 'Option invalide';
+  end if;
+
+  insert into public.app_rpc_flash_predictions (flash_id, option_id, player_id, updated_at)
+  values (p_flash_id, p_option_id, v_player_id, now())
+  on conflict (flash_id, player_id) do update set
+    option_id = excluded.option_id,
+    updated_at = excluded.updated_at
+  returning * into v_prediction;
+
+  return jsonb_build_object(
+    'id', v_prediction.id,
+    'flash_id', v_prediction.flash_id,
+    'option_id', v_prediction.option_id,
+    'player_id', v_prediction.player_id,
+    'points', null,
+    'created_at', v_prediction.created_at,
+    'updated_at', v_prediction.updated_at
+  );
+end;
+$$;
+
+create or replace function public.app_get_player_flash_predictions_by_session(p_session_token uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_player_id uuid;
+begin
+  v_player_id := app_private_session_player(p_session_token);
+
+  return (
+    select coalesce(jsonb_agg(jsonb_build_object(
+      'id', fp.id,
+      'flash_id', fp.flash_id,
+      'option_id', fp.option_id,
+      'player_id', fp.player_id,
+      'points', coalesce(fsp.points, 0),
+      'created_at', fp.created_at,
+      'updated_at', fp.updated_at,
+      'challenge', public.app_private_flash_challenge_json(fp.flash_id),
+      'selected_option', jsonb_build_object(
+        'id', fo.id,
+        'flash_id', fo.flash_id,
+        'label', fo.label,
+        'points_if_correct', fo.points_if_correct,
+        'sort_order', fo.sort_order
+      )
+    ) order by fp.updated_at desc), '[]'::jsonb)
+    from public.app_rpc_flash_predictions fp
+    join public.app_rpc_flash_options fo on fo.id = fp.option_id
+    left join public.app_rpc_flash_scored_predictions fsp on fsp.id = fp.id
+    where fp.player_id = v_player_id
+  );
+end;
+$$;
+
+create or replace function public.app_get_public_player_flash_predictions(p_player_id uuid)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'id', fp.id,
+    'flash_id', fp.flash_id,
+    'option_id', fp.option_id,
+    'player_id', fp.player_id,
+    'points', case when ch.status = 'resolved' then coalesce(fsp.points, 0) else null end,
+    'created_at', fp.created_at,
+    'updated_at', fp.updated_at,
+    'challenge', public.app_private_flash_challenge_json(fp.flash_id),
+    'selected_option', jsonb_build_object(
+      'id', fo.id,
+      'flash_id', fo.flash_id,
+      'label', fo.label,
+      'points_if_correct', fo.points_if_correct,
+      'sort_order', fo.sort_order
+    )
+  ) order by fp.updated_at desc), '[]'::jsonb)
+  from public.app_rpc_flash_predictions fp
+  join public.app_rpc_flash_challenges ch on ch.id = fp.flash_id
+  join public.app_rpc_flash_options fo on fo.id = fp.option_id
+  left join public.app_rpc_flash_scored_predictions fsp on fsp.id = fp.id
+  where fp.player_id = p_player_id
+    and (ch.status in ('closed', 'resolved') or ch.closes_at <= now());
+$$;
+
 create or replace function public.app_update_player_avatar(p_session_token uuid, p_avatar_url text)
 returns jsonb
 language plpgsql
@@ -1149,6 +1568,9 @@ revoke all on function public.app_private_prediction_is_public(text, timestamptz
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;
 revoke all on function public.app_create_weekly_leaderboard_snapshot() from public, anon, authenticated;
+revoke all on function public.app_private_world_cup_country_name(text) from public, anon, authenticated;
+revoke all on function public.app_private_flash_options_json(uuid) from public, anon, authenticated;
+revoke all on function public.app_private_flash_challenge_json(uuid) from public, anon, authenticated;
 
 grant execute on function public.app_login_player(text, text) to anon;
 grant execute on function public.app_get_player_state(uuid) to anon;
@@ -1162,5 +1584,11 @@ grant execute on function public.app_save_prediction(uuid, text, int, int, text)
 grant execute on function public.app_sync_local_predictions(uuid, jsonb) to anon;
 grant execute on function public.app_update_player_avatar(uuid, text) to anon;
 grant execute on function public.app_sync_matches(jsonb) to anon;
+grant execute on function public.app_get_world_cup_winner_prediction_by_session(uuid) to anon;
+grant execute on function public.app_save_world_cup_winner_prediction_by_session(uuid, text, text, text) to anon;
+grant execute on function public.app_get_active_flash_challenges(uuid) to anon;
+grant execute on function public.app_save_flash_prediction_by_session(uuid, uuid, uuid) to anon;
+grant execute on function public.app_get_player_flash_predictions_by_session(uuid) to anon;
+grant execute on function public.app_get_public_player_flash_predictions(uuid) to anon;
 
 select pg_notify('pgrst', 'reload schema');

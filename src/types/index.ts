@@ -94,6 +94,63 @@ export interface PublicPrediction {
 
 export type PredictionResultType = 'exact' | 'two-point' | 'winner' | 'lost' | 'pending';
 
+export interface WorldCupWinnerPrediction {
+  id: string;
+  playerId: string;
+  firstChoiceCode: string;
+  secondChoiceCode: string;
+  thirdChoiceCode: string;
+  firstChoiceName?: string;
+  secondChoiceName?: string;
+  thirdChoiceName?: string;
+  lockedAt?: string | null;
+  createdAt?: string;
+  updatedAt: string;
+}
+
+export type FlashChallengeStatus = 'open' | 'closed' | 'resolved';
+
+export interface FlashOption {
+  id: string;
+  flashId: string;
+  label: string;
+  pointsIfCorrect: number;
+  sortOrder: number;
+}
+
+export interface FlashChallenge {
+  id: string;
+  title: string;
+  description?: string | null;
+  matchId?: string | null;
+  matchLabel?: string | null;
+  closesAt: string;
+  status: FlashChallengeStatus;
+  resultOptionId?: string | null;
+  options: FlashOption[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface FlashPrediction {
+  id: string;
+  flashId: string;
+  optionId: string;
+  playerId: string;
+  points?: number | null;
+  createdAt?: string;
+  updatedAt: string;
+}
+
+export interface PublicFlashPrediction {
+  id: string;
+  challenge: FlashChallenge;
+  selectedOption: FlashOption;
+  points?: number | null;
+  resultType: 'won' | 'lost' | 'pending';
+  updatedAt: string;
+}
+
 export interface ExactPredictionWinner {
   playerId: string;
   nickname: string;

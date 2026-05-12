@@ -1470,6 +1470,242 @@ small {
   background: var(--lime);
 }
 
+.mini-badge.danger {
+  background: var(--red);
+}
+
+.top3-reminder-card {
+  border-color: rgba(255, 79, 94, 0.36);
+  background: #fff6f7;
+}
+
+.top3-reminder-card strong {
+  color: var(--red);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.28rem;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.worldcup-top3-card {
+  display: grid;
+  gap: 0.82rem;
+  border-color: var(--blue);
+}
+
+.worldcup-top3-list {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.worldcup-top3-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.42rem 0.55rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.62rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--blue-soft);
+}
+
+.worldcup-top3-row img {
+  grid-column: 1;
+  justify-self: center;
+  width: 1.65rem;
+  height: 1.1rem;
+  object-fit: cover;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(28, 70, 245, 0.14);
+}
+
+.worldcup-top3-rank {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--blue);
+  font-weight: 950;
+}
+
+.worldcup-top3-row select {
+  min-width: 0;
+  min-height: 2.35rem;
+  padding: 0.42rem 0.5rem;
+  border: 1px solid rgba(28, 70, 245, 0.22);
+  border-radius: 8px;
+  color: var(--text);
+  background: #fff;
+  font-weight: 850;
+}
+
+.worldcup-top3-points {
+  grid-column: 2;
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.form-error,
+.form-success {
+  padding: 0.58rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.form-error {
+  color: #9f1122;
+  background: #ffe1e6;
+}
+
+.form-success {
+  color: #0a6f3a;
+  background: #dcffe9;
+}
+
+.flash-home-list,
+.flash-history-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.flash-card {
+  display: grid;
+  gap: 0.72rem;
+  padding: 0.82rem;
+  border: 2px solid rgba(255, 79, 94, 0.38);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 22px rgba(255, 79, 94, 0.08);
+}
+
+.flash-card.compact {
+  gap: 0.58rem;
+  padding: 0.72rem;
+}
+
+.flash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.flash-card-header small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-align: right;
+}
+
+.flash-badge {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--red);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.flash-card-copy {
+  display: grid;
+  gap: 0.24rem;
+  min-width: 0;
+}
+
+.flash-card-copy h3 {
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.35rem;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.flash-card-copy strong,
+.flash-card-copy p,
+.flash-response {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.flash-card-copy strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.flash-card-copy p {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.flash-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.flash-option {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.55rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  font-weight: 950;
+}
+
+.flash-option span,
+.flash-option strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.flash-option.selected {
+  color: #fff;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.flash-option.winner {
+  color: var(--ink);
+  background: var(--lime);
+  border-color: var(--lime);
+}
+
+.flash-option:disabled {
+  opacity: 0.78;
+}
+
+.flash-response {
+  color: var(--blue);
+  font-size: 0.82rem;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
+.flash-response.muted,
+.flash-card-login p {
+  color: var(--muted);
+}
+
+.flash-card-login {
+  display: grid;
+  gap: 0.55rem;
+}
+
 .match-detail-screen {
   touch-action: pan-y;
 }
