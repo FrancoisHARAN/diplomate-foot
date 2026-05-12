@@ -1,10 +1,11 @@
 import { createContext, createElement, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { mockMatches } from '../data/mockMatches';
 import type { Match } from '../types';
-import { fetchCloudMatches, syncMatchesToCloud } from '../utils/appState';
+import { fetchCloudMatches } from '../utils/appState';
 
 interface LiveMatchesPayload {
   generatedAt?: string;
+  lastDataChangedAt?: string;
   source?: string;
   message?: string;
   matches?: Match[];
@@ -13,6 +14,7 @@ interface LiveMatchesPayload {
 interface LiveMatchesState {
   matches: Match[];
   generatedAt: string | null;
+  lastDataChangedAt: string | null;
   source: string;
   message: string | null;
   isFallback: boolean;
@@ -21,6 +23,7 @@ interface LiveMatchesState {
 const fallbackState: LiveMatchesState = {
   matches: mockMatches,
   generatedAt: null,
+  lastDataChangedAt: null,
   source: 'fallback-test',
   message: 'Données de test locales en attendant la clé API foot.',
   isFallback: true,
@@ -34,19 +37,28 @@ const hasPlaceholderTeam = (match: Match) => {
     match.homeTeam.id.startsWith('home-') ||
     match.awayTeam.id.startsWith('away-') ||
     labels.includes('equipe domicile') ||
-    labels.includes('equipe exterieure') ||
     labels.includes('équipe domicile') ||
+    labels.includes('equipe exterieure') ||
     labels.includes('équipe extérieure')
   );
 };
+
+const getLatestCloudUpdate = (matches: Match[]) =>
+  matches.reduce<string | null>((latest, match) => {
+    if (!match.lastUpdated) return latest;
+    if (!latest) return match.lastUpdated;
+    return new Date(match.lastUpdated).getTime() > new Date(latest).getTime() ? match.lastUpdated : latest;
+  }, null);
 
 const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   const response = await fetch(liveDataUrl(), { cache: 'no-store' });
   if (!response.ok) {
     const cloudMatches = await fetchCloudMatches();
+    const cloudUpdatedAt = getLatestCloudUpdate(cloudMatches);
     return cloudMatches.length > 0 ? {
       matches: cloudMatches,
-      generatedAt: cloudMatches[0]?.lastUpdated ?? null,
+      generatedAt: cloudUpdatedAt,
+      lastDataChangedAt: cloudUpdatedAt,
       source: 'supabase-rpc',
       message: null,
       isFallback: false,
@@ -57,14 +69,17 @@ const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   const liveMatches = Array.isArray(payload.matches)
     ? payload.matches
         .filter((match) => !hasPlaceholderTeam(match))
-        .map((match) => ({ ...match, lastUpdated: payload.generatedAt ?? match.lastUpdated }))
+        .map((match) => ({
+          ...match,
+          lastUpdated: match.lastUpdated ?? payload.lastDataChangedAt ?? payload.generatedAt,
+        }))
     : [];
   const matches = liveMatches.length > 0 ? liveMatches : mockMatches;
-  void syncMatchesToCloud(matches);
 
   return {
     matches,
     generatedAt: payload.generatedAt ?? null,
+    lastDataChangedAt: payload.lastDataChangedAt ?? payload.generatedAt ?? null,
     source: payload.source ?? 'live-data',
     message: payload.message ?? null,
     isFallback: payload.source?.includes('fallback') ?? false,

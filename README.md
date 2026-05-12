@@ -44,6 +44,12 @@ Pour GitHub Pages, ajouter ces variables dans:
 
 Sans ces variables, le site continue en mode localStorage, mais les donnees ne sont pas synchronisees entre appareils.
 
+Pour la synchronisation cloud des scores live, ajouter aussi un secret GitHub Actions:
+
+- `SUPABASE_MATCH_SYNC_TOKEN`
+
+Ce token ne va jamais dans le frontend. Son hash SHA-256 doit etre enregistre dans Supabase, voir la section Supabase.
+
 ## Synchronisation cloud Supabase
 
 Avant, les points, pronostics et avatars etaient stockes uniquement dans le `localStorage` du navigateur. Donc le telephone et le PC pouvaient afficher deux versions differentes du meme joueur.
@@ -67,6 +73,7 @@ Le frontend ne fait plus d'`insert`/`update` direct dans les tables joueurs ou p
 - `app_get_matches`
 - `app_sync_local_predictions`
 - `app_update_player_avatar`
+- `app_sync_matches` avec token de synchro serveur
 
 ## Securite MVP
 
@@ -78,14 +85,15 @@ Ce qui est evite:
 - pas de hash de vrais codes joueurs dans GitHub;
 - pas de `service_role` key cote frontend;
 - pas d'ecriture directe anon dans les tables sensibles;
+- pas de mise a jour des scores depuis le navigateur;
 - pas de `DELETE` frontend;
 - pas de Supabase Auth email.
 
 Ce qui reste MVP:
 
 - le `session_token` est stocke localement pour garder le joueur connecte;
-- les matchs peuvent etre synchronises via RPC depuis le frontend pour que le classement cloud puisse calculer les points;
-- pour une version publique plus robuste, il faudra verrouiller la mise a jour des matchs via un job serveur ou une Edge Function.
+- les scores live sont synchronises par GitHub Actions via une RPC protegee par token;
+- pour une version publique plus robuste, ce job pourrait etre remplace par une Edge Function ou un backend dedie.
 
 ## Supabase
 
@@ -93,7 +101,16 @@ Ce qui reste MVP:
 2. Ouvrir le SQL Editor.
 3. Executer tout le fichier `supabase/schema.sql`.
 4. Ajouter les variables `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`.
-5. Redeployer GitHub Pages.
+5. Generer un token aleatoire pour la synchro des matchs et enregistrer son hash:
+
+```sql
+insert into public.app_rpc_settings (key, value_hash)
+values ('match_sync_token_hash', encode(digest('TON_TOKEN_SECRET', 'sha256'), 'hex'))
+on conflict (key) do update set value_hash = excluded.value_hash, updated_at = now();
+```
+
+6. Ajouter la valeur brute `TON_TOKEN_SECRET` dans le secret GitHub Actions `SUPABASE_MATCH_SYNC_TOKEN`.
+7. Redeployer GitHub Pages.
 
 Le schema cree notamment:
 
@@ -231,7 +248,7 @@ Pour activer les vraies donnees football:
 3. Ajouter un secret nomme `FOOTBALL_DATA_TOKEN`.
 4. Lancer le workflow `Update football data` une premiere fois.
 
-Quand Supabase est configure, le frontend synchronise aussi les matchs vers Supabase via RPC afin que le classement cloud puisse calculer les points.
+Quand Supabase est configure, le workflow GitHub Actions synchronise aussi les matchs vers Supabase via `app_sync_matches`. Cette RPC exige `SUPABASE_MATCH_SYNC_TOKEN`; le frontend ne peut pas modifier les scores.
 
 ## Actualisation des scores
 

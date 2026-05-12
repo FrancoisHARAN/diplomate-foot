@@ -7,9 +7,9 @@ import { formatLastUpdated } from '../utils/date';
 
 const AppHeader = () => {
   const { player } = usePlayerSession();
-  const { matches, generatedAt, isFallback } = useLiveMatches();
+  const { matches, lastDataChangedAt, isFallback } = useLiveMatches();
   const points = player ? getUserPointsMock(matches) : 0;
-  const updatedAt = formatLastUpdated(generatedAt);
+  const updatedAt = formatLastUpdated(lastDataChangedAt);
 
   return (
     <header className="app-header">
@@ -17,7 +17,7 @@ const AppHeader = () => {
         <img className="header-logo" src={`${import.meta.env.BASE_URL}brand/logo-diplomate.png`} alt="" />
         <span>
           <strong>Le Diplomate</strong>
-          <small>Dernière actu : {isFallback ? 'test' : updatedAt ?? 'live'}</small>
+          <small>Dernière actualisation : {isFallback ? 'test' : updatedAt ?? '--:--'}</small>
         </span>
       </Link>
 

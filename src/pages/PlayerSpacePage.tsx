@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PlayerAvatar from '../components/PlayerAvatar';
 import WorldCupTopThreeCard from '../components/WorldCupTopThreeCard';
@@ -38,6 +39,9 @@ const PlayerSpacePage = () => {
   const navigate = useNavigate();
   const { player, logout, refreshPlayer } = usePlayerSession();
   const { matches } = useLiveMatches();
+  const [photoStatus, setPhotoStatus] = useState('');
+  const [photoError, setPhotoError] = useState('');
+  const [photoSaving, setPhotoSaving] = useState(false);
 
   if (!player) {
     return (
@@ -67,16 +71,30 @@ const PlayerSpacePage = () => {
           <input
             type="file"
             accept="image/*"
+            disabled={photoSaving}
             onChange={async (event) => {
               const file = event.currentTarget.files?.[0];
               if (!file) return;
-              const imageDataUrl = await resizeImageFile(file);
-              setPlayerProfileImage(player.id, imageDataUrl);
-              refreshPlayer();
+              setPhotoStatus('');
+              setPhotoError('');
+              setPhotoSaving(true);
+              try {
+                const imageDataUrl = await resizeImageFile(file);
+                await setPlayerProfileImage(player.id, imageDataUrl);
+                refreshPlayer();
+                setPhotoStatus('Photo enregistrée.');
+              } catch (error) {
+                setPhotoError(error instanceof Error ? error.message : "Impossible d'enregistrer la photo.");
+              } finally {
+                setPhotoSaving(false);
+                event.currentTarget.value = '';
+              }
             }}
           />
-          <span>Changer la photo</span>
+          <span>{photoSaving ? 'Enregistrement...' : 'Changer la photo'}</span>
         </label>
+        {photoStatus ? <p className="success-msg">{photoStatus}</p> : null}
+        {photoError ? <p className="error-msg">{photoError}</p> : null}
       </section>
 
       <section className="quick-stats">

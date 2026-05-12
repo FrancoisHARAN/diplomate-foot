@@ -25,6 +25,7 @@ const MatchDetailPage = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const dirtyRef = useRef(false);
   const latestDraft = useRef<{
@@ -34,7 +35,7 @@ const MatchDetailPage = () => {
     playerReady: boolean;
     editable: boolean;
   }>({ match: null, homeScore: 0, awayScore: 0, playerReady: false, editable: false });
-  const persistDraftRef = useRef<(silent?: boolean) => boolean>(() => true);
+  const persistDraftRef = useRef<(silent?: boolean) => Promise<boolean>>(async () => true);
 
   const match = matches.find((item) => item.id === matchId);
   const playableMatches = useMemo(
@@ -51,12 +52,12 @@ const MatchDetailPage = () => {
   const prediction = useMemo(() => (match ? getPredictionForMatch(match.id) : undefined), [match, refresh]);
   const editable = Boolean(match && canEditPrediction(match, new Date(clock)) && match.status === 'upcoming');
 
-  const persistDraft = (silent = true): boolean => {
+  const persistDraft = async (silent = true): Promise<boolean> => {
     const draft = latestDraft.current;
     if (!dirtyRef.current || !draft.match || !draft.playerReady || !draft.editable) return true;
 
     try {
-      savePrediction(draft.match, draft.homeScore, draft.awayScore);
+      await savePrediction(draft.match, draft.homeScore, draft.awayScore);
       dirtyRef.current = false;
       if (!silent) {
         setRefresh((value) => value + 1);
@@ -86,7 +87,7 @@ const MatchDetailPage = () => {
 
   useEffect(() => {
     const saveBeforeUnload = () => {
-      persistDraftRef.current(true);
+      void persistDraftRef.current(true);
     };
 
     window.addEventListener('beforeunload', saveBeforeUnload);
@@ -155,19 +156,22 @@ const MatchDetailPage = () => {
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError('');
     setMessage('');
+    setIsSaving(true);
 
     try {
-      savePrediction(match, homeScore, awayScore);
+      await savePrediction(match, homeScore, awayScore);
       dirtyRef.current = false;
       setRefresh((value) => value + 1);
       setMessage('Ton prono a bien été pris en compte.');
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Impossible d'enregistrer ce prono.");
       setClock(Date.now());
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -179,9 +183,9 @@ const MatchDetailPage = () => {
     setError('');
   };
 
-  const navigateToMatch = (target: typeof match | null) => {
+  const navigateToMatch = async (target: typeof match | null) => {
     if (!target) return;
-    persistDraftRef.current(true);
+    await persistDraftRef.current(true);
     navigate(`/matchs/${target.id}`);
   };
 
@@ -198,8 +202,8 @@ const MatchDetailPage = () => {
     touchStart.current = null;
 
     if (Math.abs(deltaX) < 70 || Math.abs(deltaY) > 90) return;
-    if (deltaX < 0) navigateToMatch(nextMatch);
-    if (deltaX > 0) navigateToMatch(previousMatch);
+    if (deltaX < 0) void navigateToMatch(nextMatch);
+    if (deltaX > 0) void navigateToMatch(previousMatch);
   };
 
   return (
@@ -316,7 +320,9 @@ const MatchDetailPage = () => {
               </div>
             </div>
 
-            <button className="btn primary" type="submit">{prediction ? 'Enregistrer la modification' : 'Valider mon prono'}</button>
+            <button className="btn primary" type="submit" disabled={isSaving}>
+              {isSaving ? 'Enregistrement...' : prediction ? 'Enregistrer la modification' : 'Valider mon prono'}
+            </button>
           </form>
         ) : null}
 
@@ -334,8 +340,8 @@ const MatchDetailPage = () => {
       </section>
 
       <nav className="match-step-nav" aria-label="Navigation entre les matchs">
-        <button className="btn ghost" type="button" disabled={!previousMatch} onClick={() => navigateToMatch(previousMatch)}>Match précédent</button>
-        <button className="btn secondary" type="button" disabled={!nextMatch} onClick={() => navigateToMatch(nextMatch)}>Match suivant</button>
+        <button className="btn ghost" type="button" disabled={!previousMatch || isSaving} onClick={() => void navigateToMatch(previousMatch)}>Match précédent</button>
+        <button className="btn secondary" type="button" disabled={!nextMatch || isSaving} onClick={() => void navigateToMatch(nextMatch)}>Match suivant</button>
       </nav>
     </div>
   );

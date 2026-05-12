@@ -7,7 +7,7 @@ import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
 import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResultType, isFlashChallengeOpen } from './flashChallenges';
 import { sortLeaderboardEntries } from './leaderboard';
-import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, getPredictionResultType } from './points';
+import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultType } from './points';
 import { isPredictionPublic } from './predictionVisibility';
 import { getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
@@ -273,14 +273,34 @@ const updateCurrentPlayer = (patch: Partial<CurrentPlayer>): CurrentPlayer | nul
   return next;
 };
 
-export const setPlayerProfileImage = (playerId: string, imageDataUrl: string): void => {
+const writePlayerProfileImage = (playerId: string, imageDataUrl: string): void => {
   const canonicalId = canonicalPlayerId(playerId);
   writeJson(STORAGE_KEYS.profileImages, { ...getPlayerProfileImages(), [playerId]: imageDataUrl, [canonicalId]: imageDataUrl });
+};
+
+export const setPlayerProfileImage = async (playerId: string, imageDataUrl: string): Promise<CurrentPlayer | null> => {
   const current = getCurrentPlayer();
-  if (current && (current.id === playerId || samePlayerId(current.legacyId, playerId))) {
-    updateCurrentPlayer({ avatarUrl: imageDataUrl });
+
+  if (isSupabaseConfigured) {
+    if (!current?.sessionToken || !samePlayerId(current.id, playerId)) {
+      throw new Error('Reconnecte-toi pour modifier ta photo.');
+    }
+
+    const player = await supabaseRpc<RpcPlayerSummary>('app_update_player_avatar', {
+      p_session_token: current.sessionToken,
+      p_avatar_url: imageDataUrl,
+    });
+    const next = toCurrentPlayer({ ...player, session_token: current.sessionToken });
+    writeJson(STORAGE_KEYS.currentPlayer, next);
+    writePlayerProfileImage(next.id, next.avatarUrl ?? imageDataUrl);
+    return next;
   }
-  syncCurrentPlayerToCloud();
+
+  writePlayerProfileImage(playerId, imageDataUrl);
+  if (current && (current.id === playerId || samePlayerId(current.legacyId, playerId))) {
+    return updateCurrentPlayer({ avatarUrl: imageDataUrl });
+  }
+  return current;
 };
 
 const findOrCreateLocalPlayer = (nickname: string, code: string): Player => {
@@ -437,38 +457,6 @@ export const syncCloudState = async (): Promise<boolean> => {
   }
 };
 
-const syncPredictionToCloud = (match: Match, prediction: Prediction): void => {
-  const current = getCurrentPlayer();
-  if (!isSupabaseConfigured || !current?.sessionToken) return;
-
-  void syncMatchesToCloud([match])
-    .then(() =>
-      supabaseRpc<RpcPredictionRow>('app_save_prediction_by_session', {
-        p_session_token: current.sessionToken,
-        p_match_id: prediction.matchId,
-        p_home_score: prediction.homeScore,
-        p_away_score: prediction.awayScore,
-      }),
-    )
-    .then(() => syncCloudState())
-    .catch((error) => console.warn('Prediction cloud sync failed.', error));
-};
-
-const syncCurrentPlayerToCloud = (): void => {
-  const current = getCurrentPlayer();
-  if (!isSupabaseConfigured || !current?.sessionToken || !current.avatarUrl) return;
-
-  void supabaseRpc<RpcPlayerSummary>('app_update_player_avatar', {
-    p_session_token: current.sessionToken,
-    p_avatar_url: current.avatarUrl,
-  })
-    .then((player) => {
-      const next = toCurrentPlayer({ ...player, session_token: current.sessionToken });
-      writeJson(STORAGE_KEYS.currentPlayer, next);
-    })
-    .catch((error) => console.warn('Player avatar cloud sync failed.', error));
-};
-
 export const getStoredPredictions = (): Prediction[] => {
   const existing = readJson<Prediction[]>(STORAGE_KEYS.predictions, []);
   if (existing.length > 0) return existing;
@@ -506,7 +494,16 @@ export const getPredictionForMatch = (matchId: string): Prediction | undefined =
   return getPredictionsForPlayer(current.id).find((prediction) => prediction.matchId === matchId);
 };
 
-export const savePrediction = (match: Match, homeScore: number, awayScore: number): Prediction => {
+const writePredictionToCache = (prediction: Prediction, player: CurrentPlayer): void => {
+  const all = getStoredPredictions();
+  const existing = all.find((item) => item.matchId === prediction.matchId && predictionBelongsToPlayer(item, player));
+  const next = existing
+    ? all.map((item) => (item.id === existing.id ? prediction : item))
+    : [...all, prediction];
+  writeJson(STORAGE_KEYS.predictions, next);
+};
+
+export const savePrediction = async (match: Match, homeScore: number, awayScore: number): Promise<Prediction> => {
   const player = getCurrentPlayer();
   if (!player) throw new Error('Joueur non connecté');
   if (!canEditPrediction(match, new Date())) {
@@ -526,12 +523,24 @@ export const savePrediction = (match: Match, homeScore: number, awayScore: numbe
     updatedAt: new Date().toISOString(),
   };
 
-  const next = existing
-    ? all.map((prediction) => (prediction.id === existing.id ? nextPrediction : prediction))
-    : [...all, nextPrediction];
+  if (isSupabaseConfigured) {
+    if (!player.sessionToken) {
+      throw new Error('Reconnecte-toi pour enregistrer ce prono.');
+    }
 
-  writeJson(STORAGE_KEYS.predictions, next);
-  syncPredictionToCloud(match, nextPrediction);
+    const row = await supabaseRpc<RpcPredictionRow>('app_save_prediction_by_session', {
+      p_session_token: player.sessionToken,
+      p_match_id: match.id,
+      p_home_score: homeScore,
+      p_away_score: awayScore,
+    });
+    const cloudPrediction = fromRpcPrediction(row);
+    writePredictionToCache(cloudPrediction, player);
+    await syncCloudState();
+    return cloudPrediction;
+  }
+
+  writePredictionToCache(nextPrediction, player);
   return nextPrediction;
 };
 
@@ -619,24 +628,24 @@ export const saveWorldCupWinnerPrediction = async (
     thirdChoiceName: getWorldCupWinnerCountryName(thirdChoiceCode),
     updatedAt: now,
   };
-  writeWorldCupWinnerPrediction(localPrediction);
 
-  if (isSupabaseConfigured && current.sessionToken) {
-    try {
-      const row = await supabaseRpc<RpcWorldCupWinnerPrediction>('app_save_world_cup_winner_prediction_by_session', {
-        p_session_token: current.sessionToken,
-        p_first_code: firstChoiceCode,
-        p_second_code: secondChoiceCode,
-        p_third_code: thirdChoiceCode,
-      });
-      const cloudPrediction = fromRpcWorldCupWinnerPrediction(row);
-      writeWorldCupWinnerPrediction(cloudPrediction);
-      return cloudPrediction;
-    } catch (error) {
-      console.warn('World Cup top 3 cloud sync failed.', error);
+  if (isSupabaseConfigured) {
+    if (!current.sessionToken) {
+      throw new Error('Reconnecte-toi pour enregistrer ton top 3.');
     }
+
+    const row = await supabaseRpc<RpcWorldCupWinnerPrediction>('app_save_world_cup_winner_prediction_by_session', {
+      p_session_token: current.sessionToken,
+      p_first_code: firstChoiceCode,
+      p_second_code: secondChoiceCode,
+      p_third_code: thirdChoiceCode,
+    });
+    const cloudPrediction = fromRpcWorldCupWinnerPrediction(row);
+    writeWorldCupWinnerPrediction(cloudPrediction);
+    return cloudPrediction;
   }
 
+  writeWorldCupWinnerPrediction(localPrediction);
   return localPrediction;
 };
 
@@ -762,24 +771,24 @@ export const saveFlashPrediction = async (challenge: FlashChallenge, optionId: s
     updatedAt: now,
   };
   writeFlashChallenges([challenge]);
-  writeFlashPrediction(localPrediction);
 
-  if (isSupabaseConfigured && current.sessionToken) {
-    try {
-      const row = await supabaseRpc<RpcFlashPredictionRow>('app_save_flash_prediction_by_session', {
-        p_session_token: current.sessionToken,
-        p_flash_id: challenge.id,
-        p_option_id: optionId,
-      });
-      const cloudPrediction = fromRpcFlashPrediction(row);
-      writeFlashPrediction(cloudPrediction);
-      await syncCloudState();
-      return cloudPrediction;
-    } catch (error) {
-      console.warn('Flash prediction cloud sync failed.', error);
+  if (isSupabaseConfigured) {
+    if (!current.sessionToken) {
+      throw new Error('Reconnecte-toi pour enregistrer ce flash.');
     }
+
+    const row = await supabaseRpc<RpcFlashPredictionRow>('app_save_flash_prediction_by_session', {
+      p_session_token: current.sessionToken,
+      p_flash_id: challenge.id,
+      p_option_id: optionId,
+    });
+    const cloudPrediction = fromRpcFlashPrediction(row);
+    writeFlashPrediction(cloudPrediction);
+    await syncCloudState();
+    return cloudPrediction;
   }
 
+  writeFlashPrediction(localPrediction);
   return localPrediction;
 };
 
@@ -977,48 +986,13 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
 
 export const getUserRank = (standings: Standing[], playerId?: string) => standings.find((entry) => samePlayerId(entry.playerId, playerId));
 
-const toRpcMatchPayload = (match: Match) => ({
-  id: match.id,
-  external_id: match.externalId,
-  competition_code: match.competitionCode,
-  competition_name: match.competitionName,
-  home_team: match.homeTeam,
-  away_team: match.awayTeam,
-  kickoff: match.kickoff,
-  status: match.status,
-  home_score: match.homeScore,
-  away_score: match.awayScore,
-  minute: match.minute,
-  venue: match.venue,
-  matchday: match.matchday,
-  stage: match.stage,
-  round: match.round,
-  group_name: match.group,
-  season: match.season,
-  source_competition_id: match.sourceCompetitionId,
-  points_multiplier: getMatchMultiplier(match),
-  source: match.source,
-  last_updated: match.lastUpdated,
-});
-
-export const syncMatchesToCloud = async (matches: Match[]): Promise<boolean> => {
-  if (!isSupabaseConfigured || matches.length === 0) return false;
-  try {
-    await supabaseRpc('app_sync_matches', { p_matches: matches.map(toRpcMatchPayload) });
-    return true;
-  } catch (error) {
-    console.warn('Match cloud sync failed.', error);
-    return false;
-  }
-};
-
 const fromRpcMatch = (row: RpcMatchRow): Match => ({
   id: row.id,
   externalId: row.external_id ?? undefined,
   competitionCode: row.competition_code as Match['competitionCode'],
   competitionName: row.competition_name ?? undefined,
-  homeTeam: row.home_team ?? { id: `${row.id}-home`, name: 'Equipe domicile', shortName: 'DOM' },
-  awayTeam: row.away_team ?? { id: `${row.id}-away`, name: 'Equipe extérieure', shortName: 'EXT' },
+  homeTeam: row.home_team ?? { id: `${row.id}-home`, name: 'Équipe domicile', shortName: 'DOM' },
+  awayTeam: row.away_team ?? { id: `${row.id}-away`, name: 'Équipe extérieure', shortName: 'EXT' },
   kickoff: row.kickoff,
   status: row.status,
   homeScore: row.home_score ?? undefined,

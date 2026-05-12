@@ -59,6 +59,17 @@ create table if not exists public.app_rpc_sessions (
   expires_at timestamptz not null default (now() + interval '90 days')
 );
 
+create table if not exists public.app_rpc_settings (
+  key text primary key,
+  value_hash text not null check (value_hash ~ '^[a-f0-9]{64}$'),
+  updated_at timestamptz not null default now()
+);
+
+-- Token de synchro des scores live:
+-- insert into public.app_rpc_settings (key, value_hash)
+-- values ('match_sync_token_hash', encode(digest('TON_TOKEN_SECRET', 'sha256'), 'hex'))
+-- on conflict (key) do update set value_hash = excluded.value_hash, updated_at = now();
+
 create table if not exists public.app_rpc_matches (
   id text primary key,
   external_id text,
@@ -201,6 +212,7 @@ create index if not exists idx_app_rpc_leaderboard_snapshots_player on public.ap
 alter table public.app_rpc_players enable row level security;
 alter table public.app_rpc_player_codes enable row level security;
 alter table public.app_rpc_sessions enable row level security;
+alter table public.app_rpc_settings enable row level security;
 alter table public.app_rpc_matches enable row level security;
 alter table public.app_rpc_predictions enable row level security;
 alter table public.app_rpc_world_cup_winner_predictions enable row level security;
@@ -215,6 +227,7 @@ alter table public.app_rpc_predictions
 revoke all on public.app_rpc_players from anon, authenticated;
 revoke all on public.app_rpc_player_codes from anon, authenticated;
 revoke all on public.app_rpc_sessions from anon, authenticated;
+revoke all on public.app_rpc_settings from anon, authenticated;
 revoke all on public.app_rpc_matches from anon, authenticated;
 revoke all on public.app_rpc_predictions from anon, authenticated;
 revoke all on public.app_rpc_world_cup_winner_predictions from anon, authenticated;
@@ -238,6 +251,30 @@ language sql
 stable
 as $$
   select encode(digest(p_player_id::text || ':' || coalesce(p_code, ''), 'sha256'), 'hex');
+$$;
+
+create or replace function public.app_private_require_match_sync_token(p_sync_token text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_expected_hash text;
+begin
+  select value_hash
+  into v_expected_hash
+  from public.app_rpc_settings
+  where key = 'match_sync_token_hash';
+
+  if v_expected_hash is null then
+    raise exception 'Token de synchro des matchs non configure';
+  end if;
+
+  if encode(digest(coalesce(p_sync_token, ''), 'sha256'), 'hex') <> v_expected_hash then
+    raise exception 'Token de synchro des matchs invalide';
+  end if;
+end;
 $$;
 
 create or replace function public.app_admin_create_player(p_nickname text, p_code text)
@@ -1246,23 +1283,43 @@ begin
   for v_item in select * from jsonb_array_elements(coalesce(p_predictions, '[]'::jsonb))
   loop
     v_match_id := v_item->>'match_id';
+    if coalesce(v_item->>'home_score', '') !~ '^[0-9]+$' or coalesce(v_item->>'away_score', '') !~ '^[0-9]+$' then
+      continue;
+    end if;
     v_home := (v_item->>'home_score')::int;
     v_away := (v_item->>'away_score')::int;
-    v_updated_at := coalesce((v_item->>'updated_at')::timestamptz, now());
+    begin
+      v_updated_at := coalesce((v_item->>'updated_at')::timestamptz, now());
+    exception
+      when others then
+        v_updated_at := now();
+    end;
 
     if v_match_id is null or v_home < 0 or v_home > 30 or v_away < 0 or v_away > 30 then
       continue;
     end if;
 
-    insert into public.app_rpc_predictions (player_id, match_id, home_score, away_score, updated_at)
-    values (v_player_id, v_match_id, v_home, v_away, v_updated_at)
-    on conflict (player_id, match_id) do update set
-      home_score = excluded.home_score,
-      away_score = excluded.away_score,
-      updated_at = excluded.updated_at
-    where public.app_rpc_predictions.updated_at <= excluded.updated_at;
+    if exists (
+      select 1
+      from public.app_rpc_predictions existing
+      where existing.player_id = v_player_id
+        and existing.match_id = v_match_id
+        and existing.updated_at > v_updated_at
+    ) then
+      continue;
+    end if;
 
-    v_count := v_count + 1;
+    begin
+      perform public.app_private_save_prediction(v_player_id, v_match_id, v_home, v_away);
+      update public.app_rpc_predictions
+      set updated_at = v_updated_at
+      where player_id = v_player_id
+        and match_id = v_match_id;
+      v_count := v_count + 1;
+    exception
+      when others then
+        continue;
+    end;
   end loop;
 
   return jsonb_build_object('synced_count', v_count);
@@ -1322,6 +1379,12 @@ begin
 
   if v_first = '' or v_second = '' or v_third = '' or v_first = v_second or v_first = v_third or v_second = v_third then
     raise exception 'Top 3 invalide';
+  end if;
+
+  if public.app_private_world_cup_country_name(v_first) = v_first
+    or public.app_private_world_cup_country_name(v_second) = v_second
+    or public.app_private_world_cup_country_name(v_third) = v_third then
+    raise exception 'Pays indisponible pour le Top 3';
   end if;
 
   if now() >= timestamptz '2026-06-17T00:00:00Z' then
@@ -1630,7 +1693,9 @@ begin
 end;
 $$;
 
-create or replace function public.app_sync_matches(p_matches jsonb)
+drop function if exists public.app_sync_matches(jsonb);
+
+create or replace function public.app_sync_matches(p_sync_token text, p_matches jsonb)
 returns jsonb
 language plpgsql
 security definer
@@ -1640,6 +1705,8 @@ declare
   v_item jsonb;
   v_count int := 0;
 begin
+  perform public.app_private_require_match_sync_token(p_sync_token);
+
   for v_item in select * from jsonb_array_elements(coalesce(p_matches, '[]'::jsonb))
   loop
     if coalesce(v_item->>'id', '') = '' or coalesce(v_item->>'kickoff', '') = '' then
@@ -1726,6 +1793,7 @@ $$;
 
 revoke all on function public.app_admin_create_player(text, text) from public, anon, authenticated;
 revoke all on function public.app_private_code_hash(uuid, text) from public, anon, authenticated;
+revoke all on function public.app_private_require_match_sync_token(text) from public, anon, authenticated;
 revoke all on function public.app_private_session_player(uuid) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_points(int, int, int, int, int) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_is_public(text, timestamptz) from public, anon, authenticated;
@@ -1736,6 +1804,7 @@ revoke all on function public.app_create_weekly_leaderboard_snapshot() from publ
 revoke all on function public.app_private_world_cup_country_name(text) from public, anon, authenticated;
 revoke all on function public.app_private_flash_options_json(uuid) from public, anon, authenticated;
 revoke all on function public.app_private_flash_challenge_json(uuid) from public, anon, authenticated;
+revoke all on function public.app_save_prediction(uuid, text, int, int, text) from public, anon, authenticated;
 
 grant execute on function public.app_login_player(text, text) to anon;
 grant execute on function public.app_get_player_state(uuid) to anon;
@@ -1745,10 +1814,9 @@ grant execute on function public.app_get_public_player_profile(uuid) to anon;
 grant execute on function public.app_get_recent_exact_predictions() to anon;
 grant execute on function public.app_get_leaderboard_history(int) to anon;
 grant execute on function public.app_save_prediction_by_session(uuid, text, int, int) to anon;
-grant execute on function public.app_save_prediction(uuid, text, int, int, text) to anon;
 grant execute on function public.app_sync_local_predictions(uuid, jsonb) to anon;
 grant execute on function public.app_update_player_avatar(uuid, text) to anon;
-grant execute on function public.app_sync_matches(jsonb) to anon;
+grant execute on function public.app_sync_matches(text, jsonb) to anon;
 grant execute on function public.app_get_world_cup_winner_prediction_by_session(uuid) to anon;
 grant execute on function public.app_save_world_cup_winner_prediction_by_session(uuid, text, text, text) to anon;
 grant execute on function public.app_get_active_flash_challenges(uuid) to anon;

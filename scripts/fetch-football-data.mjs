@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { buildLiveDataPayload } from './lib/football-data-change-utils.mjs';
 
 const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
 const WORLD_CUP_2026_SEASON = process.env.WORLD_CUP_2026_SEASON || '2026';
@@ -169,21 +170,22 @@ const normalizeTeam = (team, knownTeam, fallbackId, fallbackName, isNationalTeam
 };
 
 const isPlaceholderTeam = (team) => team.id.startsWith('home-') || team.id.startsWith('away-');
-
 const isDisplayableMatch = (match) => !isPlaceholderTeam(match.homeTeam) && !isPlaceholderTeam(match.awayTeam);
 
-const readArchivedFinishedMatches = async () => {
+const readExistingPayload = async () => {
   try {
-    const existing = JSON.parse(await readFile(outputPath, 'utf8'));
-    return (existing.matches ?? []).filter((match) => {
-      if (match.status !== 'finished') return false;
-      if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return false;
-      return new Date(match.kickoff).getTime() >= archiveFrom.getTime();
-    });
+    return JSON.parse(await readFile(outputPath, 'utf8'));
   } catch {
-    return [];
+    return null;
   }
 };
+
+const readArchivedFinishedMatches = (existingPayload) =>
+  (existingPayload?.matches ?? []).filter((match) => {
+    if (match.status !== 'finished') return false;
+    if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return false;
+    return new Date(match.kickoff).getTime() >= archiveFrom.getTime();
+  });
 
 const normalizeMatch = (match, competition) => {
   const knownFixture = knownFixtureTeams[String(match.id)] ?? {};
@@ -252,16 +254,32 @@ if (!token) {
   process.exit(0);
 }
 
+const previousPayload = await readExistingPayload();
 const results = [];
 for (const competition of competitions) {
   try {
-    results.push({ status: 'fulfilled', value: await fetchCompetition(competition) });
+    results.push({ competition, status: 'fulfilled', value: await fetchCompetition(competition) });
   } catch (error) {
-    results.push({ status: 'rejected', reason: error });
+    results.push({ competition, status: 'rejected', reason: error });
   }
 }
-const freshMatches = results.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
-const archivedFinishedMatches = await readArchivedFinishedMatches();
+
+const previousMatches = previousPayload?.matches ?? [];
+const fallbackMatchesByCompetition = new Map(
+  competitions.map((competition) => [
+    competition.code,
+    previousMatches.filter((match) => match.competitionCode === competition.code),
+  ]),
+);
+const freshMatches = results.flatMap((result) => {
+  if (result.status === 'fulfilled') return result.value;
+  const fallbackMatches = fallbackMatchesByCompetition.get(result.competition.code) ?? [];
+  if (fallbackMatches.length > 0) {
+    console.log(`${result.competition.code}: using ${fallbackMatches.length} cached match(es) after fetch failure`);
+  }
+  return fallbackMatches;
+});
+const archivedFinishedMatches = readArchivedFinishedMatches(previousPayload);
 const byId = new Map();
 
 archivedFinishedMatches.forEach((match) => byId.set(match.id, match));
@@ -274,8 +292,10 @@ const errors = results
 
 matches.sort((a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime());
 
-const payload = {
-  generatedAt: new Date().toISOString(),
+const nowIso = new Date().toISOString();
+const nextPayload = {
+  generatedAt: nowIso,
+  lastDataChangedAt: nowIso,
   source: 'football-data.org',
   dateFrom,
   dateTo,
@@ -283,7 +303,12 @@ const payload = {
   message: errors.length > 0 ? `Certaines compétitions n'ont pas répondu: ${errors.join(' | ')}` : null,
   matches,
 };
+const payload = buildLiveDataPayload({
+  previousPayload,
+  nextPayload,
+  nowIso,
+});
 
 await mkdir(dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
-console.log(`Wrote ${matches.length} matches to ${outputPath}`);
+console.log(`Wrote ${payload.matches?.length ?? matches.length} matches to ${outputPath}`);
