@@ -3,7 +3,7 @@ import DeadlineBadge from './DeadlineBadge';
 import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
 import { canEditPrediction, formatKickoffDay, formatKickoffTime, isLiveDisplayMatch } from '../utils/date';
-import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, isMatchFinal } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode } from '../utils/worldCupFilters';
 
 interface MatchCardProps {
@@ -15,7 +15,7 @@ interface MatchCardProps {
 }
 
 const getMatchState = (match: Match, editable: boolean) => {
-  if (match.status === 'finished') return { label: 'Terminé', tone: 'done' };
+  if (isMatchFinal(match)) return { label: 'Terminé', tone: 'done' };
   if (isLiveDisplayMatch(match)) return { label: 'Match en live', tone: 'live' };
   if (!editable) return { label: 'Fermé', tone: 'closed' };
   return { label: 'Ouvert', tone: 'open' };
@@ -33,6 +33,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const state = getMatchState(match, editable);
   const multiplier = getMatchMultiplier(match);
   const boostLabel = getWorldCupBoostLabel(match, multiplier);
+  const isFinal = isMatchFinal(match);
   const isLiveDisplay = isLiveDisplayMatch(match);
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
   const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
@@ -41,13 +42,13 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
 
   const scoreLabel =
-    (match.status === 'finished' || isLiveDisplay) && hasScore
+    (isFinal || isLiveDisplay) && hasScore
       ? `${match.homeScore} - ${match.awayScore}`
       : isLiveDisplay
         ? 'Live'
       : 'VS';
   const actionLabel =
-    match.status === 'finished'
+    isFinal
       ? 'Voir le résultat'
       : prediction
         ? editable
@@ -58,11 +59,11 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
           : 'Voir';
 
   const basePoints =
-    prediction && match.status === 'finished' && hasScore
+    prediction && isFinal && hasScore
       ? calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore ?? 0, match.awayScore ?? 0)
       : null;
   const points =
-    prediction && match.status === 'finished' && hasScore
+    prediction && isFinal && hasScore
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
   const exactPrediction = basePoints === 3;
@@ -129,7 +130,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
           {exactPrediction ? <span className="exact-flame" role="img" aria-label="Score parfait">🔥</span> : null}
         </span>
         <strong>{prediction ? `${prediction.homeScore} - ${prediction.awayScore}` : 'À jouer'}</strong>
-        {points !== null ? <small>{points} pts</small> : null}
+        {points !== null ? <small>{points} pts</small> : prediction && !editable ? <small>Points en attente</small> : null}
       </div>
     </button>
   );

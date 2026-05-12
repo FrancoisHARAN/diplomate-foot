@@ -1,6 +1,31 @@
 import type { Match, PredictionResultType } from '../types';
 import { isFranceWorldCup2026Match, isWorldCup2026Match } from './worldCupFilters';
 
+const FINAL_MATCH_STATUSES = new Set([
+  'finished',
+  'ft',
+  'full_time',
+  'completed',
+  'complete',
+  'termine',
+  'final',
+  'ended',
+  'after_extra_time',
+  'aet',
+  'penalties',
+]);
+
+const normalizeMatchStatus = (status?: string | null): string =>
+  String(status ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+export const isMatchFinal = (match: Pick<Match, 'status'> | { status?: string | null }): boolean =>
+  FINAL_MATCH_STATUSES.has(normalizeMatchStatus(match.status));
+
 export const calculatePredictionPoints = (
   predictedHome: number,
   predictedAway: number,
@@ -35,6 +60,15 @@ export const getPredictionResultType = (
   if (points === 2) return 'two-point';
   if (points === 1) return 'winner';
   return 'lost';
+};
+
+export const getPredictionResultTypeForMatch = (
+  predictedHome: number,
+  predictedAway: number,
+  match: Match,
+): PredictionResultType => {
+  if (!isMatchFinal(match) || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return 'pending';
+  return getPredictionResultType(predictedHome, predictedAway, match.homeScore, match.awayScore);
 };
 
 const hasTeam = (match: Match, terms: string[]): boolean => {
@@ -82,7 +116,7 @@ export const calculatePredictionPointsForMatch = (
   predictedHome: number,
   predictedAway: number,
   match: Match,
-): number => {
-  if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return 0;
+): number | null => {
+  if (!isMatchFinal(match) || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return null;
   return applyMatchMultiplier(calculatePredictionPoints(predictedHome, predictedAway, match.homeScore, match.awayScore), match);
 };

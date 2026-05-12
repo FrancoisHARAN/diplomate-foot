@@ -1,5 +1,6 @@
 import { WORLD_CUP_WINNER_QUALIFIED_COUNTRIES, WORLD_CUP_WINNER_COUNTRIES } from '../config/worldCupWinnerPredictions';
 import type { Match, MatchStatus, Team } from '../types';
+import { isMatchFinal } from './points';
 import { getTeamCountryCode, getWorldCupTeamDisplayName, isGroupStageMatch, isKnockoutStageMatch, isWorldCup2026Match } from './worldCupFilters';
 
 export interface WorldCupTeamInfo {
@@ -141,7 +142,7 @@ export const calculateWorldCupGroups = (matches: Match[]): WorldCupGroup[] => {
   });
 
   matches
-    .filter((match) => isWorldCup2026Match(match) && isGroupStageMatch(match) && match.status === 'finished')
+    .filter((match) => isWorldCup2026Match(match) && isGroupStageMatch(match) && isMatchFinal(match))
     .forEach((match) => {
       if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return;
       const groupId = getGroupIdForMatch(match);

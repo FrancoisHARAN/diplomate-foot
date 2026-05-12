@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Match, PublicMatchPrediction } from '../types';
 import { fetchPublicMatchPredictions, getStoredPredictions } from '../utils/appState';
+import { isMatchFinal } from '../utils/points';
 import { isPredictionPublic } from '../utils/predictionVisibility';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -22,7 +23,8 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
   const [predictions, setPredictions] = useState<PublicMatchPrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const publicVisible = isPredictionPublic(match);
-  const hasFinalScore = match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+  const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+  const hasFinalScore = isMatchFinal(match) && hasScore;
 
   useEffect(() => {
     let mounted = true;
@@ -108,6 +110,9 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
           <p className="section-subtitle">
             {getWorldCupTeamDisplayName(match.homeTeam, match)} - {getWorldCupTeamDisplayName(match.awayTeam, match)}
           </p>
+          {!hasFinalScore && hasScore ? (
+            <p className="section-subtitle">Score en cours : {match.homeScore} - {match.awayScore}. Points en attente.</p>
+          ) : null}
         </div>
       </div>
 

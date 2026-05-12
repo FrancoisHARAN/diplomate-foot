@@ -7,7 +7,7 @@ import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
 import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResultType, isFlashChallengeOpen } from './flashChallenges';
 import { sortLeaderboardEntries } from './leaderboard';
-import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultType } from './points';
+import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultTypeForMatch, isMatchFinal } from './points';
 import { isPredictionPublic } from './predictionVisibility';
 import { getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
@@ -853,7 +853,7 @@ export const fetchPublicPlayerFlashPredictions = async (playerId?: string): Prom
 };
 
 const calculateFinishedStats = (playerId: string, predictions: Prediction[], matches: Match[]) => {
-  const finishedById = new Map(matches.filter((match) => match.status === 'finished').map((match) => [match.id, match]));
+  const finishedById = new Map(matches.filter((match) => isMatchFinal(match)).map((match) => [match.id, match]));
   const playerPredictions = getPredictionsForPlayer(playerId, predictions);
   const firstPredictionAt = playerPredictions
     .map((prediction) => prediction.updatedAt)
@@ -903,7 +903,7 @@ export const getUserRankMock = (matches: Match[] = mockMatches): number | null =
 export type PredictionUiStatus = 'open' | 'closing' | 'closed' | 'done';
 
 export const getPredictionUiStatus = (match: Match, prediction?: Prediction): PredictionUiStatus => {
-  if (match.status === 'finished') return 'done';
+  if (isMatchFinal(match)) return 'done';
   if (match.status === 'live') return 'closed';
   if (!canEditPrediction(match)) return 'closed';
 
@@ -1068,9 +1068,9 @@ const buildLocalPublicMatchPredictions = (
         avatarUrl: getPlayerAvatarUrl(prediction.playerId) ?? player?.avatarUrl,
         homeScore: prediction.homeScore,
         awayScore: prediction.awayScore,
-        points: match.status === 'finished' ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
-        resultType: match.status === 'finished'
-          ? getPredictionResultType(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+        points: isMatchFinal(match) ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
+        resultType: isMatchFinal(match)
+          ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match)
           : 'pending',
         updatedAt: prediction.updatedAt,
       };
@@ -1128,7 +1128,7 @@ const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): Publ
   if (!match) return null;
   if (!isPredictionPublic(match)) return null;
 
-  const isFinished = row.is_finished ?? match.status === 'finished';
+  const isFinished = isMatchFinal(match);
 
   return {
     id: row.id ?? row.prediction_id ?? `public-${row.player_id}-${row.match_id}`,
@@ -1136,7 +1136,7 @@ const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): Publ
     prediction: fromRpcPrediction(normalizedPrediction),
     points: isFinished ? row.points ?? calculatePredictionPointsForMatch(normalizedPrediction.home_score, normalizedPrediction.away_score, match) : null,
     resultType: isFinished
-      ? row.result_type ?? getPredictionResultType(normalizedPrediction.home_score, normalizedPrediction.away_score, match.homeScore, match.awayScore)
+      ? row.result_type ?? getPredictionResultTypeForMatch(normalizedPrediction.home_score, normalizedPrediction.away_score, match)
       : 'pending',
   };
 };
@@ -1191,9 +1191,9 @@ export const buildLocalPublicPlayerProfile = (
         id: prediction.id,
         match,
         prediction,
-        points: match.status === 'finished' ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
-        resultType: match.status === 'finished'
-          ? getPredictionResultType(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+        points: isMatchFinal(match) ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
+        resultType: isMatchFinal(match)
+          ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match)
           : 'pending',
       };
     })

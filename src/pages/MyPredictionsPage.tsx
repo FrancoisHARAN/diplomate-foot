@@ -8,7 +8,7 @@ import type { FlashChallenge, FlashPrediction, Match, Prediction } from '../type
 import { fetchPlayerFlashPredictions, getFlashPredictionsForPlayer, getPredictionsForPlayer, getStoredFlashChallenges, getUserPointsMock, saveFlashPrediction, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
 import { flashMatchesPredictionFilter, isFlashChallengeOpen } from '../utils/flashChallenges';
-import { calculatePredictionPointsForMatch } from '../utils/points';
+import { calculatePredictionPointsForMatch, isMatchFinal } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type PredictionFilter = 'all' | 'live' | 'finished' | 'upcoming' | 'won' | 'lost';
@@ -23,7 +23,7 @@ const predictionFilters: Array<{ id: PredictionFilter; label: string }> = [
 ];
 
 const getFinishedPoints = (prediction: Prediction | undefined, match: Match): number | null => {
-  if (!prediction || match.status !== 'finished' || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return null;
+  if (!prediction || !isMatchFinal(match) || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return null;
   return calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match);
 };
 
@@ -68,7 +68,7 @@ const MyPredictionsPage = () => {
 
   const mine = getPredictionsForPlayer(player.id);
   const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
-  const remaining = matches.filter((match) => match.status !== 'finished' && !predictionByMatch.has(match.id)).length;
+  const remaining = matches.filter((match) => !isMatchFinal(match) && !predictionByMatch.has(match.id)).length;
   const now = Date.now();
   const flashChallengeById = new Map(flashChallenges.map((challenge) => [challenge.id, challenge]));
   const myFlashRows = flashPredictions
@@ -90,8 +90,8 @@ const MyPredictionsPage = () => {
     const points = getFinishedPoints(prediction, match);
 
     if (filter === 'live') return isLiveDisplayMatch(match);
-    if (filter === 'finished') return match.status === 'finished';
-    if (filter === 'upcoming') return match.status !== 'finished' && !isLiveDisplayMatch(match);
+    if (filter === 'finished') return isMatchFinal(match);
+    if (filter === 'upcoming') return !isMatchFinal(match) && !isLiveDisplayMatch(match);
     if (filter === 'won') return points !== null && points > 0;
     if (filter === 'lost') return points !== null && points === 0;
     return true;
@@ -187,7 +187,8 @@ const MyPredictionsPage = () => {
             filteredMatches.map((match) => {
               const prediction = predictionByMatch.get(match.id);
               const editable = canEditPrediction(match);
-              const state = match.status === 'finished' ? 'Terminé' : editable ? 'Modifiable' : 'Verrouillé';
+              const isFinal = isMatchFinal(match);
+              const state = isFinal ? 'Terminé' : editable ? 'Modifiable' : isLiveDisplayMatch(match) ? 'En cours' : 'Verrouillé';
               const points = getFinishedPoints(prediction, match);
 
               return (
@@ -197,7 +198,7 @@ const MyPredictionsPage = () => {
                     <small>{state}</small>
                   </span>
                   <span className="prediction-score-chip">{prediction?.homeScore} - {prediction?.awayScore}</span>
-                  <strong>{points !== null ? `${points} pts` : 'À venir'}</strong>
+                  <strong>{points !== null ? `${points} pts` : editable ? 'À venir' : 'Points en attente'}</strong>
                   {editable ? <span className="edit-pencil" aria-label="Modifier le prono">✎</span> : null}
                 </Link>
               );

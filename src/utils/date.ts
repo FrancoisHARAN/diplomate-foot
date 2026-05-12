@@ -1,4 +1,5 @@
 import type { Match, MatchStatus } from '../types';
+import { isMatchFinal } from './points';
 
 const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'short',
@@ -32,12 +33,16 @@ export const formatKickoffLong = (isoDate: string): string => {
 };
 
 export const getMatchStatusLabel = (status: MatchStatus): string => {
+  const normalized = String(status ?? '').toLowerCase();
+  if (isMatchFinal({ status })) return 'Terminé';
+  if (['live', 'in_play', 'in-progress', 'in_progress', 'inplay', 'paused', 'en cours'].includes(normalized)) return 'En cours';
+
   const labels: Record<MatchStatus, string> = {
     upcoming: 'À venir',
     live: 'En cours',
     finished: 'Terminé',
   };
-  return labels[status];
+  return labels[status] ?? 'À venir';
 };
 
 export const canEditPrediction = (match: Match, now = new Date()): boolean => {

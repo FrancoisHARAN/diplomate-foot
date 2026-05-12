@@ -8,6 +8,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction } from '../types';
 import { fetchPublicPlayerFlashPredictions, fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
 import { formatKickoff, getMatchStatusLabel } from '../utils/date';
+import { isMatchFinal } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type ProfileFilter = 'all' | 'finished' | 'locked' | 'won' | PredictionResultType;
@@ -42,18 +43,19 @@ const resultClassName: Record<PredictionResultType, string> = {
 };
 
 const getResultSummary = (resultType: PredictionResultType, points?: number | null): string => {
-  if (resultType === 'pending') return 'En attente - prono verrouillé';
+  if (resultType === 'pending') return 'Points en attente';
   if (resultType === 'lost') return 'Pronostic perdu';
   return `+${points ?? 0} pts - ${resultLabels[resultType]}`;
 };
 
 const filterPrediction = (item: PublicPrediction, filter: ProfileFilter): boolean => {
+  const isFinal = isMatchFinal(item.match);
   if (filter === 'all') return true;
-  if (filter === 'finished') return item.match.status === 'finished';
-  if (filter === 'locked') return item.match.status !== 'finished';
-  if (filter === 'won') return item.match.status === 'finished' && (item.points ?? 0) > 0;
-  if (filter === 'lost') return item.match.status === 'finished' && item.resultType === 'lost';
-  return item.match.status === 'finished' && item.resultType === filter;
+  if (filter === 'finished') return isFinal;
+  if (filter === 'locked') return !isFinal;
+  if (filter === 'won') return isFinal && (item.points ?? 0) > 0;
+  if (filter === 'lost') return isFinal && item.resultType === 'lost';
+  return isFinal && item.resultType === filter;
 };
 
 const PlayerProfilePage = () => {
@@ -172,36 +174,41 @@ const PlayerProfilePage = () => {
 
         <div className="prediction-list">
           {filteredPredictions.length > 0 ? (
-            filteredPredictions.map(({ id, prediction, match, points, resultType }) => (
-              <article className="social-prono-row public-prono-row" key={id}>
-                <div className="social-prono-teams">
-                  <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
-                  <span>
-                    <strong>{getWorldCupTeamDisplayName(match.homeTeam, match)} - {getWorldCupTeamDisplayName(match.awayTeam, match)}</strong>
-                    <small>{match.competitionName ?? match.competitionCode ?? 'Match'} · {formatKickoff(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
-                  </span>
-                  <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
-                </div>
-                <div className="public-prono-outcome">
-                  <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>
-                </div>
-                <div className="public-prono-details" aria-label="Détail du pronostic">
-                  <span className="public-detail-item">
-                    <small>Prono</small>
-                    <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
-                  </span>
-                  {match.status === 'finished' ? (
-                    <span className="public-detail-item">
-                      <small>Score final</small>
-                      <strong>{match.homeScore} - {match.awayScore}</strong>
+            filteredPredictions.map(({ id, prediction, match, points, resultType }) => {
+              const isFinal = isMatchFinal(match);
+              const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+
+              return (
+                <article className="social-prono-row public-prono-row" key={id}>
+                  <div className="social-prono-teams">
+                    <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
+                    <span>
+                      <strong>{getWorldCupTeamDisplayName(match.homeTeam, match)} - {getWorldCupTeamDisplayName(match.awayTeam, match)}</strong>
+                      <small>{match.competitionName ?? match.competitionCode ?? 'Match'} · {formatKickoff(match.kickoff)} · {getMatchStatusLabel(match.status)}</small>
                     </span>
-                  ) : null}
-                </div>
-                <div className={`public-result-summary ${resultClassName[resultType]}`}>
-                  {getResultSummary(resultType, points)}
-                </div>
-              </article>
-            ))
+                    <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
+                  </div>
+                  <div className="public-prono-outcome">
+                    <span className={`public-result-badge ${resultClassName[resultType]}`}>{resultLabels[resultType]}</span>
+                  </div>
+                  <div className="public-prono-details" aria-label="Détail du pronostic">
+                    <span className="public-detail-item">
+                      <small>Prono</small>
+                      <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
+                    </span>
+                    {hasScore ? (
+                      <span className="public-detail-item">
+                        <small>{isFinal ? 'Score final' : 'Score en cours'}</small>
+                        <strong>{match.homeScore} - {match.awayScore}</strong>
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className={`public-result-summary ${resultClassName[resultType]}`}>
+                    {getResultSummary(resultType, points)}
+                  </div>
+                </article>
+              );
+            })
           ) : (
             <div className="empty-state inline">
               <strong>{profile.predictions.length > 0 ? 'Aucun prono dans ce filtre.' : 'Ce joueur n’a pas encore de pronostic visible.'}</strong>

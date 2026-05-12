@@ -1,5 +1,5 @@
 import type { ExactPredictionHighlight, Match, Prediction } from '../types';
-import { calculatePredictionPoints } from './points';
+import { calculatePredictionPoints, isMatchFinal } from './points';
 
 interface PlayerLike {
   id?: string;
@@ -25,7 +25,7 @@ export const getRecentExactPredictionHighlights = (
 ): ExactPredictionHighlight[] => {
   const playerById = new Map(players.map((player) => [playerIdOf(player), player]));
   const finishedMatches = matches.filter(
-    (match) => match.status === 'finished' && typeof match.homeScore === 'number' && typeof match.awayScore === 'number',
+    (match) => isMatchFinal(match) && typeof match.homeScore === 'number' && typeof match.awayScore === 'number',
   );
 
   return finishedMatches

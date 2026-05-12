@@ -8,7 +8,7 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { Match } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
 import { canEditPrediction, formatKickoffLong, isLiveDisplayMatch } from '../utils/date';
-import { calculatePredictionPointsForMatch, getMatchMultiplier } from '../utils/points';
+import { calculatePredictionPointsForMatch, getMatchMultiplier, isMatchFinal } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const SWIPE_HINT_KEY = 'diplomate.matchSwipeHintSeen.v1';
@@ -42,7 +42,7 @@ const MatchDetailPage = () => {
   const playableMatches = useMemo(
     () =>
       matches
-        .filter((item) => item.status !== 'finished' && shouldShowMatchInApp(item))
+        .filter((item) => !isMatchFinal(item) && shouldShowMatchInApp(item))
         .sort((left, right) => new Date(left.kickoff).getTime() - new Date(right.kickoff).getTime()),
     [matches],
   );
@@ -146,6 +146,7 @@ const MatchDetailPage = () => {
 
   const multiplier = getMatchMultiplier(match);
   const boostLabel = getWorldCupBoostLabel(match, multiplier);
+  const isFinal = isMatchFinal(match);
   const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
   const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
@@ -153,7 +154,7 @@ const MatchDetailPage = () => {
   const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
   const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
   const points =
-    match.status === 'finished' && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
+    isFinal && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
 
@@ -239,7 +240,7 @@ const MatchDetailPage = () => {
             <strong>{homeName}</strong>
             <small>{homeCode}</small>
           </div>
-          <span className="detail-versus">{(match.status === 'finished' || isLiveDisplay) && hasScore ? `${match.homeScore} - ${match.awayScore}` : isLiveDisplay ? 'Live' : 'VS'}</span>
+          <span className="detail-versus">{(isFinal || isLiveDisplay) && hasScore ? `${match.homeScore} - ${match.awayScore}` : isLiveDisplay ? 'Live' : 'VS'}</span>
           <div className="detail-team">
             <TeamBadge team={match.awayTeam} competitionCode={match.competitionCode} match={match} />
             <strong>{awayName}</strong>
@@ -258,7 +259,7 @@ const MatchDetailPage = () => {
           <div className="detail-current-prono">
             <span>Ton prono</span>
             <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
-            {points !== null ? <small>{points} pts</small> : <small>{editable ? "Modifiable jusqu'au coup d'envoi" : 'Enregistré'}</small>}
+            {points !== null ? <small>{points} pts</small> : <small>{editable ? "Modifiable jusqu'au coup d'envoi" : 'Points en attente'}</small>}
           </div>
         ) : null}
 
@@ -329,9 +330,9 @@ const MatchDetailPage = () => {
 
         {player && !editable ? (
           <div className="locked-summary">
-            <strong>{match.status === 'finished' ? 'Match terminé' : 'Pronostics verrouillés'}</strong>
+            <strong>{isFinal ? 'Match terminé' : 'Pronostics verrouillés'}</strong>
             <p>{prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun prono enregistré.'}</p>
-            {match.status === 'finished' ? <p>Score final : {match.homeScore} - {match.awayScore}</p> : null}
+            {hasScore ? <p>{isFinal ? 'Score final' : 'Score en cours'} : {match.homeScore} - {match.awayScore}</p> : null}
             {points !== null ? <p>Points gagnés : {points} pts</p> : null}
           </div>
         ) : null}

@@ -9,7 +9,20 @@
 -- - pas d'ecriture directe anon dans les tables sensibles;
 -- - actions sensibles via RPC SECURITY DEFINER.
 
-create extension if not exists pgcrypto;
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+do $$
+begin
+  if exists (
+    select 1
+    from pg_extension e
+    join pg_namespace n on n.oid = e.extnamespace
+    where e.extname = 'pgcrypto'
+      and n.nspname <> 'extensions'
+  ) then
+    alter extension pgcrypto set schema extensions;
+  end if;
+end $$;
 
 -- Nettoyage defensif si un ancien MVP avait donne des droits directs.
 do $$
@@ -67,7 +80,7 @@ create table if not exists public.app_rpc_settings (
 
 -- Token de synchro des scores live:
 -- insert into public.app_rpc_settings (key, value_hash)
--- values ('match_sync_token_hash', encode(digest('TON_TOKEN_SECRET', 'sha256'), 'hex'))
+-- values ('match_sync_token_hash', public.app_private_text_hash('TON_TOKEN_SECRET'))
 -- on conflict (key) do update set value_hash = excluded.value_hash, updated_at = now();
 
 create table if not exists public.app_rpc_matches (
@@ -245,19 +258,29 @@ create policy "app rpc matches public read"
 
 grant select on public.app_rpc_matches to anon;
 
+create or replace function public.app_private_text_hash(p_value text)
+returns text
+language sql
+stable
+set search_path = public, extensions
+as $$
+  select encode(extensions.digest(convert_to(coalesce(p_value, ''), 'UTF8'), 'sha256'), 'hex');
+$$;
+
 create or replace function public.app_private_code_hash(p_player_id uuid, p_code text)
 returns text
 language sql
 stable
+set search_path = public, extensions
 as $$
-  select encode(digest(p_player_id::text || ':' || coalesce(p_code, ''), 'sha256'), 'hex');
+  select encode(extensions.digest(convert_to(p_player_id::text || ':' || coalesce(p_code, ''), 'UTF8'), 'sha256'), 'hex');
 $$;
 
 create or replace function public.app_private_require_match_sync_token(p_sync_token text)
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_expected_hash text;
@@ -271,7 +294,7 @@ begin
     raise exception 'Token de synchro des matchs non configure';
   end if;
 
-  if encode(digest(coalesce(p_sync_token, ''), 'sha256'), 'hex') <> v_expected_hash then
+  if public.app_private_text_hash(p_sync_token) <> v_expected_hash then
     raise exception 'Token de synchro des matchs invalide';
   end if;
 end;
@@ -365,6 +388,14 @@ as $$
     or p_kickoff < now();
 $$;
 
+create or replace function public.app_private_match_is_final(p_status text)
+returns boolean
+language sql
+immutable
+as $$
+  select lower(coalesce(p_status, '')) in ('finished', 'ft', 'full_time', 'completed');
+$$;
+
 create or replace function public.app_private_match_multiplier(
   p_points_multiplier int,
   p_competition_code text,
@@ -432,7 +463,7 @@ select
   ), 0) as points
 from public.app_rpc_predictions pr
 left join public.app_rpc_matches m on m.id = pr.match_id
-where m.status = 'finished';
+where public.app_private_match_is_final(m.status);
 
 create or replace function public.app_private_world_cup_country_name(p_code text)
 returns text
@@ -822,8 +853,7 @@ as $$
           'final_home_score', m.home_score,
           'final_away_score', m.away_score,
           'points', case
-            when lower(coalesce(m.status, '')) = 'finished'
-              or (m.home_score is not null and m.away_score is not null and m.kickoff <= now())
+            when public.app_private_match_is_final(m.status)
             then coalesce(sp.points, app_private_prediction_points(
               pr.home_score,
               pr.away_score,
@@ -834,15 +864,13 @@ as $$
             else null
           end,
           'result_type', case
-            when lower(coalesce(m.status, '')) <> 'finished'
-              and not (m.home_score is not null and m.away_score is not null and m.kickoff <= now()) then 'pending'
+            when not public.app_private_match_is_final(m.status) then 'pending'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
             else 'lost'
           end,
-          'is_finished', lower(coalesce(m.status, '')) = 'finished'
-            or (m.home_score is not null and m.away_score is not null and m.kickoff <= now()),
+          'is_finished', public.app_private_match_is_final(m.status),
           'is_live', lower(coalesce(m.status, '')) in ('live', 'in_progress', 'in-progress', 'inplay', 'in_play'),
           'is_locked', public.app_private_prediction_is_public(m.status, m.kickoff),
           'created_at', pr.created_at,
@@ -916,9 +944,9 @@ as $$
     pr.away_score as predicted_away_score,
     m.home_score as final_home_score,
     m.away_score as final_away_score,
-    case when m.status = 'finished' then coalesce(sp.points, 0) else null end as points,
+    case when public.app_private_match_is_final(m.status) then coalesce(sp.points, 0) else null end as points,
     case
-      when m.status <> 'finished' then 'pending'
+      when not public.app_private_match_is_final(m.status) then 'pending'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
@@ -972,7 +1000,7 @@ as $$
     from public.app_rpc_predictions pr
     join public.app_rpc_matches m on m.id = pr.match_id
     join public.app_rpc_players p on p.id = pr.player_id
-    where m.status = 'finished'
+    where public.app_private_match_is_final(m.status)
       and m.home_score is not null
       and m.away_score is not null
       and pr.home_score = m.home_score
@@ -1172,7 +1200,7 @@ as $$
     cross join lateral (
       select public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as value
     ) mult
-    where m.status = 'finished'
+    where public.app_private_match_is_final(m.status)
   ),
   flash_events as (
     select
@@ -1912,11 +1940,13 @@ end;
 $$;
 
 revoke all on function public.app_admin_create_player(text, text) from public, anon, authenticated;
+revoke all on function public.app_private_text_hash(text) from public, anon, authenticated;
 revoke all on function public.app_private_code_hash(uuid, text) from public, anon, authenticated;
 revoke all on function public.app_private_require_match_sync_token(text) from public, anon, authenticated;
 revoke all on function public.app_private_session_player(uuid) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_points(int, int, int, int, int) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_is_public(text, timestamptz) from public, anon, authenticated;
+revoke all on function public.app_private_match_is_final(text) from public, anon, authenticated;
 revoke all on function public.app_private_match_multiplier(int, text, text, text, text, int, jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;
