@@ -7,7 +7,7 @@ import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { Match } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
-import { canEditPrediction, formatKickoffLong, isLiveDisplayMatch } from '../utils/date';
+import { canEditPrediction, formatKickoffLong, formatLastUpdated, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPointsForMatch, getMatchMultiplier, isMatchFinal } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
@@ -16,7 +16,7 @@ const SWIPE_HINT_KEY = 'diplomate.matchSwipeHintSeen.v1';
 const MatchDetailPage = () => {
   const { matchId } = useParams();
   const { player } = usePlayerSession();
-  const { matches } = useLiveMatches();
+  const { matches, lastDataChangedAt } = useLiveMatches();
   const navigate = useNavigate();
   const location = useLocation();
   const [refresh, setRefresh] = useState(0);
@@ -153,6 +153,7 @@ const MatchDetailPage = () => {
   const awayName = getWorldCupTeamDisplayName(match.awayTeam, match);
   const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
   const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
+  const scoreUpdatedAt = formatLastUpdated(match.lastUpdated ?? lastDataChangedAt);
   const points =
     isFinal && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
@@ -251,7 +252,7 @@ const MatchDetailPage = () => {
         {isLiveDisplay ? (
           <div className="live-update-alert detail-live-alert">
             <span>Match en live</span>
-            <small>Score en cours</small>
+            <small>{scoreUpdatedAt ? `Score actualisé à ${scoreUpdatedAt}` : 'Actualisation récente'}</small>
           </div>
         ) : null}
 

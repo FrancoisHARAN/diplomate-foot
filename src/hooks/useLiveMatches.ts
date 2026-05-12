@@ -43,26 +43,54 @@ const hasPlaceholderTeam = (match: Match) => {
   );
 };
 
-const getLatestCloudUpdate = (matches: Match[]) =>
+const dateMs = (value?: string | null): number | null => {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : null;
+};
+
+const getLatestMatchUpdate = (matches: Match[]) =>
   matches.reduce<string | null>((latest, match) => {
     if (!match.lastUpdated) return latest;
     if (!latest) return match.lastUpdated;
-    return new Date(match.lastUpdated).getTime() > new Date(latest).getTime() ? match.lastUpdated : latest;
+    return (dateMs(match.lastUpdated) ?? 0) > (dateMs(latest) ?? 0) ? match.lastUpdated : latest;
   }, null);
+
+const fromCloudMatches = (cloudMatches: Match[]): LiveMatchesState | null => {
+  const cloudUpdatedAt = getLatestMatchUpdate(cloudMatches);
+  return cloudMatches.length > 0 ? {
+    matches: cloudMatches,
+    generatedAt: cloudUpdatedAt,
+    lastDataChangedAt: cloudUpdatedAt,
+    source: 'supabase-rpc',
+    message: null,
+    isFallback: false,
+  } : null;
+};
+
+const preferCloudIfNewer = async (state: LiveMatchesState): Promise<LiveMatchesState> => {
+  let cloudState: LiveMatchesState | null = null;
+  try {
+    cloudState = fromCloudMatches(await fetchCloudMatches());
+  } catch {
+    return state;
+  }
+
+  if (!cloudState?.lastDataChangedAt) return state;
+
+  const cloudTime = dateMs(cloudState.lastDataChangedAt);
+  const staticTime = dateMs(state.lastDataChangedAt);
+  if (cloudTime !== null && (staticTime === null || cloudTime > staticTime)) {
+    return cloudState;
+  }
+
+  return state;
+};
 
 const loadLiveMatches = async (): Promise<LiveMatchesState> => {
   const response = await fetch(liveDataUrl(), { cache: 'no-store' });
   if (!response.ok) {
-    const cloudMatches = await fetchCloudMatches();
-    const cloudUpdatedAt = getLatestCloudUpdate(cloudMatches);
-    return cloudMatches.length > 0 ? {
-      matches: cloudMatches,
-      generatedAt: cloudUpdatedAt,
-      lastDataChangedAt: cloudUpdatedAt,
-      source: 'supabase-rpc',
-      message: null,
-      isFallback: false,
-    } : fallbackState;
+    return fromCloudMatches(await fetchCloudMatches()) ?? fallbackState;
   }
 
   const payload = (await response.json()) as LiveMatchesPayload;
@@ -76,14 +104,14 @@ const loadLiveMatches = async (): Promise<LiveMatchesState> => {
     : [];
   const matches = liveMatches.length > 0 ? liveMatches : mockMatches;
 
-  return {
+  return preferCloudIfNewer({
     matches,
     generatedAt: payload.generatedAt ?? null,
     lastDataChangedAt: payload.lastDataChangedAt ?? payload.generatedAt ?? null,
     source: payload.source ?? 'live-data',
     message: payload.message ?? null,
     isFallback: payload.source?.includes('fallback') ?? false,
-  };
+  });
 };
 
 const LiveMatchesContext = createContext<LiveMatchesState | undefined>(undefined);

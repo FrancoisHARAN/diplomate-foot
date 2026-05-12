@@ -17,7 +17,7 @@ const AppHeader = () => {
         <img className="header-logo" src={`${import.meta.env.BASE_URL}brand/logo-diplomate.png`} alt="" />
         <span>
           <strong>Le Diplomate</strong>
-          <small>Dernière actualisation : {isFallback ? 'test' : updatedAt ?? '--:--'}</small>
+          <small>Dernière actu : {isFallback ? 'test' : updatedAt ?? '--:--'}</small>
         </span>
       </Link>
 

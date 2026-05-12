@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import DeadlineBadge from './DeadlineBadge';
 import TeamBadge from './TeamBadge';
 import type { Match, Prediction } from '../types';
-import { canEditPrediction, formatKickoffDay, formatKickoffTime, isLiveDisplayMatch } from '../utils/date';
+import { canEditPrediction, formatKickoffDay, formatKickoffTime, formatLastUpdated, isLiveDisplayMatch } from '../utils/date';
 import { calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, isMatchFinal } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode } from '../utils/worldCupFilters';
 
@@ -40,6 +40,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
   const awayName = getWorldCupTeamDisplayName(match.awayTeam, match);
   const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
   const awayCode = getWorldCupTeamShortCode(match.awayTeam, match);
+  const scoreUpdatedAt = formatLastUpdated(match.lastUpdated);
 
   const scoreLabel =
     (isFinal || isLiveDisplay) && hasScore
@@ -82,7 +83,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
       {isLiveDisplay ? (
         <div className="live-update-alert match-card-live-alert">
           <span>Live</span>
-          <small>Score en cours</small>
+          <small>{scoreUpdatedAt ? `Maj ${scoreUpdatedAt}` : 'Score en cours'}</small>
         </div>
       ) : (
         <div className="match-card-topline">
