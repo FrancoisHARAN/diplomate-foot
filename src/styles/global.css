@@ -1387,6 +1387,7 @@ small {
   line-height: 1.35;
 }
 
+.history-range-row,
 .history-filter-row {
   display: flex;
   gap: 0.45rem;
@@ -1395,12 +1396,23 @@ small {
   scrollbar-width: none;
 }
 
+.history-range-row::-webkit-scrollbar,
 .history-filter-row::-webkit-scrollbar {
   display: none;
 }
 
+.history-range-row .pill,
 .history-filter-row .pill {
   border-color: rgba(255, 255, 255, 0.32);
+  white-space: nowrap;
+}
+
+.history-range-row {
+  margin-top: 0.9rem;
+}
+
+.history-filter-row {
+  margin-top: 0.5rem;
 }
 
 .history-note {
@@ -1417,16 +1429,19 @@ small {
 .history-chart-scroll {
   margin-top: 0.85rem;
   overflow-x: auto;
-  padding: 0.75rem;
+  padding: 0.7rem 0.65rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
-  background: rgba(5, 10, 36, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    rgba(5, 10, 36, 0.58);
   scrollbar-width: thin;
 }
 
 .history-chart {
   display: block;
   min-width: 100%;
+  max-height: 17.5rem;
 }
 
 .history-grid-line {
@@ -1439,15 +1454,14 @@ small {
   stroke-width: 1;
 }
 
-.history-rank-label,
-.history-period-label,
-.history-points-label {
+.history-axis-label,
+.history-value-label {
   fill: rgba(255, 255, 255, 0.76);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 850;
 }
 
-.history-period-label.current {
+.history-axis-label.current {
   fill: var(--lime);
 }
 
@@ -1455,18 +1469,28 @@ small {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 3.5;
-  opacity: 0.86;
+  stroke-width: 3;
+  opacity: 0.78;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.18));
 }
 
+.history-player-line.is-leader,
 .history-player-line.is-me {
-  stroke-width: 5;
+  stroke-width: 4.8;
   opacity: 1;
 }
 
 .history-player-dot {
   stroke: #102071;
   stroke-width: 2;
+}
+
+.history-player-dot.is-leader {
+  stroke-width: 2.5;
+}
+
+.history-player-dot.is-me {
+  stroke: #fff;
 }
 
 .history-legend {
@@ -1488,9 +1512,13 @@ small {
   font-weight: 850;
 }
 
-.history-legend span.is-me {
+.history-legend span.is-leader {
   color: var(--ink);
   background: var(--lime);
+}
+
+.history-legend span.is-me:not(.is-leader) {
+  border: 1px solid var(--lime);
 }
 
 .history-legend i {
@@ -1504,6 +1532,16 @@ small {
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.78rem;
   line-height: 1.28;
+}
+
+.history-empty {
+  margin-top: 0.85rem;
+  color: var(--ink);
+}
+
+.history-empty p,
+.history-empty strong {
+  color: var(--ink);
 }
 
 .notice-panel,
@@ -2782,6 +2820,89 @@ button.action-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
+}
+
+.match-public-predictions {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.match-public-predictions.is-hidden {
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.match-public-group-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.match-public-group {
+  display: grid;
+  gap: 0.48rem;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.match-public-group.is-exact {
+  border-color: rgba(94, 186, 80, 0.82);
+  background:
+    linear-gradient(90deg, rgba(210, 255, 82, 0.18) 1px, transparent 1px),
+    linear-gradient(rgba(210, 255, 82, 0.18) 1px, transparent 1px),
+    #f8ffe8;
+  background-size: 18px 18px;
+  box-shadow: 0 0 0 2px rgba(210, 255, 82, 0.46);
+}
+
+.match-public-score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.match-public-score strong {
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 1.28rem;
+  line-height: 1;
+}
+
+.match-public-score span,
+.match-public-score small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.55rem;
+  padding: 0.22rem 0.48rem;
+  border-radius: 999px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.match-public-score small {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.match-public-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+}
+
+.match-public-names span {
+  min-width: 0;
+  padding: 0.26rem 0.42rem;
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(28, 70, 245, 0.08);
+  font-size: 0.78rem;
+  font-weight: 820;
+  overflow-wrap: anywhere;
 }
 
 .photo-upload {

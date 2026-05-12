@@ -15,11 +15,9 @@ const closedPublicStatuses = new Set([
 
 export const isPredictionPublic = (match: Match, now = new Date()): boolean => {
   const status = String(match.status).toLowerCase();
-  if (closedPublicStatuses.has(status)) return true;
-
-  const kickoff = new Date(match.kickoff).getTime();
-  const minutesUntilKickoff = (kickoff - now.getTime()) / (1000 * 60);
-  if (minutesUntilKickoff <= 60) return true;
-
-  return !canEditPrediction(match, now);
+  return closedPublicStatuses.has(status) || !canEditPrediction(match, now);
 };
+
+export const isMatchClosedForPredictions = (match: Match, now = new Date()): boolean => !canEditPrediction(match, now);
+
+export const isPredictionPubliclyVisible = isPredictionPublic;

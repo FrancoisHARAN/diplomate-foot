@@ -361,18 +361,8 @@ returns boolean
 language sql
 stable
 as $$
-  select lower(coalesce(p_status, '')) in (
-      'live',
-      'finished',
-      'locked',
-      'closed',
-      'in_progress',
-      'in-progress',
-      'inplay',
-      'in_play',
-      'started'
-    )
-    or p_kickoff <= now() + interval '1 hour';
+  select lower(coalesce(p_status, 'upcoming')) <> 'upcoming'
+    or p_kickoff < now();
 $$;
 
 create or replace function public.app_private_match_multiplier(
@@ -895,6 +885,55 @@ as $$
   where p.id = p_player_id;
 $$;
 
+create or replace function public.app_get_public_match_predictions(p_match_id text)
+returns table (
+  prediction_id uuid,
+  player_id uuid,
+  nickname text,
+  display_name text,
+  avatar_url text,
+  match_id text,
+  predicted_home_score int,
+  predicted_away_score int,
+  final_home_score int,
+  final_away_score int,
+  points int,
+  result_type text,
+  updated_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    pr.id as prediction_id,
+    p.id as player_id,
+    p.nickname,
+    p.display_name,
+    p.avatar_url,
+    pr.match_id,
+    pr.home_score as predicted_home_score,
+    pr.away_score as predicted_away_score,
+    m.home_score as final_home_score,
+    m.away_score as final_away_score,
+    case when m.status = 'finished' then coalesce(sp.points, 0) else null end as points,
+    case
+      when m.status <> 'finished' then 'pending'
+      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
+      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
+      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
+      else 'lost'
+    end::text as result_type,
+    pr.updated_at
+  from public.app_rpc_predictions pr
+  join public.app_rpc_matches m on m.id = pr.match_id
+  join public.app_rpc_players p on p.id = pr.player_id
+  left join public.app_rpc_scored_predictions sp on sp.id = pr.id
+  where pr.match_id = p_match_id
+    and public.app_private_prediction_is_public(m.status, m.kickoff)
+  order by pr.home_score asc, pr.away_score asc, p.display_name asc;
+$$;
+
 create or replace function public.app_get_recent_exact_predictions()
 returns jsonb
 language sql
@@ -1097,7 +1136,7 @@ $$;
 
 drop function if exists public.app_get_leaderboard_history(int);
 
-create or replace function public.app_get_leaderboard_history(p_limit_weeks int default 8)
+create or replace function public.app_get_leaderboard_history(p_limit_weeks int default 104)
 returns table (
   period_label text,
   snapshot_at timestamptz,
@@ -1116,32 +1155,112 @@ language sql
 security definer
 set search_path = public
 as $$
-  with selected_weeks as (
-    select s.week_start
-    from public.app_rpc_leaderboard_snapshots s
-    where s.period_type = 'weekly'
-    group by s.week_start
-    order by s.week_start desc
-    limit greatest(1, coalesce(p_limit_weeks, 8))
+  with params as (
+    select greatest(1, coalesce(p_limit_weeks, 104))::int as limit_weeks
   ),
-  snapshot_rows as (
+  match_events as (
     select
-      s.period_label,
-      s.snapshot_at,
-      s.player_id,
+      pr.player_id,
+      date_trunc('day', coalesce(m.last_updated, m.kickoff))::date as event_day,
+      coalesce(sp.points, 0)::int as points,
+      case when coalesce(sp.points, 0) = 3 * mult.value then 1 else 0 end::int as exact_scores,
+      case when coalesce(sp.points, 0) = 2 * mult.value then 1 else 0 end::int as two_point_results,
+      pr.updated_at as first_prediction_at
+    from public.app_rpc_predictions pr
+    join public.app_rpc_matches m on m.id = pr.match_id
+    left join public.app_rpc_scored_predictions sp on sp.id = pr.id
+    cross join lateral (
+      select public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as value
+    ) mult
+    where m.status = 'finished'
+  ),
+  flash_events as (
+    select
+      fsp.player_id,
+      date_trunc('day', coalesce(ch.updated_at, fsp.updated_at))::date as event_day,
+      coalesce(fsp.points, 0)::int as points,
+      0::int as exact_scores,
+      0::int as two_point_results,
+      fsp.updated_at as first_prediction_at
+    from public.app_rpc_flash_scored_predictions fsp
+    join public.app_rpc_flash_challenges ch on ch.id = fsp.flash_id
+    where ch.status = 'resolved'
+  ),
+  scoring_events as (
+    select * from match_events
+    union all
+    select * from flash_events
+  ),
+  first_scoring as (
+    select min(event_day) as first_day
+    from scoring_events
+    where points > 0
+  ),
+  bounds as (
+    select
+      greatest(first_day, (current_date - ((select limit_weeks from params) * 7 - 1))::date) as start_day,
+      current_date as end_day,
+      first_day
+    from first_scoring
+    where first_day is not null
+  ),
+  days as (
+    select generate_series(start_day, end_day, interval '1 day')::date as event_day
+    from bounds
+  ),
+  daily_totals as (
+    select
+      player_id,
+      event_day,
+      sum(points)::int as points,
+      sum(exact_scores)::int as exact_scores,
+      sum(two_point_results)::int as two_point_results,
+      min(first_prediction_at) as first_prediction_at
+    from scoring_events
+    group by player_id, event_day
+  ),
+  player_days as (
+    select
+      d.event_day,
+      p.id as player_id,
       p.nickname,
       p.display_name,
-      p.avatar_url,
-      s.rank,
-      s.points,
-      s.exact_scores,
-      s.two_point_results,
-      s.first_prediction_at,
-      false as is_current
-    from public.app_rpc_leaderboard_snapshots s
-    join selected_weeks w on w.week_start = s.week_start
-    join public.app_rpc_players p on p.id = s.player_id
-    where s.period_type = 'weekly'
+      p.avatar_url
+    from days d
+    cross join public.app_rpc_players p
+  ),
+  cumulative_rows as (
+    select
+      pd.event_day,
+      pd.player_id,
+      pd.nickname,
+      pd.display_name,
+      pd.avatar_url,
+      coalesce(sum(coalesce(dt.points, 0)) over (partition by pd.player_id order by pd.event_day rows between unbounded preceding and current row), 0)::int as points,
+      coalesce(sum(coalesce(dt.exact_scores, 0)) over (partition by pd.player_id order by pd.event_day rows between unbounded preceding and current row), 0)::int as exact_scores,
+      coalesce(sum(coalesce(dt.two_point_results, 0)) over (partition by pd.player_id order by pd.event_day rows between unbounded preceding and current row), 0)::int as two_point_results,
+      min(dt.first_prediction_at) over (partition by pd.player_id order by pd.event_day rows between unbounded preceding and current row) as first_prediction_at
+    from player_days pd
+    left join daily_totals dt on dt.player_id = pd.player_id and dt.event_day = pd.event_day
+  ),
+  ranked_rows as (
+    select
+      to_char(event_day, 'DD/MM') as period_label,
+      event_day::timestamptz as snapshot_at,
+      player_id,
+      nickname,
+      display_name,
+      avatar_url,
+      (row_number() over (
+        partition by event_day
+        order by points desc, exact_scores desc, two_point_results desc, first_prediction_at asc nulls last, display_name asc
+      ))::int as rank,
+      points,
+      exact_scores,
+      two_point_results,
+      first_prediction_at,
+      event_day = current_date as is_current
+    from cumulative_rows
   ),
   current_rows as (
     select
@@ -1158,9 +1277,10 @@ as $$
       lb.first_prediction_at,
       true as is_current
     from public.app_rpc_leaderboard lb
+    where not exists (select 1 from bounds)
   )
   select *
-  from snapshot_rows
+  from ranked_rows
   union all
   select *
   from current_rows
@@ -1811,6 +1931,7 @@ grant execute on function public.app_get_player_state(uuid) to anon;
 grant execute on function public.app_get_leaderboard() to anon;
 grant execute on function public.app_get_matches() to anon;
 grant execute on function public.app_get_public_player_profile(uuid) to anon;
+grant execute on function public.app_get_public_match_predictions(text) to anon;
 grant execute on function public.app_get_recent_exact_predictions() to anon;
 grant execute on function public.app_get_leaderboard_history(int) to anon;
 grant execute on function public.app_save_prediction_by_session(uuid, text, int, int) to anon;

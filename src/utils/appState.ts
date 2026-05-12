@@ -2,7 +2,7 @@ import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
 import { isSupabaseConfigured, supabaseRpc } from '../lib/supabaseClient';
-import type { ExactPredictionHighlight, FlashChallenge, FlashOption, FlashPrediction, Match, Player, Prediction, PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction, Standing, Team, WorldCupWinnerPrediction } from '../types';
+import type { ExactPredictionHighlight, FlashChallenge, FlashOption, FlashPrediction, Match, Player, Prediction, PredictionResultType, PublicFlashPrediction, PublicMatchPrediction, PublicPlayerProfile, PublicPrediction, Standing, Team, WorldCupWinnerPrediction } from '../types';
 import { canEditPrediction } from './date';
 import { getRecentExactPredictionHighlights } from './exactPredictions';
 import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResultType, isFlashChallengeOpen } from './flashChallenges';
@@ -110,6 +110,22 @@ interface RpcPublicPredictionRow extends RpcPredictionRow {
   is_finished?: boolean | null;
   is_live?: boolean | null;
   is_locked?: boolean | null;
+}
+
+interface RpcPublicMatchPredictionRow {
+  prediction_id?: string | null;
+  player_id: string;
+  nickname: string;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  match_id: string;
+  predicted_home_score: number;
+  predicted_away_score: number;
+  final_home_score?: number | null;
+  final_away_score?: number | null;
+  points?: number | null;
+  result_type?: PredictionResultType | null;
+  updated_at?: string | null;
 }
 
 interface RpcPublicPlayerProfile {
@@ -1021,6 +1037,65 @@ export const fetchCloudMatches = async (): Promise<Match[]> => {
   }
 };
 
+const fromRpcPublicMatchPrediction = (row: RpcPublicMatchPredictionRow): PublicMatchPrediction => ({
+  id: row.prediction_id ?? `match-public-${row.player_id}-${row.match_id}`,
+  playerId: row.player_id,
+  nickname: row.display_name ?? row.nickname,
+  avatarUrl: row.avatar_url ?? getPlayerAvatarUrl(row.player_id),
+  homeScore: row.predicted_home_score,
+  awayScore: row.predicted_away_score,
+  points: row.points ?? null,
+  resultType: row.result_type ?? 'pending',
+  updatedAt: row.updated_at ?? null,
+});
+
+const buildLocalPublicMatchPredictions = (
+  match: Match,
+  predictions: Prediction[] = getStoredPredictions(),
+  players: Player[] = mockPlayers,
+): PublicMatchPrediction[] => {
+  if (!isPredictionPublic(match)) return [];
+
+  const playerPool = buildPlayerPool(players, predictions);
+  return predictions
+    .filter((prediction) => prediction.matchId === match.id)
+    .map((prediction) => {
+      const player = playerPool.find((entry) => samePlayerId(entry.id, prediction.playerId));
+      return {
+        id: prediction.id,
+        playerId: prediction.playerId,
+        nickname: player?.nickname ?? nicknameFromPlayerId(prediction.playerId),
+        avatarUrl: getPlayerAvatarUrl(prediction.playerId) ?? player?.avatarUrl,
+        homeScore: prediction.homeScore,
+        awayScore: prediction.awayScore,
+        points: match.status === 'finished' ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match) : null,
+        resultType: match.status === 'finished'
+          ? getPredictionResultType(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore)
+          : 'pending',
+        updatedAt: prediction.updatedAt,
+      };
+    })
+    .sort((left, right) => left.nickname.localeCompare(right.nickname, 'fr'));
+};
+
+export const fetchPublicMatchPredictions = async (
+  match: Match,
+  predictions: Prediction[] = getStoredPredictions(),
+): Promise<PublicMatchPrediction[]> => {
+  if (!isPredictionPublic(match)) return [];
+
+  const fallback = buildLocalPublicMatchPredictions(match, predictions);
+  if (!isSupabaseConfigured) return fallback;
+
+  try {
+    const rows = await supabaseRpc<RpcPublicMatchPredictionRow[]>('app_get_public_match_predictions', { p_match_id: match.id });
+    return rows.map(fromRpcPublicMatchPrediction);
+  } catch (error) {
+    console.warn('Public match predictions unavailable, using local fallback.', error);
+    return fallback;
+  }
+};
+
 const normalizeRpcPublicPrediction = (row: RpcPublicPredictionRow): RpcPredictionRow | null => {
   const homeScore = row.home_score ?? row.predicted_home_score;
   const awayScore = row.away_score ?? row.predicted_away_score;
@@ -1051,6 +1126,7 @@ const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): Publ
     : null;
   const match = rpcMatch ? fromRpcMatch(rpcMatch) : matches.find((item) => item.id === row.match_id);
   if (!match) return null;
+  if (!isPredictionPublic(match)) return null;
 
   const isFinished = row.is_finished ?? match.status === 'finished';
 

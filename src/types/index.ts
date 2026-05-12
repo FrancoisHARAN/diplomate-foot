@@ -93,6 +93,18 @@ export interface PublicPrediction {
   resultType: PredictionResultType;
 }
 
+export interface PublicMatchPrediction {
+  id: string;
+  playerId: string;
+  nickname: string;
+  avatarUrl?: string;
+  homeScore: number;
+  awayScore: number;
+  points?: number | null;
+  resultType: PredictionResultType;
+  updatedAt?: string | null;
+}
+
 export type PredictionResultType = 'exact' | 'two-point' | 'winner' | 'lost' | 'pending';
 
 export interface WorldCupWinnerPrediction {

@@ -1,63 +1,68 @@
 import type { LeaderboardHistoryPeriod, Standing } from '../types';
 
-const mockNames = new Map([
-  ['p1', 'Nico'],
-  ['p2', 'Sarah'],
-  ['p-francois', 'François'],
-  ['p-solene', 'Solène'],
-]);
+interface HistoryMockPlayer {
+  playerId: string;
+  nickname: string;
+  avatarUrl?: string;
+  points: number;
+}
 
-const periods = [
-  { label: 'Semaine 1', ranks: ['p1', 'p2', 'p-francois', 'p-solene'] },
-  { label: 'Semaine 2', ranks: ['p2', 'p-francois', 'p1', 'p-solene'] },
-  { label: 'Semaine 3', ranks: ['p-francois', 'p2', 'p-solene', 'p1'] },
+const demoPlayers: HistoryMockPlayer[] = [
+  { playerId: 'p-francois', nickname: 'Francois', points: 36 },
+  { playerId: 'p-solene', nickname: 'Solene', points: 29 },
+  { playerId: 'p2', nickname: 'Sarah', points: 24 },
+  { playerId: 'p1', nickname: 'Nico', points: 18 },
 ];
 
 const toIso = (daysAgo: number): string => new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
 
-const mockPeriod = (label: string, ranks: string[], index: number): LeaderboardHistoryPeriod => ({
-  label,
-  snapshotAt: toIso((periods.length - index) * 7),
-  isCurrent: false,
-  entries: ranks.map((playerId, rankIndex) => ({
-    periodLabel: label,
-    snapshotAt: toIso((periods.length - index) * 7),
-    playerId,
-    nickname: mockNames.get(playerId) ?? 'Joueur',
-    rank: rankIndex + 1,
-    points: Math.max(0, 20 - rankIndex * 4 + index * 3),
-    exactScores: Math.max(0, 4 - rankIndex + index),
-    twoPointResults: Math.max(0, 3 - rankIndex + index),
-    firstPredictionAt: toIso(30 - index * 3 - rankIndex),
-    isCurrent: false,
-  })),
-});
+const dayLabel = (iso: string): string =>
+  new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(new Date(iso));
+
+const pointsForDay = (finalPoints: number, dayIndex: number, totalDays: number, playerIndex: number): number => {
+  if (finalPoints <= 0) return 0;
+  const progress = dayIndex / Math.max(1, totalDays - 1);
+  const wave = Math.max(0, Math.sin((dayIndex + playerIndex) * 1.1)) * 2;
+  return Math.min(finalPoints, Math.floor(finalPoints * progress + wave));
+};
 
 export const buildMockLeaderboardHistory = (currentStandings: Standing[]): LeaderboardHistoryPeriod[] => {
-  const frozenPeriods = periods.map((period, index) => mockPeriod(period.label, period.ranks, index));
-  const currentEntries = currentStandings.slice(0, 8).map((standing) => ({
-    periodLabel: 'En cours',
-    snapshotAt: new Date().toISOString(),
-    playerId: standing.playerId,
-    nickname: standing.nickname,
-    avatarUrl: standing.avatarUrl,
-    rank: standing.position,
-    points: standing.points,
-    exactScores: standing.exactScores,
-    twoPointResults: standing.twoPointResults ?? 0,
-    firstPredictionAt: standing.firstPredictionAt,
-    isCurrent: true,
-  }));
+  const sourcePlayers: HistoryMockPlayer[] = currentStandings.length > 0
+    ? currentStandings.slice(0, 8).map((standing) => ({
+        playerId: standing.playerId,
+        nickname: standing.nickname,
+        avatarUrl: standing.avatarUrl,
+        points: standing.points,
+      }))
+    : demoPlayers;
 
-  return [
-    ...frozenPeriods,
-    {
-      label: 'En cours',
-      snapshotAt: new Date().toISOString(),
-      isCurrent: true,
-      entries: currentEntries.length > 0
-        ? currentEntries
-        : mockPeriod('En cours', ['p-francois', 'p-solene', 'p2', 'p1'], 3).entries.map((entry) => ({ ...entry, isCurrent: true })),
-    },
-  ];
+  const days = Array.from({ length: 15 }, (_, index) => {
+    const daysAgo = 14 - index;
+    return toIso(daysAgo);
+  });
+
+  return days.map((snapshotAt, dayIndex) => {
+    const entries = sourcePlayers
+      .map((player, playerIndex) => ({
+        periodLabel: dayLabel(snapshotAt),
+        snapshotAt,
+        playerId: player.playerId,
+        nickname: player.nickname,
+        avatarUrl: player.avatarUrl,
+        rank: 0,
+        points: pointsForDay(player.points, dayIndex, days.length, playerIndex),
+        exactScores: 0,
+        twoPointResults: 0,
+        firstPredictionAt: dayIndex > 0 ? snapshotAt : null,
+        isCurrent: dayIndex === days.length - 1,
+      }))
+      .sort((left, right) => right.points - left.points || left.nickname.localeCompare(right.nickname, 'fr'));
+
+    return {
+      label: dayIndex === days.length - 1 ? "Aujourd'hui" : dayLabel(snapshotAt),
+      snapshotAt,
+      isCurrent: dayIndex === days.length - 1,
+      entries: entries.map((entry, index) => ({ ...entry, rank: index + 1 })),
+    };
+  });
 };

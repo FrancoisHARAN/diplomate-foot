@@ -34,14 +34,15 @@ const requireRegex = (source, pattern, label) => {
 ].forEach((snippet) => requireText(schema, snippet, 'supabase/schema.sql'));
 
 [
-  "'live'",
-  "'finished'",
-  "'locked'",
-  "'closed'",
-  "'in_progress'",
-].forEach((status) => requireText(schema, status, 'SQL prediction visibility'));
+  "lower(coalesce(p_status, 'upcoming')) <> 'upcoming'",
+  'or p_kickoff < now()',
+].forEach((snippet) => requireText(schema, snippet, 'SQL prediction visibility'));
 
 requireRegex(schema, /pg_notify\s*\(\s*'pgrst'\s*,\s*'reload schema'\s*\)/i, 'PostgREST schema cache reload');
+
+if (/now\(\)\s*\+\s*interval\s+'1 hour'|minutesUntilKickoff/.test(`${schema}\n${visibility}`)) {
+  throw new Error('Public player profiles must not expose predictions before kickoff.');
+}
 
 [
   'predictions: RpcPublicPredictionRow[]',

@@ -44,6 +44,7 @@ for (const rpc of [
   'app_sync_local_predictions',
   'app_update_player_avatar',
   'app_get_public_player_profile',
+  'app_get_public_match_predictions',
   'app_get_recent_exact_predictions',
   'app_get_world_cup_winner_prediction_by_session',
   'app_save_world_cup_winner_prediction_by_session',

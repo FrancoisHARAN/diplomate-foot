@@ -76,7 +76,7 @@ export const useLeaderboardHistory = (currentStandings: Standing[]) => {
       };
     }
 
-    void supabaseRpc<RpcLeaderboardHistoryRow[]>('app_get_leaderboard_history', { p_limit_weeks: 8 })
+    void supabaseRpc<RpcLeaderboardHistoryRow[]>('app_get_leaderboard_history', { p_limit_weeks: 104 })
       .then((rows) => {
         if (!mounted) return;
         const normalized = normalizeRows(rows);

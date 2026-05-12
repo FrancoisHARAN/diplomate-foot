@@ -12,6 +12,8 @@
     "check:public-profile": "node scripts/check-public-player-profile.mjs",
     "check:points": "node scripts/check-rules-and-points.mjs",
     "check:football-update": "node scripts/check-football-update-status.mjs",
+    "check:leaderboard-history": "node scripts/check-leaderboard-history-chart.mjs",
+    "check:public-predictions": "node scripts/check-public-prediction-visibility.mjs",
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",
     "check:home-exacts": "node scripts/check-home-exact-predictions.mjs",
     "preview": "vite preview",

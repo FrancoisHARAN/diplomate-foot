@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { LeaderboardHistoryPeriod } from '../types';
-import LeaderboardHistoryChart, { type HistoryLimit } from './LeaderboardHistoryChart';
+import LeaderboardHistoryChart, { type HistoryLimit, type PointHistoryRange } from './LeaderboardHistoryChart';
 
 interface LeaderboardHistorySectionProps {
   periods: LeaderboardHistoryPeriod[];
@@ -15,22 +15,41 @@ const filters: Array<{ id: HistoryLimit; label: string }> = [
   { id: 'all', label: 'Tous' },
 ];
 
+const rangeFilters: Array<{ id: PointHistoryRange; label: string }> = [
+  { id: 'two-weeks', label: '2 semaines' },
+  { id: 'since-start', label: 'Depuis le début' },
+];
+
 const LeaderboardHistorySection = ({ periods, currentPlayerId, isFallback, hasFrozenSnapshots }: LeaderboardHistorySectionProps) => {
-  const [limit, setLimit] = useState<HistoryLimit>(8);
+  const [limit, setLimit] = useState<HistoryLimit>(5);
+  const [range, setRange] = useState<PointHistoryRange>('two-weeks');
   const visiblePlayerCount = useMemo(() => new Set(periods.flatMap((period) => period.entries.map((entry) => entry.playerId))).size, [periods]);
 
   return (
     <section className="section-block leaderboard-history-section">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Semaines figées + semaine en cours</p>
-          <h2>Historique du classement</h2>
+          <p className="eyebrow">Historique</p>
+          <h2>Évolution des points</h2>
         </div>
       </div>
 
       <p className="history-intro">
-        Le classement évolue en direct pendant la semaine. Chaque semaine, une version est figée pour suivre les changements de position.
+        Suis la progression des meilleurs joueurs au fil des jours.
       </p>
+
+      <div className="history-range-row" role="tablist" aria-label="Filtrer la période affichée">
+        {rangeFilters.map((filter) => (
+          <button
+            key={filter.id}
+            className={`pill ${range === filter.id ? 'active' : ''}`}
+            type="button"
+            onClick={() => setRange(filter.id)}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
 
       <div className="history-filter-row" role="tablist" aria-label="Filtrer les joueurs affichés">
         {filters.map((filter) => (
@@ -47,25 +66,25 @@ const LeaderboardHistorySection = ({ periods, currentPlayerId, isFallback, hasFr
 
       {!hasFrozenSnapshots ? (
         <div className="notice-panel compact history-note">
-          <strong>Aucun historique figé pour le moment.</strong>
-          <p>Le classement live apparaît déjà en “En cours”. Les semaines seront ajoutées après le premier snapshot.</p>
+          <strong>Historique en préparation.</strong>
+          <p>Le classement actuel reste affiché en attendant plus de journées avec points.</p>
         </div>
       ) : null}
 
       {periods.length > 0 ? (
         <>
-          <LeaderboardHistoryChart periods={periods} currentPlayerId={currentPlayerId} limit={limit} />
+          <LeaderboardHistoryChart periods={periods} currentPlayerId={currentPlayerId} limit={limit} range={range} />
           <p className="history-footnote">
             {limit === 'all'
               ? `${visiblePlayerCount} joueurs affichés.`
-              : 'Affichage des meilleurs joueurs pour garder le graphique lisible.'}
+              : 'Les joueurs suivent le classement actuel.'}
             {isFallback ? ' Données de démonstration si Supabase est indisponible.' : ''}
           </p>
         </>
       ) : (
         <div className="empty-state inline">
-          <strong>Aucun historique figé pour le moment.</strong>
-          <p>Le classement live apparaîtra ici dès que des semaines seront enregistrées.</p>
+          <strong>Aucun point pour le moment.</strong>
+          <p>Le graphique apparaîtra dès les premiers résultats.</p>
         </div>
       )}
     </section>

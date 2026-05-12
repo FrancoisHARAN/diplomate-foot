@@ -1,18 +1,47 @@
 import type { LeaderboardHistoryPeriod } from '../types';
 
 type HistoryLimit = 5 | 8 | 'all';
+type PointHistoryRange = 'two-weeks' | 'since-start';
 
 interface LeaderboardHistoryChartProps {
   periods: LeaderboardHistoryPeriod[];
   currentPlayerId?: string;
   limit: HistoryLimit;
+  range: PointHistoryRange;
 }
 
-const palette = ['#d2ff52', '#25e6b7', '#ffffff', '#ff4f5e', '#8ab0ff', '#ffd166', '#f77fbe', '#9dffcb'];
+interface PointSeriesItem {
+  periodIndex: number;
+  points: number;
+  changed: boolean;
+}
+
+const palette = ['#d2ff52', '#25e6b7', '#ffffff', '#ff5c70', '#8ab0ff', '#ffd166', '#f77fbe', '#9dffcb'];
+
+const sortPeriods = (periods: LeaderboardHistoryPeriod[]): LeaderboardHistoryPeriod[] =>
+  [...periods].sort((left, right) => new Date(left.snapshotAt).getTime() - new Date(right.snapshotAt).getTime());
+
+const periodDay = (period: LeaderboardHistoryPeriod): string => new Date(period.snapshotAt).toISOString().slice(0, 10);
+
+const visiblePeriods = (periods: LeaderboardHistoryPeriod[], range: PointHistoryRange): LeaderboardHistoryPeriod[] => {
+  const ordered = sortPeriods(periods);
+  if (ordered.length === 0) return [];
+
+  const firstScoringIndex = ordered.findIndex((period) => period.entries.some((entry) => entry.points > 0));
+  const fromFirstScore = firstScoringIndex >= 0 ? ordered.slice(firstScoringIndex) : ordered;
+  if (range === 'since-start') return fromFirstScore;
+
+  const latestTime = new Date(fromFirstScore[fromFirstScore.length - 1].snapshotAt).getTime();
+  const cutoff = latestTime - 13 * 24 * 60 * 60 * 1000;
+  const lastTwoWeeks = fromFirstScore.filter((period) => new Date(period.snapshotAt).getTime() >= cutoff);
+  return lastTwoWeeks.length > 0 ? lastTwoWeeks : fromFirstScore.slice(-1);
+};
 
 const selectPlayers = (periods: LeaderboardHistoryPeriod[], limit: HistoryLimit, currentPlayerId?: string): string[] => {
   const latest = periods[periods.length - 1];
-  const ordered = latest?.entries.map((entry) => entry.playerId) ?? [];
+  const ordered = latest?.entries
+    .filter((entry) => entry.points > 0 || latest.entries.some((item) => item.points > 0))
+    .map((entry) => entry.playerId) ?? [];
   const visible = limit === 'all' ? ordered : ordered.slice(0, limit);
 
   if (currentPlayerId && ordered.includes(currentPlayerId) && !visible.includes(currentPlayerId) && limit !== 'all') {
@@ -30,73 +59,107 @@ const playerName = (periods: LeaderboardHistoryPeriod[], playerId: string): stri
   return 'Joueur';
 };
 
-const playerRanks = (periods: LeaderboardHistoryPeriod[], playerId: string) =>
-  periods.map((period, periodIndex) => {
-    const entry = period.entries.find((item) => item.playerId === playerId);
-    return entry ? { periodIndex, rank: entry.rank, points: entry.points } : null;
-  }).filter((item): item is { periodIndex: number; rank: number; points: number } => Boolean(item));
+const playerPoints = (periods: LeaderboardHistoryPeriod[], playerId: string): PointSeriesItem[] => {
+  let lastPoints: number | null = null;
 
-const LeaderboardHistoryChart = ({ periods, currentPlayerId, limit }: LeaderboardHistoryChartProps) => {
-  if (periods.length === 0) return null;
+  return periods
+    .map((period, periodIndex) => {
+      const entry = period.entries.find((item) => item.playerId === playerId);
+      if (entry) {
+        const changed = lastPoints === null || entry.points !== lastPoints;
+        lastPoints = entry.points;
+        return { periodIndex, points: entry.points, changed };
+      }
 
-  const visiblePlayers = selectPlayers(periods, limit, currentPlayerId);
-  const left = 46;
+      if (lastPoints === null) return null;
+      return { periodIndex, points: lastPoints, changed: false };
+    })
+    .filter((item): item is PointSeriesItem => Boolean(item));
+};
+
+const compactDate = (period: LeaderboardHistoryPeriod): string => {
+  if (period.isCurrent) return 'Auj.';
+  return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' }).format(new Date(period.snapshotAt));
+};
+
+const LeaderboardHistoryChart = ({ periods, currentPlayerId, limit, range }: LeaderboardHistoryChartProps) => {
+  const chartPeriods = visiblePeriods(periods, range);
+  if (chartPeriods.length === 0) return null;
+
+  const visiblePlayers = selectPlayers(chartPeriods, limit, currentPlayerId);
+  if (visiblePlayers.length === 0) {
+    return (
+      <div className="empty-state inline history-empty">
+        <strong>Pas encore de points.</strong>
+        <p>Le graphique se remplira dès les premiers résultats.</p>
+      </div>
+    );
+  }
+
+  const left = 42;
   const top = 24;
   const bottom = 42;
-  const right = 24;
-  const stepX = Math.max(84, Math.round(300 / Math.max(1, periods.length - 1)));
-  const rowGap = 34;
-  const maxRank = Math.max(1, ...visiblePlayers.flatMap((playerId) => playerRanks(periods, playerId).map((item) => item.rank)));
-  const width = left + right + stepX * Math.max(1, periods.length - 1);
-  const height = top + bottom + rowGap * Math.max(1, maxRank - 1);
+  const right = 22;
+  const chartHeight = 188;
+  const stepX = range === 'two-weeks' ? 36 : Math.max(24, Math.min(40, Math.round(720 / Math.max(1, chartPeriods.length - 1))));
+  const width = Math.max(330, left + right + stepX * Math.max(1, chartPeriods.length - 1));
+  const height = top + chartHeight + bottom;
+  const maxPoints = Math.max(1, ...visiblePlayers.flatMap((playerId) => playerPoints(chartPeriods, playerId).map((item) => item.points)));
+  const tickValues = Array.from(new Set([0, Math.ceil(maxPoints / 2), maxPoints]));
+  const labelEvery = Math.max(1, Math.ceil(chartPeriods.length / (range === 'two-weeks' ? 7 : 8)));
   const xFor = (periodIndex: number) => left + periodIndex * stepX;
-  const yFor = (rank: number) => top + (rank - 1) * rowGap;
+  const yFor = (points: number) => top + chartHeight - (points / maxPoints) * chartHeight;
 
   return (
-    <div className="history-chart-scroll" role="img" aria-label="Evolution hebdomadaire du classement">
+    <div className="history-chart-scroll" role="img" aria-label="Évolution des points cumulés">
       <svg className="history-chart" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
-        {Array.from({ length: maxRank }).map((_, index) => {
-          const rank = index + 1;
-          return (
-            <g key={rank}>
-              <line x1={left} x2={width - right} y1={yFor(rank)} y2={yFor(rank)} className="history-grid-line" />
-              <text x={8} y={yFor(rank) + 4} className="history-rank-label">#{rank}</text>
-            </g>
-          );
-        })}
+        {tickValues.map((value) => (
+          <g key={value}>
+            <line x1={left} x2={width - right} y1={yFor(value)} y2={yFor(value)} className="history-grid-line" />
+            <text x={8} y={yFor(value) + 4} className="history-value-label">{value}</text>
+          </g>
+        ))}
 
-        {periods.map((period, index) => (
-          <g key={period.label}>
-            <line x1={xFor(index)} x2={xFor(index)} y1={top - 8} y2={height - bottom + 8} className="history-period-line" />
-            <text x={xFor(index)} y={height - 12} textAnchor="middle" className={period.isCurrent ? 'history-period-label current' : 'history-period-label'}>
-              {period.label}
-            </text>
+        {chartPeriods.map((period, index) => (
+          <g key={`${periodDay(period)}-${period.label}`}>
+            <line x1={xFor(index)} x2={xFor(index)} y1={top} y2={height - bottom} className="history-period-line" />
+            {index % labelEvery === 0 || index === chartPeriods.length - 1 ? (
+              <text x={xFor(index)} y={height - 13} textAnchor="middle" className={period.isCurrent ? 'history-axis-label current' : 'history-axis-label'}>
+                {compactDate(period)}
+              </text>
+            ) : null}
           </g>
         ))}
 
         {visiblePlayers.map((playerId, playerIndex) => {
-          const ranks = playerRanks(periods, playerId);
-          const color = playerId === currentPlayerId ? '#d2ff52' : palette[playerIndex % palette.length];
-          const path = ranks.map((item, index) => `${index === 0 ? 'M' : 'L'} ${xFor(item.periodIndex)} ${yFor(item.rank)}`).join(' ');
+          const series = playerPoints(chartPeriods, playerId);
+          const isLeader = playerIndex === 0;
+          const isMe = playerId === currentPlayerId;
+          const color = palette[playerIndex % palette.length];
+          const path = series.map((item, index) => `${index === 0 ? 'M' : 'L'} ${xFor(item.periodIndex)} ${yFor(item.points)}`).join(' ');
           return (
             <g key={playerId}>
-              <path d={path} className={playerId === currentPlayerId ? 'history-player-line is-me' : 'history-player-line'} style={{ stroke: color }} />
-              {ranks.map((item) => (
-                <g key={`${playerId}-${item.periodIndex}`}>
-                  <circle cx={xFor(item.periodIndex)} cy={yFor(item.rank)} r={playerId === currentPlayerId ? 5 : 4} className="history-player-dot" style={{ fill: color }} />
-                  <text x={xFor(item.periodIndex)} y={yFor(item.rank) - 8} textAnchor="middle" className="history-points-label">{item.points}p</text>
-                </g>
+              <path d={path} className={`history-player-line ${isLeader ? 'is-leader' : ''} ${isMe ? 'is-me' : ''}`} style={{ stroke: color }} />
+              {series.filter((item) => item.changed).map((item) => (
+                <circle
+                  key={`${playerId}-${item.periodIndex}`}
+                  cx={xFor(item.periodIndex)}
+                  cy={yFor(item.points)}
+                  r={isLeader ? 4.8 : 3.8}
+                  className={`history-player-dot ${isLeader ? 'is-leader' : ''} ${isMe ? 'is-me' : ''}`}
+                  style={{ fill: color }}
+                />
               ))}
             </g>
           );
         })}
       </svg>
 
-      <div className="history-legend">
+      <div className="history-legend" aria-label="Joueurs affichés">
         {visiblePlayers.map((playerId, index) => (
-          <span key={playerId} className={playerId === currentPlayerId ? 'is-me' : ''}>
-            <i style={{ background: playerId === currentPlayerId ? '#d2ff52' : palette[index % palette.length] }} />
-            {playerName(periods, playerId)}
+          <span key={playerId} className={`${index === 0 ? 'is-leader' : ''} ${playerId === currentPlayerId ? 'is-me' : ''}`}>
+            <i style={{ background: palette[index % palette.length] }} />
+            {playerName(chartPeriods, playerId)}
           </span>
         ))}
       </div>
@@ -105,4 +168,4 @@ const LeaderboardHistoryChart = ({ periods, currentPlayerId, limit }: Leaderboar
 };
 
 export default LeaderboardHistoryChart;
-export type { HistoryLimit };
+export type { HistoryLimit, PointHistoryRange };

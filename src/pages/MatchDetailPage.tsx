@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type TouchEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import DeadlineBadge from '../components/DeadlineBadge';
+import MatchPublicPredictionsSection from '../components/MatchPublicPredictionsSection';
 import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
@@ -343,6 +344,8 @@ const MatchDetailPage = () => {
         <button className="btn ghost" type="button" disabled={!previousMatch || isSaving} onClick={() => void navigateToMatch(previousMatch)}>Match précédent</button>
         <button className="btn secondary" type="button" disabled={!nextMatch || isSaving} onClick={() => void navigateToMatch(nextMatch)}>Match suivant</button>
       </nav>
+
+      <MatchPublicPredictionsSection match={match} />
     </div>
   );
 };
