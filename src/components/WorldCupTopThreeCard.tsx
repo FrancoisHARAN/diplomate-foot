@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { WORLD_CUP_WINNER_COUNTRIES, WORLD_CUP_WINNER_POINTS_BY_POSITION } from '../config/worldCupWinnerPredictions';
 import type { CurrentPlayer } from '../utils/appState';
 import { fetchWorldCupWinnerPrediction, saveWorldCupWinnerPrediction } from '../utils/appState';
+import { formatWorldCupTopThreeLockDate, getWorldCupTopThreeRemainingLabel, isWorldCupTopThreeLocked } from '../utils/worldCupWinnerPredictions';
 
 interface WorldCupTopThreeCardProps {
   player: CurrentPlayer | null;
@@ -15,6 +16,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
   const [choices, setChoices] = useState<string[]>(emptyChoices);
   const [status, setStatus] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     let mounted = true;
@@ -30,16 +32,22 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
     };
   }, [player?.id]);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
   const duplicate = useMemo(() => choices.filter(Boolean).length !== new Set(choices.filter(Boolean)).size, [choices]);
   const complete = choices.every(Boolean) && !duplicate;
+  const locked = isWorldCupTopThreeLocked(now);
 
   if (!player) {
     return (
       <section className="section-block worldcup-top3-card" id="top3-coupe-du-monde">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Bonus Coupe du Monde</p>
-            <h2>Ton top 3 Coupe du Monde</h2>
+            <p className="eyebrow">Prédiction champion du monde</p>
+            <h2>Ton top 3 champion du monde</h2>
           </div>
         </div>
         <p className="section-subtitle">Connecte-toi pour enregistrer tes 3 favoris.</p>
@@ -52,11 +60,15 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
     <section className="section-block worldcup-top3-card" id="top3-coupe-du-monde">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Bonus Coupe du Monde</p>
-          <h2>Ton top 3 Coupe du Monde</h2>
-          <p className="section-subtitle">Choisis tes 3 favoris pour gagner la Coupe du Monde. Si le champion est dans ta liste, tu marques des points selon sa position.</p>
+          <p className="eyebrow">Prédiction champion du monde</p>
+          <h2>Ton top 3 champion du monde</h2>
+          <p className="section-subtitle">Choisis tes 3 favoris pour devenir champion du monde. Si le champion est dans ton top 3, tu marques des points selon sa position.</p>
         </div>
       </div>
+      <p className={`worldcup-top3-lock ${locked ? 'locked' : ''}`}>
+        {locked ? 'Prédiction verrouillée' : getWorldCupTopThreeRemainingLabel(now)}
+        <small>À compléter avant le {formatWorldCupTopThreeLockDate()}.</small>
+      </p>
 
       <div className="worldcup-top3-list">
         {choices.map((choice, index) => {
@@ -68,6 +80,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
               <span className="worldcup-top3-rank">{index + 1}</span>
               <select
                 value={choice}
+                disabled={locked}
                 onChange={(event) => {
                   const next = [...choices];
                   next[index] = event.target.value;
@@ -78,7 +91,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
                 <option value="">Choisir un pays</option>
                 {WORLD_CUP_WINNER_COUNTRIES.map((country) => (
                   <option key={country.code} value={country.code} disabled={takenByAnotherSlot(country.code)}>
-                    {country.name}
+                    {country.name} · Groupe {country.group}
                   </option>
                 ))}
               </select>
@@ -95,7 +108,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
       <button
         className="btn primary"
         type="button"
-        disabled={!complete || saving}
+        disabled={!complete || saving || locked}
         onClick={async () => {
           setSaving(true);
           setStatus('');
@@ -110,7 +123,7 @@ const WorldCupTopThreeCard = ({ player, onSaved }: WorldCupTopThreeCardProps) =>
           }
         }}
       >
-        {saving ? 'Enregistrement...' : 'Enregistrer mon top 3'}
+        {locked ? 'Prédiction verrouillée' : saving ? 'Enregistrement...' : 'Enregistrer mon top 3'}
       </button>
     </section>
   );

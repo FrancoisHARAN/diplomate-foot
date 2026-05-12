@@ -155,8 +155,8 @@ const HomePage = () => {
       {player && !worldCupTop3 ? (
         <section className="notice-panel top3-reminder-card">
           <span className="mini-badge danger">À compléter</span>
-          <strong>Top 3 Coupe du Monde à compléter</strong>
-          <p>Choisis tes 3 favoris pour le champion du monde.</p>
+          <strong>Prédiction champion du monde à compléter</strong>
+          <p>Choisis tes 3 favoris pour devenir champion du monde.</p>
           <Link className="btn primary" to="/mon-compte">Compléter mon top 3</Link>
         </section>
       ) : null}

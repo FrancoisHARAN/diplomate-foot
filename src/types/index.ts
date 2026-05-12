@@ -82,6 +82,7 @@ export interface PublicPlayerProfile {
   avatarUrl?: string;
   stats: PublicPlayerStats;
   predictions: PublicPrediction[];
+  worldCupTopThree?: WorldCupWinnerPrediction | null;
 }
 
 export interface PublicPrediction {

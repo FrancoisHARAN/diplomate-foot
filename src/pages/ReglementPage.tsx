@@ -90,12 +90,35 @@ const ReglementPage = () => (
       <article className="rules-info-card boost-card">
         <span>03</span>
         <h2>Boosts</h2>
-        <p>Certains matchs peuvent compter x2 ou plus.</p>
-        <strong>Sur un match boosté x2, un score exact vaut 6 points au lieu de 3.</strong>
+        <p>Certains matchs rapportent plus de points. Le boost le plus fort s’applique, les boosts ne se cumulent pas.</p>
+        <ul>
+          <li>Matchs de la France : x2</li>
+          <li>Huitièmes : x2</li>
+          <li>Quarts : x3</li>
+          <li>Demi-finales : x4</li>
+          <li>Finale : x5</li>
+        </ul>
+        <strong>France en demi-finale : x4, pas x8.</strong>
+      </article>
+
+      <article className="rules-info-card">
+        <span>04</span>
+        <h2>Paris flash</h2>
+        <p>Des défis flash peuvent apparaître pendant quelques jours sur les gros matchs.</p>
+        <strong>Ils se ferment au coup d’envoi et rapportent des points bonus si ta réponse est correcte.</strong>
+      </article>
+    </section>
+
+    <section className="rules-section rules-info-grid">
+      <article className="rules-info-card">
+        <span>05</span>
+        <h2>Prédiction champion du monde</h2>
+        <p>Dans ton compte, classe tes 3 favoris pour devenir champion du monde.</p>
+        <strong>Champion placé 1er : 20 pts. Placé 2e : 15 pts. Placé 3e : 10 pts.</strong>
       </article>
 
       <article className="rules-info-card prizes-card">
-        <span>04</span>
+        <span>06</span>
         <h2>Classement et lots</h2>
         <p>Le classement est mis à jour avec les points gagnés sur les matchs terminés.</p>
         <ul>
@@ -103,22 +126,6 @@ const ReglementPage = () => (
             <li key={prize}>{prize}</li>
           ))}
         </ul>
-      </article>
-    </section>
-
-    <section className="rules-section rules-info-grid">
-      <article className="rules-info-card">
-        <span>05</span>
-        <h2>Top 3 Coupe du Monde</h2>
-        <p>Dans ton compte, classe tes 3 favoris pour gagner la Coupe du Monde.</p>
-        <strong>Champion placé 1er : 20 pts. Placé 2e : 15 pts. Placé 3e : 10 pts.</strong>
-      </article>
-
-      <article className="rules-info-card">
-        <span>06</span>
-        <h2>Paris flash</h2>
-        <p>Certains défis spéciaux peuvent apparaître pendant quelques jours.</p>
-        <strong>Ils se ferment au début du match concerné et peuvent rapporter des points bonus.</strong>
       </article>
     </section>
 

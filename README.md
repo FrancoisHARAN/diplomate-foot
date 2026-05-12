@@ -266,7 +266,9 @@ La logique d'affichage est volontairement filtree:
 
 Equipes selectionnees en phase de groupe:
 
-France, Espagne, Argentine, Angleterre, Portugal, Bresil, Pays-Bas, Maroc, Belgique, Allemagne, Croatie, Italie, Colombie, Senegal.
+France, Espagne, Argentine, Angleterre, Portugal, Bresil, Pays-Bas, Maroc, Belgique, Allemagne, Croatie, Colombie, Senegal.
+
+Italie n'est pas dans la liste Coupe du Monde actuelle.
 
 Les fichiers de configuration principaux sont:
 
@@ -300,9 +302,15 @@ Les noms de pays affiches dans le contexte selection nationale / Coupe du Monde 
 
 Cette conversion ne s'applique que si le match est identifie comme une selection nationale / Coupe du Monde. Les clubs restent traites avec leurs logos de clubs: `MAR` peut etre Marseille en club sans devenir Maroc.
 
-## Top 3 vainqueur Coupe du Monde
+## Prediction champion du monde
 
-Dans `/mon-compte`, chaque joueur peut enregistrer ses 3 favoris pour gagner la Coupe du Monde.
+Dans `/mon-compte`, chaque joueur peut enregistrer son **top 3 champion du monde**: les 3 pays qu'il pense capables de gagner la Coupe du Monde. Ce n'est pas le podium reel de la competition, seulement une liste de favoris pour le champion final.
+
+Texte joueur:
+
+- choisis tes 3 favoris pour devenir champion du monde;
+- si le champion est dans ton top 3, tu marques des points selon sa position;
+- le joueur peut modifier son choix jusqu'a la date limite configuree.
 
 Regle de points prevue pour la fin de competition:
 
@@ -311,7 +319,63 @@ Regle de points prevue pour la fin de competition:
 - champion place en 3e choix: 10 points;
 - champion absent du top 3: 0 point.
 
-Le calcul utilitaire est dans `src/utils/worldCupWinnerPredictions.ts`. Les choix sont synchronises par RPC Supabase quand la base est configuree, sinon ils restent en fallback localStorage.
+La date limite est centralisee dans `WORLD_CUP_TOP_THREE_LOCKS_AT`, dans `src/config/worldCupWinnerPredictions.ts`. La valeur temporaire actuelle est:
+
+```txt
+2026-06-17T00:00:00Z
+```
+
+Pour changer la date limite, modifier cette constante puis redeployer. Le verrouillage est applique cote frontend et dans la RPC `app_save_world_cup_winner_prediction_by_session`.
+
+La liste des 48 pays qualifies utilisee par ce formulaire est aussi dans `src/config/worldCupWinnerPredictions.ts`. Elle est organisee par groupe:
+
+- Groupe A: Mexique, Afrique du Sud, Coree du Sud, Tchequie
+- Groupe B: Canada, Bosnie-Herzegovine, Qatar, Suisse
+- Groupe C: Bresil, Maroc, Haiti, Ecosse
+- Groupe D: Etats-Unis, Paraguay, Australie, Turquie
+- Groupe E: Allemagne, Curacao, Cote d'Ivoire, Equateur
+- Groupe F: Pays-Bas, Japon, Suede, Tunisie
+- Groupe G: Belgique, Egypte, Iran, Nouvelle-Zelande
+- Groupe H: Espagne, Cap-Vert, Arabie saoudite, Uruguay
+- Groupe I: France, Senegal, Irak, Norvege
+- Groupe J: Argentine, Algerie, Autriche, Jordanie
+- Groupe K: Portugal, RD Congo, Ouzbekistan, Colombie
+- Groupe L: Angleterre, Croatie, Ghana, Panama
+
+Italie est volontairement absente de cette liste.
+
+Le calcul utilitaire est dans `src/utils/worldCupWinnerPredictions.ts`. Les choix sont synchronises par RPC Supabase quand la base est configuree, sinon ils restent en fallback localStorage. Le top 3 public d'un joueur est renvoye par `app_get_public_player_profile`.
+
+## Boosts Coupe du Monde
+
+Les boosts ne se cumulent pas. Le boost final est toujours le plus fort multiplicateur applicable au match.
+
+- Matchs de la France: x2
+- Seiziemes / huitiemes: x2
+- Quarts de finale: x3
+- Match pour la 3e place: x3
+- Demi-finales: x4
+- Finale: x5
+
+Exemples:
+
+- France en huitieme: x2, pas x4;
+- France en demi-finale: x4, pas x8;
+- France en finale: x5, pas x10.
+
+Le meme principe est applique cote frontend et dans `supabase/schema.sql`.
+
+## Avatars cloud
+
+Les photos de profil sont synchronisees via Supabase quand la base est configuree.
+
+- la mise a jour passe par `app_update_player_avatar`;
+- l'avatar est renvoye par `app_get_player_state`;
+- l'avatar est renvoye par `app_get_leaderboard`;
+- l'avatar est renvoye par `app_get_public_player_profile`;
+- la RPC refuse les avatars trop lourds pour eviter de stocker une image enorme en base.
+
+Sans Supabase, l'avatar reste disponible seulement dans le cache/fallback local.
 
 ## Paris flash
 
@@ -327,14 +391,24 @@ Tables/RPC ajoutees par `supabase/schema.sql`:
 - `app_get_player_flash_predictions_by_session`;
 - `app_get_public_player_flash_predictions`.
 
-Exemple SQL pour creer un flash:
+Le schema contient un seed idempotent pour le flash de test:
+
+- titre: `Dembélé buteur ?`
+- description: `Dembélé marque-t-il contre Lens ?`
+- match lie: `fd-542664` si les donnees live contiennent Lens - PSG
+- fermeture: `2026-05-13T19:00:00Z`
+- options: `Oui, il marque` pour 5 points, `Non, il ne marque pas` pour 2 points.
+
+Relancer `supabase/schema.sql` ne doit pas creer de doublon de ce flash.
+
+Exemple SQL pour creer un autre flash:
 
 ```sql
 with challenge as (
   insert into public.app_rpc_flash_challenges (title, description, match_label, closes_at, status)
   values (
-    'Dembele buteur ?',
-    'Dembele marque-t-il contre Lens ?',
+    'Nouveau flash ?',
+    'Description courte du defi',
     'Lens - PSG',
     '2026-06-12 21:00:00+02',
     'open'
@@ -347,12 +421,31 @@ union all
 select id, 'Non, il ne marque pas', 2, 2 from challenge;
 ```
 
+Exemple SQL pour trouver les options du flash Dembélé:
+
+```sql
+select c.id as flash_id, o.id as option_id, o.label, o.points_if_correct
+from public.app_rpc_flash_challenges c
+join public.app_rpc_flash_options o on o.flash_id = c.id
+where c.title = 'Dembélé buteur ?'
+order by o.sort_order;
+```
+
 Exemple SQL pour resoudre le flash:
 
 ```sql
 update public.app_rpc_flash_challenges
 set status = 'resolved',
     result_option_id = '<ID_OPTION_GAGNANTE>',
+    updated_at = now()
+where id = '<ID_FLASH>';
+```
+
+Pour fermer un flash sans le resoudre:
+
+```sql
+update public.app_rpc_flash_challenges
+set status = 'closed',
     updated_at = now()
 where id = '<ID_FLASH>';
 ```

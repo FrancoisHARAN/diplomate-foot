@@ -1,3 +1,23 @@
+import { readFileSync } from 'node:fs';
+
+const schema = readFileSync(new URL('../supabase/schema.sql', import.meta.url), 'utf8');
+
+for (const expected of [
+  'Dembélé buteur ?',
+  'Dembélé marque-t-il contre Lens ?',
+  'Oui, il marque',
+  'Non, il ne marque pas',
+  'fd-542664',
+]) {
+  if (!schema.includes(expected)) {
+    throw new Error(`Missing seeded Dembélé flash detail in schema: ${expected}`);
+  }
+}
+
+if (!schema.includes('into v_flash_id') || !schema.includes('where title =')) {
+  throw new Error('Dembélé flash seed must stay idempotent and avoid duplicates.');
+}
+
 const challenge = {
   status: 'resolved',
   resultOptionId: 'yes',

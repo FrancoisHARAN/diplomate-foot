@@ -14,9 +14,10 @@ assert.equal(flagsSource.includes("team.id.startsWith('t-')"), false, 'Flags mus
 assert.equal(flagsSource.includes('isWorldCup2026Match'), true, 'Team crests must gate country flags behind World Cup detection.');
 
 const configSource = readFileSync(join(root, 'src', 'config', 'worldCup2026.ts'), 'utf8');
-['FRA', 'ESP', 'ARG', 'ENG', 'POR', 'BRA', 'NED', 'MAR', 'BEL', 'GER', 'CRO', 'ITA', 'COL', 'SEN'].forEach((code) => {
+['FRA', 'ESP', 'ARG', 'ENG', 'POR', 'BRA', 'NED', 'MAR', 'BEL', 'GER', 'CRO', 'COL', 'SEN'].forEach((code) => {
   assert.equal(configSource.includes(`code: '${code}'`), true, `Featured team ${code} missing from World Cup config.`);
 });
+assert.equal(configSource.includes("code: 'ITA'"), false, 'Italy must not be in the current featured World Cup list.');
 
 const normalize = (value) =>
   String(value ?? '')
@@ -38,14 +39,13 @@ const codeByAlias = new Map([
   ['belgium', 'BEL'], ['belgique', 'BEL'], ['bel', 'BEL'],
   ['germany', 'GER'], ['allemagne', 'GER'], ['deu', 'GER'], ['ger', 'GER'],
   ['croatia', 'CRO'], ['croatie', 'CRO'], ['cro', 'CRO'],
-  ['italy', 'ITA'], ['italie', 'ITA'], ['ita', 'ITA'],
   ['colombia', 'COL'], ['colombie', 'COL'], ['col', 'COL'],
   ['senegal', 'SEN'], ['sen', 'SEN'],
   ['canada', 'CAN'], ['can', 'CAN'],
   ['japan', 'JPN'], ['japon', 'JPN'], ['jpn', 'JPN'],
 ]);
 
-const featured = new Set(['FRA', 'ESP', 'ARG', 'ENG', 'POR', 'BRA', 'NED', 'MAR', 'BEL', 'GER', 'CRO', 'ITA', 'COL', 'SEN']);
+const featured = new Set(['FRA', 'ESP', 'ARG', 'ENG', 'POR', 'BRA', 'NED', 'MAR', 'BEL', 'GER', 'CRO', 'COL', 'SEN']);
 const flagByCode = new Map([
   ['FRA', 'fr.webp'],
   ['MAR', 'ma.webp'],

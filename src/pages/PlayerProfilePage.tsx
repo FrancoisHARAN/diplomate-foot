@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import FlashChallengeCard from '../components/FlashChallengeCard';
 import PlayerAvatar from '../components/PlayerAvatar';
 import TeamBadge from '../components/TeamBadge';
+import { WORLD_CUP_WINNER_COUNTRIES } from '../config/worldCupWinnerPredictions';
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction } from '../types';
 import { fetchPublicPlayerFlashPredictions, fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
@@ -29,6 +30,8 @@ const resultLabels: Record<PredictionResultType, string> = {
   lost: 'Perdu',
   pending: 'En attente',
 };
+
+const topThreeCountry = (code: string) => WORLD_CUP_WINNER_COUNTRIES.find((country) => country.code === code);
 
 const resultClassName: Record<PredictionResultType, string> = {
   exact: 'exact',
@@ -122,6 +125,33 @@ const PlayerProfilePage = () => {
           <span><strong>{profile.predictions.length}</strong> pronos visibles</span>
         </div>
       </section>
+
+      {profile.worldCupTopThree ? (
+        <section className="section-block public-top3-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Prédiction champion du monde</p>
+              <h2>Top 3</h2>
+            </div>
+          </div>
+          <div className="public-top3-list">
+            {[
+              profile.worldCupTopThree.firstChoiceCode,
+              profile.worldCupTopThree.secondChoiceCode,
+              profile.worldCupTopThree.thirdChoiceCode,
+            ].map((code, index) => {
+              const country = topThreeCountry(code);
+              return (
+                <span className="public-top3-row" key={`${profile.id}-top3-${code}`}>
+                  <strong>{index + 1}</strong>
+                  {country?.flagUrl ? <img src={country.flagUrl} alt="" /> : null}
+                  <span>{country?.name ?? code}</span>
+                </span>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section className="section-block public-profile-history">
         <div className="section-heading">

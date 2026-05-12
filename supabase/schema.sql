@@ -338,6 +338,56 @@ as $$
     or p_kickoff <= now() + interval '1 hour';
 $$;
 
+create or replace function public.app_private_match_multiplier(
+  p_points_multiplier int,
+  p_competition_code text,
+  p_competition_name text,
+  p_stage text,
+  p_round text,
+  p_matchday int,
+  p_home_team jsonb,
+  p_away_team jsonb
+)
+returns int
+language sql
+immutable
+as $$
+  with match_values as (
+    select
+      lower(regexp_replace(coalesce(p_competition_code, '') || ' ' || coalesce(p_competition_name, ''), '[^a-zA-Z0-9]+', ' ', 'g')) as competition_text,
+      lower(regexp_replace(coalesce(p_stage, '') || ' ' || coalesce(p_round, '') || ' ' || coalesce(p_matchday::text, ''), '[^a-zA-Z0-9]+', ' ', 'g')) as stage_text,
+      lower(regexp_replace(coalesce(p_home_team->>'countryCode', '') || ' ' || coalesce(p_home_team->>'name', '') || ' ' || coalesce(p_home_team->>'shortName', '') || ' ' ||
+            coalesce(p_away_team->>'countryCode', '') || ' ' || coalesce(p_away_team->>'name', '') || ' ' || coalesce(p_away_team->>'shortName', ''), '[^a-zA-Z0-9]+', ' ', 'g')) as teams_text
+  )
+  select greatest(
+    1,
+    coalesce(p_points_multiplier, 1),
+    case
+      when competition_text like '%wc2026%' or competition_text like '%world cup%' or competition_text like '%coupe du monde%' then
+        case
+          when stage_text like '%semi%' or stage_text like '%demi%' then 4
+          when stage_text like '%third place%' or stage_text like '%3e place%' or stage_text like '%troisieme%' then 3
+          when stage_text like '%quarter%' or stage_text like '%quart%' then 3
+          when stage_text like '%round of 16%' or stage_text like '%last 16%' or stage_text like '%huitieme%' then 2
+          when stage_text like '%round of 32%' or stage_text like '%last 32%' or stage_text like '%seizieme%' then 2
+          when stage_text like '%final%' or stage_text like '%finale%' then 5
+          else 1
+        end
+      else 1
+    end,
+    case
+      when (competition_text like '%wc2026%' or competition_text like '%world cup%' or competition_text like '%coupe du monde%')
+        and (teams_text like '%fra%' or teams_text like '%france%') then 2
+      else 1
+    end,
+    case
+      when competition_text like '%final%' or competition_text like '%finale%' then 5
+      else 1
+    end
+  )
+  from match_values;
+$$;
+
 create or replace view public.app_rpc_scored_predictions as
 select
   pr.id,
@@ -351,7 +401,7 @@ select
     pr.away_score,
     m.home_score,
     m.away_score,
-    m.points_multiplier
+    public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team)
   ), 0) as points
 from public.app_rpc_predictions pr
 left join public.app_rpc_matches m on m.id = pr.match_id
@@ -374,9 +424,43 @@ as $$
     when 'BEL' then 'Belgique'
     when 'GER' then 'Allemagne'
     when 'CRO' then 'Croatie'
-    when 'ITA' then 'Italie'
     when 'COL' then 'Colombie'
     when 'SEN' then 'Senegal'
+    when 'MEX' then 'Mexique'
+    when 'RSA' then 'Afrique du Sud'
+    when 'KOR' then 'Coree du Sud'
+    when 'CZE' then 'Tchequie'
+    when 'CAN' then 'Canada'
+    when 'BIH' then 'Bosnie-Herzegovine'
+    when 'QAT' then 'Qatar'
+    when 'SUI' then 'Suisse'
+    when 'HAI' then 'Haiti'
+    when 'SCO' then 'Ecosse'
+    when 'USA' then 'Etats-Unis'
+    when 'PAR' then 'Paraguay'
+    when 'AUS' then 'Australie'
+    when 'TUR' then 'Turquie'
+    when 'CUW' then 'Curacao'
+    when 'CIV' then 'Cote d''Ivoire'
+    when 'ECU' then 'Equateur'
+    when 'JPN' then 'Japon'
+    when 'SWE' then 'Suede'
+    when 'TUN' then 'Tunisie'
+    when 'EGY' then 'Egypte'
+    when 'IRN' then 'Iran'
+    when 'NZL' then 'Nouvelle-Zelande'
+    when 'CPV' then 'Cap-Vert'
+    when 'KSA' then 'Arabie saoudite'
+    when 'URU' then 'Uruguay'
+    when 'IRQ' then 'Irak'
+    when 'NOR' then 'Norvege'
+    when 'ALG' then 'Algerie'
+    when 'AUT' then 'Autriche'
+    when 'JOR' then 'Jordanie'
+    when 'COD' then 'RD Congo'
+    when 'UZB' then 'Ouzbekistan'
+    when 'GHA' then 'Ghana'
+    when 'PAN' then 'Panama'
     else upper(coalesce(p_code, ''))
   end;
 $$;
@@ -436,9 +520,9 @@ from (
   left join lateral (
     select
       coalesce(sum(sp.points), 0)::int as points,
-      coalesce(sum(case when sp.points = 3 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as exact_scores,
-      coalesce(sum(case when sp.points = 2 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as two_point_results,
-      coalesce(sum(case when sp.points = 1 * greatest(1, coalesce(m.points_multiplier, 1)) then 1 else 0 end), 0)::int as one_point_results,
+      coalesce(sum(case when sp.points = 3 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as exact_scores,
+      coalesce(sum(case when sp.points = 2 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as two_point_results,
+      coalesce(sum(case when sp.points = 1 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as one_point_results,
       coalesce(sum(case when sp.points > 0 then 1 else 0 end), 0)::int as correct_results,
       min(pr.updated_at) as first_prediction_at
     from public.app_rpc_predictions pr
@@ -680,6 +764,23 @@ as $$
       ),
       0
     ),
+    'world_cup_winner_prediction', (
+      select jsonb_build_object(
+        'id', wp.id,
+        'player_id', wp.player_id,
+        'first_choice_code', wp.first_choice_code,
+        'second_choice_code', wp.second_choice_code,
+        'third_choice_code', wp.third_choice_code,
+        'first_choice_name', wp.first_choice_name,
+        'second_choice_name', wp.second_choice_name,
+        'third_choice_name', wp.third_choice_name,
+        'locked_at', wp.locked_at,
+        'created_at', wp.created_at,
+        'updated_at', wp.updated_at
+      )
+      from public.app_rpc_world_cup_winner_predictions wp
+      where wp.player_id = p.id
+    ),
     'predictions', coalesce(
       (
         select jsonb_agg(jsonb_build_object(
@@ -696,7 +797,13 @@ as $$
           'points', case
             when lower(coalesce(m.status, '')) = 'finished'
               or (m.home_score is not null and m.away_score is not null and m.kickoff <= now())
-            then coalesce(sp.points, app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, m.points_multiplier), 0)
+            then coalesce(sp.points, app_private_prediction_points(
+              pr.home_score,
+              pr.away_score,
+              m.home_score,
+              m.away_score,
+              public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team)
+            ), 0)
             else null
           end,
           'result_type', case
@@ -1217,6 +1324,10 @@ begin
     raise exception 'Top 3 invalide';
   end if;
 
+  if now() >= timestamptz '2026-06-17T00:00:00Z' then
+    raise exception 'Prediction champion du monde verrouillee';
+  end if;
+
   insert into public.app_rpc_world_cup_winner_predictions (
     player_id,
     first_choice_code,
@@ -1446,6 +1557,55 @@ as $$
     and (ch.status in ('closed', 'resolved') or ch.closes_at <= now());
 $$;
 
+do $$
+declare
+  v_flash_id uuid;
+begin
+  select id
+  into v_flash_id
+  from public.app_rpc_flash_challenges
+  where title = 'Dembélé buteur ?'
+  limit 1;
+
+  if v_flash_id is null then
+    insert into public.app_rpc_flash_challenges (title, description, match_id, match_label, closes_at, status)
+    values (
+      'Dembélé buteur ?',
+      'Dembélé marque-t-il contre Lens ?',
+      'fd-542664',
+      'Lens - PSG',
+      '2026-05-13T19:00:00Z'::timestamptz,
+      'open'
+    )
+    returning id into v_flash_id;
+  else
+    update public.app_rpc_flash_challenges
+    set description = 'Dembélé marque-t-il contre Lens ?',
+        match_id = coalesce(match_id, 'fd-542664'),
+        match_label = coalesce(match_label, 'Lens - PSG'),
+        closes_at = coalesce(closes_at, '2026-05-13T19:00:00Z'::timestamptz),
+        updated_at = now()
+    where id = v_flash_id
+      and status = 'open';
+  end if;
+
+  if not exists (
+    select 1 from public.app_rpc_flash_options
+    where flash_id = v_flash_id and label = 'Oui, il marque'
+  ) then
+    insert into public.app_rpc_flash_options (flash_id, label, points_if_correct, sort_order)
+    values (v_flash_id, 'Oui, il marque', 5, 1);
+  end if;
+
+  if not exists (
+    select 1 from public.app_rpc_flash_options
+    where flash_id = v_flash_id and label = 'Non, il ne marque pas'
+  ) then
+    insert into public.app_rpc_flash_options (flash_id, label, points_if_correct, sort_order)
+    values (v_flash_id, 'Non, il ne marque pas', 2, 2);
+  end if;
+end $$;
+
 create or replace function public.app_update_player_avatar(p_session_token uuid, p_avatar_url text)
 returns jsonb
 language plpgsql
@@ -1456,6 +1616,10 @@ declare
   v_player_id uuid;
 begin
   v_player_id := app_private_session_player(p_session_token);
+
+  if p_avatar_url is not null and length(p_avatar_url) > 350000 then
+    raise exception 'Avatar trop lourd';
+  end if;
 
   update public.app_rpc_players
   set avatar_url = nullif(p_avatar_url, ''),
@@ -1565,6 +1729,7 @@ revoke all on function public.app_private_code_hash(uuid, text) from public, ano
 revoke all on function public.app_private_session_player(uuid) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_points(int, int, int, int, int) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_is_public(text, timestamptz) from public, anon, authenticated;
+revoke all on function public.app_private_match_multiplier(int, text, text, text, text, int, jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;
 revoke all on function public.app_create_weekly_leaderboard_snapshot() from public, anon, authenticated;

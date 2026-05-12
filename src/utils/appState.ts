@@ -9,7 +9,7 @@ import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResul
 import { sortLeaderboardEntries } from './leaderboard';
 import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getMatchMultiplier, getPredictionResultType } from './points';
 import { isPredictionPublic } from './predictionVisibility';
-import { getWorldCupWinnerCountryName, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
+import { getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
 const STORAGE_KEYS = {
   currentPlayer: 'diplomate.currentPlayer',
@@ -120,6 +120,7 @@ interface RpcPublicPlayerProfile {
     visible_predictions_count?: number | null;
   };
   predictions: RpcPublicPredictionRow[];
+  world_cup_winner_prediction?: RpcWorldCupWinnerPrediction | null;
   visible_predictions_count?: number | null;
 }
 
@@ -600,6 +601,7 @@ export const saveWorldCupWinnerPrediction = async (
 ): Promise<WorldCupWinnerPrediction> => {
   const current = getCurrentPlayer();
   if (!current) throw new Error('Connecte-toi pour enregistrer ton top 3.');
+  if (isWorldCupTopThreeLocked()) throw new Error('La prédiction champion du monde est verrouillée.');
 
   const codes = [firstChoiceCode, secondChoiceCode, thirdChoiceCode];
   const validationError = validateWorldCupWinnerPredictionCodes(codes);
@@ -1105,6 +1107,7 @@ const fromRpcPublicProfile = (payload: RpcPublicPlayerProfile, matches: Match[])
     .map((prediction) => toPublicPrediction(prediction, matches))
     .filter((prediction): prediction is PublicPrediction => Boolean(prediction))
     .sort((left, right) => new Date(right.match.kickoff).getTime() - new Date(left.match.kickoff).getTime()),
+  worldCupTopThree: payload.world_cup_winner_prediction ? fromRpcWorldCupWinnerPrediction(payload.world_cup_winner_prediction) : null,
 });
 
 export const buildLocalPublicPlayerProfile = (
@@ -1165,6 +1168,7 @@ export const buildLocalPublicPlayerProfile = (
       rank: standing?.position,
     },
     predictions: playerPredictions,
+    worldCupTopThree: getWorldCupWinnerPredictionForPlayer(player.id),
   };
 };
 

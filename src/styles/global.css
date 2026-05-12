@@ -1275,9 +1275,83 @@ small {
   font-weight: 950;
 }
 
+.podium-rank-badge {
+  padding: 0.28rem 0.52rem;
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--lime);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.podium-rank-badge.rank-1 {
+  color: #4e3600;
+  background: #ffd45a;
+}
+
+.podium-rank-badge.rank-2 {
+  color: #293241;
+  background: #dbe3ef;
+}
+
+.podium-rank-badge.rank-3 {
+  color: #4b2612;
+  background: #d48a4a;
+}
+
 .podium-card.rank-1 {
   border-color: var(--blue);
   background: linear-gradient(180deg, var(--blue-soft), #fff);
+}
+
+.leaderboard-me-card {
+  border-color: var(--blue);
+  background:
+    linear-gradient(90deg, rgba(28, 70, 245, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(28, 70, 245, 0.06) 1px, transparent 1px),
+    #fff;
+  background-size: 18px 18px;
+}
+
+.leaderboard-me-card h2 {
+  color: var(--blue);
+  font-family: Impact, "Arial Black", sans-serif;
+  font-size: 2rem;
+  line-height: 0.95;
+}
+
+.leaderboard-me-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.leaderboard-me-stats span {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+  padding: 0.55rem 0.42rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.leaderboard-me-stats strong {
+  color: var(--blue);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.leaderboard-me-stats small {
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 820;
+  line-height: 1.08;
+}
+
+.leaderboard-lower-list {
+  display: grid;
+  gap: 0.55rem;
 }
 
 .player-link-card {
@@ -1496,6 +1570,30 @@ small {
 .worldcup-top3-list {
   display: grid;
   gap: 0.58rem;
+}
+
+.worldcup-top3-lock {
+  display: grid;
+  gap: 0.12rem;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid rgba(28, 70, 245, 0.18);
+  border-radius: 8px;
+  color: var(--blue);
+  background: var(--blue-soft);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.worldcup-top3-lock.locked {
+  color: var(--red);
+  background: #ffe6ea;
+  border-color: rgba(255, 79, 94, 0.28);
+}
+
+.worldcup-top3-lock small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 760;
 }
 
 .worldcup-top3-row {
@@ -2362,6 +2460,53 @@ button.action-row {
   color: var(--blue);
   font-size: 1.15rem;
   line-height: 1;
+}
+
+.public-top3-card {
+  border-color: rgba(28, 70, 245, 0.18);
+}
+
+.public-top3-list {
+  display: grid;
+  gap: 0.48rem;
+  margin-top: 0.72rem;
+}
+
+.public-top3-row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.58rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--blue-soft);
+}
+
+.public-top3-row strong {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--blue);
+  font-size: 0.82rem;
+}
+
+.public-top3-row img {
+  width: 1.7rem;
+  height: 1.1rem;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.public-top3-row span {
+  min-width: 0;
+  color: var(--text);
+  font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .social-badge {

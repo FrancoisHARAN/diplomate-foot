@@ -23,7 +23,6 @@ export const WORLD_CUP_2026_FEATURED_TEAMS: WorldCupFeaturedTeam[] = [
   { code: 'BEL', displayName: 'Belgique', aliases: ['Belgium', 'Belgique', 'BEL'] },
   { code: 'GER', displayName: 'Allemagne', aliases: ['Germany', 'Deutschland', 'Allemagne', 'GER', 'DEU'] },
   { code: 'CRO', displayName: 'Croatie', aliases: ['Croatia', 'Croatie', 'CRO'] },
-  { code: 'ITA', displayName: 'Italie', aliases: ['Italy', 'Italia', 'Italie', 'ITA'] },
   { code: 'COL', displayName: 'Colombie', aliases: ['Colombia', 'Colombie', 'COL'] },
   { code: 'SEN', displayName: 'Sénégal', aliases: ['Senegal', 'Sénégal', 'SEN'] },
 ];
