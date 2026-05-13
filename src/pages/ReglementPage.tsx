@@ -33,9 +33,9 @@ const pointRules = [
 ];
 
 const prizes = [
-  '1er : 20 € de conso au bar',
-  '2e : une pizza',
-  '3e : un saucisson',
+  '1er : 50 € de consommation au bar',
+  '2e : 25 € de consommation au bar',
+  '3e : 10 € de consommation au bar',
 ];
 
 const boosts = [
@@ -127,6 +127,7 @@ const ReglementPage = () => (
         <span>06</span>
         <h2>Classement et lots</h2>
         <p>Le classement suit les points validés.</p>
+        <p>Les lots sont des consommations au bar.</p>
         <ul>
           {prizes.map((prize) => (
             <li key={prize}>{prize}</li>

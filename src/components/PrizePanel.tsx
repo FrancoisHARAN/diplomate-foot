@@ -1,7 +1,7 @@
 const prizes = [
-  { rank: '1', title: '20 €', text: 'conso au bar' },
-  { rank: '2', title: 'Pizza', text: 'au Diplomate' },
-  { rank: '3', title: 'Saucisson', text: 'à partager' },
+  { rank: '1', title: '50 €', text: 'consommation au bar' },
+  { rank: '2', title: '25 €', text: 'consommation au bar' },
+  { rank: '3', title: '10 €', text: 'consommation au bar' },
 ];
 
 const PrizePanel = () => (
