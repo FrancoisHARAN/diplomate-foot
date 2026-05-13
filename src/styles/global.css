@@ -395,7 +395,17 @@ small {
   background: var(--blue);
 }
 
+.bottom-link.has-live {
+  color: var(--red);
+}
+
+.bottom-link.has-live.active {
+  color: #fff;
+  background: var(--red);
+}
+
 .bottom-icon {
+  position: relative;
   display: grid;
   place-items: center;
   width: 1.65rem;
@@ -412,10 +422,32 @@ small {
   object-fit: contain;
 }
 
+.bottom-link.has-live .bottom-icon img {
+  filter: hue-rotate(118deg) saturate(1.9) brightness(0.95);
+}
+
 .bottom-link.active .bottom-icon {
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
+.bottom-live-badge {
+  position: absolute;
+  top: -0.34rem;
+  right: -0.48rem;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.04rem;
+  height: 1.04rem;
+  padding: 0 0.22rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--red);
+  font-size: 0.56rem;
+  font-weight: 950;
+  line-height: 1;
 }
 
 .hero-panel,
@@ -3068,7 +3100,9 @@ button.action-row {
   padding: 0.78rem;
   border: 1px solid var(--line);
   border-radius: 8px;
+  color: var(--text);
   background: #fff;
+  text-decoration: none;
 }
 
 .public-prono-row {
@@ -3079,6 +3113,13 @@ button.action-row {
   overflow: hidden;
   border-color: rgba(28, 70, 245, 0.16);
   box-shadow: 0 8px 22px rgba(11, 24, 60, 0.06);
+}
+
+.public-prono-row:hover,
+.public-prono-row:focus-visible {
+  border-color: rgba(28, 70, 245, 0.34);
+  outline: 2px solid rgba(28, 70, 245, 0.18);
+  outline-offset: 2px;
 }
 
 .public-profile-history {
@@ -3327,10 +3368,20 @@ button.action-row {
   text-transform: uppercase;
 }
 
-.exact-history-card > strong {
+.exact-history-card > strong,
+.exact-history-match-link {
   color: var(--blue);
   font-size: 1rem;
+  font-weight: 950;
   line-height: 1.16;
+  text-decoration: none;
+}
+
+.exact-history-match-link:hover,
+.exact-history-match-link:focus-visible {
+  color: var(--ink);
+  outline: 2px solid rgba(28, 70, 245, 0.22);
+  outline-offset: 2px;
 }
 
 .exact-history-winners {

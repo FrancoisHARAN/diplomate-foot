@@ -49,7 +49,8 @@ for (const snippet of [
   "'result_type', case",
   'when not public.app_private_match_is_final(m.status)',
   'or m.home_score is null',
-  "or m.away_score is null then 'pending'",
+  'or m.away_score is null',
+  "or not public.app_private_is_after_scoring_epoch(m.kickoff) then 'pending'",
   "'is_finished', public.app_private_match_is_final(m.status)",
 ]) {
   requireText(publicProfileBody, snippet, 'app_get_public_player_profile');
@@ -63,10 +64,12 @@ const matchPredictionsBody = schema.slice(
 for (const snippet of [
   'when public.app_private_match_is_final(m.status)',
   'and m.home_score is not null',
-  'and m.away_score is not null then coalesce(sp.points, 0)',
+  'and m.away_score is not null',
+  'and public.app_private_is_after_scoring_epoch(m.kickoff) then coalesce(sp.points, 0)',
   'when not public.app_private_match_is_final(m.status)',
   'or m.home_score is null',
-  "or m.away_score is null then 'pending'",
+  'or m.away_score is null',
+  "or not public.app_private_is_after_scoring_epoch(m.kickoff) then 'pending'",
 ]) {
   requireText(matchPredictionsBody, snippet, 'app_get_public_match_predictions');
 }

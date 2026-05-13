@@ -242,9 +242,9 @@ const HomePage = () => {
             exactHighlights.map((highlight) => (
               <article className="exact-history-card" key={highlight.matchId}>
                 <span className="exact-history-badge">Score exact 🎯</span>
-                <strong>
+                <Link className="exact-history-match-link" to={`/matchs/${highlight.matchId}`}>
                   {getWorldCupTeamDisplayName(highlight.match.homeTeam, highlight.match)} {highlight.match.homeScore} - {highlight.match.awayScore} {getWorldCupTeamDisplayName(highlight.match.awayTeam, highlight.match)}
-                </strong>
+                </Link>
                 <small>{homeDayTitle(highlight.match.kickoff)}</small>
                 <div className="exact-history-winners">
                   {highlight.winners.map((winner) => (

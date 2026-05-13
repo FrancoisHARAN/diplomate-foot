@@ -21,6 +21,8 @@
     "check:supabase-scoring": "node scripts/check-supabase-hashing-and-live-points.mjs",
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",
     "check:home-exacts": "node scripts/check-home-exact-predictions.mjs",
+    "check:internal-nav": "node scripts/check-internal-navigation-links.mjs",
+    "check:scoring-reset": "node scripts/check-scoring-reset-epoch.mjs",
     "preview": "vite preview",
     "lint": "eslint ."
   },

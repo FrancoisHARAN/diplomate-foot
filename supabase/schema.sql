@@ -78,6 +78,13 @@ create table if not exists public.app_rpc_settings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.app_rpc_config (
+  key text primary key,
+  value_text text,
+  value_timestamptz timestamptz,
+  updated_at timestamptz not null default now()
+);
+
 -- Token de synchro des scores live:
 -- insert into public.app_rpc_settings (key, value_hash)
 -- values ('match_sync_token_hash', public.app_private_text_hash('TON_TOKEN_SECRET'))
@@ -226,6 +233,7 @@ alter table public.app_rpc_players enable row level security;
 alter table public.app_rpc_player_codes enable row level security;
 alter table public.app_rpc_sessions enable row level security;
 alter table public.app_rpc_settings enable row level security;
+alter table public.app_rpc_config enable row level security;
 alter table public.app_rpc_matches enable row level security;
 alter table public.app_rpc_predictions enable row level security;
 alter table public.app_rpc_world_cup_winner_predictions enable row level security;
@@ -241,6 +249,7 @@ revoke all on public.app_rpc_players from anon, authenticated;
 revoke all on public.app_rpc_player_codes from anon, authenticated;
 revoke all on public.app_rpc_sessions from anon, authenticated;
 revoke all on public.app_rpc_settings from anon, authenticated;
+revoke all on public.app_rpc_config from anon, authenticated;
 revoke all on public.app_rpc_matches from anon, authenticated;
 revoke all on public.app_rpc_predictions from anon, authenticated;
 revoke all on public.app_rpc_world_cup_winner_predictions from anon, authenticated;
@@ -409,6 +418,63 @@ as $$
   );
 $$;
 
+create or replace function public.app_private_scoring_epoch_start()
+returns timestamptz
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select value_timestamptz
+  from public.app_rpc_config
+  where key = 'scoring_epoch_start';
+$$;
+
+create or replace function public.app_private_is_after_scoring_epoch(p_event_at timestamptz)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select p_event_at is not null
+    and (
+      public.app_private_scoring_epoch_start() is null
+      or p_event_at >= public.app_private_scoring_epoch_start()
+    );
+$$;
+
+create or replace function public.app_admin_set_scoring_epoch(p_reset_at timestamptz default now())
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_reset_at timestamptz := coalesce(p_reset_at, now());
+begin
+  insert into public.app_rpc_config (key, value_text, value_timestamptz, updated_at)
+  values ('scoring_epoch_start', v_reset_at::text, v_reset_at, now())
+  on conflict (key) do update set
+    value_text = excluded.value_text,
+    value_timestamptz = excluded.value_timestamptz,
+    updated_at = now();
+
+  return jsonb_build_object(
+    'scoring_epoch_start', v_reset_at,
+    'preserved_data', jsonb_build_array(
+      'players',
+      'sessions',
+      'predictions',
+      'world_cup_top_three',
+      'avatars',
+      'matches',
+      'flash_challenges'
+    )
+  );
+end;
+$$;
+
 create or replace function public.app_private_match_multiplier(
   p_points_multiplier int,
   p_competition_code text,
@@ -478,7 +544,8 @@ from public.app_rpc_predictions pr
 left join public.app_rpc_matches m on m.id = pr.match_id
 where public.app_private_match_is_final(m.status)
   and m.home_score is not null
-  and m.away_score is not null;
+  and m.away_score is not null
+  and public.app_private_is_after_scoring_epoch(m.kickoff);
 
 create or replace function public.app_private_world_cup_country_name(p_code text)
 returns text
@@ -551,7 +618,9 @@ select
   end::int as points
 from public.app_rpc_flash_predictions fp
 join public.app_rpc_flash_challenges ch on ch.id = fp.flash_id
-join public.app_rpc_flash_options opt on opt.id = fp.option_id;
+join public.app_rpc_flash_options opt on opt.id = fp.option_id
+where ch.status = 'resolved'
+  and public.app_private_is_after_scoring_epoch(coalesce(ch.updated_at, fp.updated_at));
 
 create or replace view public.app_rpc_leaderboard as
 select
@@ -597,11 +666,10 @@ from (
       coalesce(sum(case when sp.points = 2 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as two_point_results,
       coalesce(sum(case when sp.points = 1 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as one_point_results,
       coalesce(sum(case when sp.points > 0 then 1 else 0 end), 0)::int as correct_results,
-      min(pr.updated_at) as first_prediction_at
-    from public.app_rpc_predictions pr
-    left join public.app_rpc_scored_predictions sp on sp.id = pr.id
-    left join public.app_rpc_matches m on m.id = pr.match_id
-    where pr.player_id = p.id
+      min(sp.updated_at) as first_prediction_at
+    from public.app_rpc_scored_predictions sp
+    join public.app_rpc_matches m on m.id = sp.match_id
+    where sp.player_id = p.id
   ) match_stats on true
   left join lateral (
     select
@@ -871,19 +939,15 @@ as $$
             when public.app_private_match_is_final(m.status)
               and m.home_score is not null
               and m.away_score is not null
-            then coalesce(sp.points, app_private_prediction_points(
-              pr.home_score,
-              pr.away_score,
-              m.home_score,
-              m.away_score,
-              public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team)
-            ), 0)
+              and public.app_private_is_after_scoring_epoch(m.kickoff)
+            then coalesce(sp.points, 0)
             else null
           end,
           'result_type', case
             when not public.app_private_match_is_final(m.status)
               or m.home_score is null
-              or m.away_score is null then 'pending'
+              or m.away_score is null
+              or not public.app_private_is_after_scoring_epoch(m.kickoff) then 'pending'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
@@ -966,13 +1030,15 @@ as $$
     case
       when public.app_private_match_is_final(m.status)
         and m.home_score is not null
-        and m.away_score is not null then coalesce(sp.points, 0)
+        and m.away_score is not null
+        and public.app_private_is_after_scoring_epoch(m.kickoff) then coalesce(sp.points, 0)
       else null
     end as points,
     case
       when not public.app_private_match_is_final(m.status)
         or m.home_score is null
-        or m.away_score is null then 'pending'
+        or m.away_score is null
+        or not public.app_private_is_after_scoring_epoch(m.kickoff) then 'pending'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
@@ -1029,6 +1095,7 @@ as $$
     where public.app_private_match_is_final(m.status)
       and m.home_score is not null
       and m.away_score is not null
+      and public.app_private_is_after_scoring_epoch(m.kickoff)
       and pr.home_score = m.home_score
       and pr.away_score = m.away_score
   ),
@@ -1212,6 +1279,9 @@ as $$
   with params as (
     select greatest(1, coalesce(p_limit_weeks, 104))::int as limit_weeks
   ),
+  epoch as (
+    select public.app_private_scoring_epoch_start() as start_at
+  ),
   match_events as (
     select
       pr.player_id,
@@ -1227,6 +1297,7 @@ as $$
       select public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as value
     ) mult
     where public.app_private_match_is_final(m.status)
+      and public.app_private_is_after_scoring_epoch(m.kickoff)
   ),
   flash_events as (
     select
@@ -1239,6 +1310,7 @@ as $$
     from public.app_rpc_flash_scored_predictions fsp
     join public.app_rpc_flash_challenges ch on ch.id = fsp.flash_id
     where ch.status = 'resolved'
+      and public.app_private_is_after_scoring_epoch(coalesce(ch.updated_at, fsp.updated_at))
   ),
   scoring_events as (
     select * from match_events
@@ -1252,7 +1324,11 @@ as $$
   ),
   bounds as (
     select
-      greatest(first_day, (current_date - ((select limit_weeks from params) * 7 - 1))::date) as start_day,
+      greatest(
+        first_day,
+        coalesce((select start_at::date from epoch), first_day),
+        (current_date - ((select limit_weeks from params) * 7 - 1))::date
+      ) as start_day,
       current_date as end_day,
       first_day
     from first_scoring
@@ -1774,7 +1850,12 @@ as $$
     'flash_id', fp.flash_id,
     'option_id', fp.option_id,
     'player_id', fp.player_id,
-    'points', case when ch.status = 'resolved' then coalesce(fsp.points, 0) else null end,
+    'points', case
+      when ch.status = 'resolved'
+        and public.app_private_is_after_scoring_epoch(coalesce(ch.updated_at, fp.updated_at))
+      then coalesce(fsp.points, 0)
+      else null
+    end,
     'created_at', fp.created_at,
     'updated_at', fp.updated_at,
     'challenge', public.app_private_flash_challenge_json(fp.flash_id),
@@ -1973,6 +2054,9 @@ revoke all on function public.app_private_session_player(uuid) from public, anon
 revoke all on function public.app_private_prediction_points(int, int, int, int, int) from public, anon, authenticated;
 revoke all on function public.app_private_prediction_is_public(text, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_private_match_is_final(text) from public, anon, authenticated;
+revoke all on function public.app_private_scoring_epoch_start() from public, anon, authenticated;
+revoke all on function public.app_private_is_after_scoring_epoch(timestamptz) from public, anon, authenticated;
+revoke all on function public.app_admin_set_scoring_epoch(timestamptz) from public, anon, authenticated;
 revoke all on function public.app_private_match_multiplier(int, text, text, text, text, int, jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;

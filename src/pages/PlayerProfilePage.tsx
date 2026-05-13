@@ -179,7 +179,12 @@ const PlayerProfilePage = () => {
               const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
 
               return (
-                <article className="social-prono-row public-prono-row" key={id}>
+                <Link
+                  className="social-prono-row public-prono-row"
+                  key={id}
+                  to={`/matchs/${match.id}`}
+                  aria-label={`Voir le match ${getWorldCupTeamDisplayName(match.homeTeam, match)} - ${getWorldCupTeamDisplayName(match.awayTeam, match)}`}
+                >
                   <div className="social-prono-teams">
                     <TeamBadge team={match.homeTeam} competitionCode={match.competitionCode} match={match} />
                     <span>
@@ -206,7 +211,7 @@ const PlayerProfilePage = () => {
                   <div className={`public-result-summary ${resultClassName[resultType]}`}>
                     {getResultSummary(resultType, points)}
                   </div>
-                </article>
+                </Link>
               );
             })
           ) : (
