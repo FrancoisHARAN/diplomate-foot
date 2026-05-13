@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { LeaderboardHistoryPeriod } from '../types';
 
 type HistoryLimit = 5 | 8 | 'all';
@@ -157,10 +158,10 @@ const LeaderboardHistoryChart = ({ periods, currentPlayerId, limit, range }: Lea
 
       <div className="history-legend" aria-label="Joueurs affichés">
         {visiblePlayers.map((playerId, index) => (
-          <span key={playerId} className={`${index === 0 ? 'is-leader' : ''} ${playerId === currentPlayerId ? 'is-me' : ''}`}>
+          <Link key={playerId} to={`/joueurs/${playerId}`} className={`history-legend-chip ${index === 0 ? 'is-leader' : ''} ${playerId === currentPlayerId ? 'is-me' : ''}`}>
             <i style={{ background: palette[index % palette.length] }} />
             {playerName(chartPeriods, playerId)}
-          </span>
+          </Link>
         ))}
       </div>
     </div>

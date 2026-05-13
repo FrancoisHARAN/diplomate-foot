@@ -16,6 +16,7 @@
     "check:leaderboard-history": "node scripts/check-leaderboard-history-chart.mjs",
     "check:live-points": "node scripts/check-live-match-pending-points.mjs",
     "check:match-detail-finished-ui": "node scripts/check-match-detail-finished-ui.mjs",
+    "check:player-links": "node scripts/check-player-links-and-match-predictions.mjs",
     "check:public-predictions": "node scripts/check-public-prediction-visibility.mjs",
     "check:supabase-scoring": "node scripts/check-supabase-hashing-and-live-points.mjs",
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",

@@ -36,6 +36,7 @@ requireText(publicPredictionsSource, 'resultRank: number;', 'public prediction g
 requireText(publicPredictionsSource, 'getPredictionResultTypeForMatch', 'public prediction group result type');
 requireText(publicPredictionsSource, 'right.players.length - left.players.length', 'public prediction popularity sort');
 requireText(publicPredictionsSource, 'right.resultRank - left.resultRank', 'public prediction result tie-break');
-requireText(publicPredictionsSource, 'isExact: hasFinalScore &&', 'live groups must not be exact');
+requireText(publicPredictionsSource, "const resultType = hasFinalScore", 'live groups must stay pending before final score');
+requireText(publicPredictionsSource, "isExact: resultType === 'exact'", 'live groups must not be exact');
 
 console.log('check-match-detail-finished-ui: ok');

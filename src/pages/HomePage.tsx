@@ -248,9 +248,9 @@ const HomePage = () => {
                 <small>{homeDayTitle(highlight.match.kickoff)}</small>
                 <div className="exact-history-winners">
                   {highlight.winners.map((winner) => (
-                    <span key={`${highlight.matchId}-${winner.playerId}`}>
+                    <Link className="exact-history-winner-link" key={`${highlight.matchId}-${winner.playerId}`} to={`/joueurs/${winner.playerId}`}>
                       {winner.nickname} — prono {winner.homeScore} - {winner.awayScore}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </article>

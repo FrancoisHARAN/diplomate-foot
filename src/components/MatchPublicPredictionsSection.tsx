@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Match, PredictionResultType, PublicMatchPrediction } from '../types';
 import { fetchPublicMatchPredictions, getStoredPredictions } from '../utils/appState';
-import { getPredictionResultTypeForMatch, isMatchFinal } from '../utils/points';
+import { calculatePredictionPointsForMatch, getPredictionResultTypeForMatch, isMatchFinal } from '../utils/points';
 import { isPredictionPublic } from '../utils/predictionVisibility';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -15,7 +16,10 @@ interface PredictionGroup {
   awayScore: number;
   players: PublicMatchPrediction[];
   isExact: boolean;
+  resultType: PredictionResultType;
   resultRank: number;
+  pointsLabel: string | null;
+  resultLabel: string | null;
 }
 
 const pluralPlayers = (count: number): string => `${count} joueur${count > 1 ? 's' : ''}`;
@@ -27,6 +31,17 @@ const resultRankByType: Record<PredictionResultType, number> = {
   lost: 1,
   pending: 0,
 };
+
+const resultLabels: Record<PredictionResultType, string> = {
+  exact: 'Score exact',
+  'two-point': 'Bon écart',
+  winner: 'Bon gagnant',
+  lost: 'Perdu',
+  pending: 'En attente',
+};
+
+const formatGroupPointsLabel = (points: number, resultType: PredictionResultType): string =>
+  resultType === 'lost' ? 'Perdu' : `+${points} ${points > 1 ? 'pts' : 'pt'}`;
 
 const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionProps) => {
   const [predictions, setPredictions] = useState<PublicMatchPrediction[]>([]);
@@ -78,14 +93,20 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
       const resultType = hasFinalScore
         ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match)
         : 'pending';
+      const points = hasFinalScore
+        ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
+        : null;
 
       groups.set(key, {
         key,
         homeScore: prediction.homeScore,
         awayScore: prediction.awayScore,
         players: [prediction],
-        isExact: hasFinalScore && prediction.homeScore === match.homeScore && prediction.awayScore === match.awayScore,
+        isExact: resultType === 'exact',
+        resultType,
         resultRank: resultRankByType[resultType],
+        pointsLabel: points !== null ? formatGroupPointsLabel(points, resultType) : null,
+        resultLabel: hasFinalScore ? resultLabels[resultType] : null,
       });
     });
 
@@ -142,11 +163,18 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
               <div className="match-public-score">
                 <strong>{group.homeScore} - {group.awayScore}</strong>
                 <span>{pluralPlayers(group.players.length)}</span>
-                {group.isExact ? <small>Score exact</small> : null}
+                {group.pointsLabel ? <small className={`match-public-result-badge ${group.resultType}`}>{group.pointsLabel}</small> : null}
+                {group.resultLabel && group.resultType !== 'lost' ? <small className={`match-public-result-badge ${group.resultType}`}>{group.resultLabel}</small> : null}
               </div>
               <div className="match-public-names">
                 {group.players.map((player) => (
-                  <span key={`${group.key}-${player.playerId}`}>{player.nickname}</span>
+                  player.playerId ? (
+                    <Link className="match-public-player-link" key={`${group.key}-${player.playerId}`} to={`/joueurs/${player.playerId}`}>
+                      {player.nickname}
+                    </Link>
+                  ) : (
+                    <span key={`${group.key}-${player.nickname}`}>{player.nickname}</span>
+                  )
                 ))}
               </div>
             </article>

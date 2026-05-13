@@ -1500,7 +1500,7 @@ small {
   margin-top: 0.75rem;
 }
 
-.history-legend span {
+.history-legend-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.28rem;
@@ -1510,15 +1510,23 @@ small {
   background: rgba(255, 255, 255, 0.12);
   font-size: 0.72rem;
   font-weight: 850;
+  text-decoration: none;
 }
 
-.history-legend span.is-leader {
+.history-legend-chip.is-leader {
   color: var(--ink);
   background: var(--lime);
 }
 
-.history-legend span.is-me:not(.is-leader) {
+.history-legend-chip.is-me:not(.is-leader) {
   border: 1px solid var(--lime);
+}
+
+.history-legend-chip:hover,
+.history-legend-chip:focus-visible {
+  transform: translateY(-1px);
+  outline: 2px solid rgba(210, 255, 82, 0.75);
+  outline-offset: 2px;
 }
 
 .history-legend i {
@@ -2888,13 +2896,24 @@ button.action-row {
   background: var(--lime);
 }
 
+.match-public-score .match-public-result-badge.winner {
+  color: #fff;
+  background: var(--blue);
+}
+
+.match-public-score .match-public-result-badge.lost {
+  color: #fff;
+  background: var(--red);
+}
+
 .match-public-names {
   display: flex;
   flex-wrap: wrap;
   gap: 0.32rem;
 }
 
-.match-public-names span {
+.match-public-names span,
+.match-public-player-link {
   min-width: 0;
   padding: 0.26rem 0.42rem;
   border-radius: 999px;
@@ -2903,6 +2922,15 @@ button.action-row {
   font-size: 0.78rem;
   font-weight: 820;
   overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.match-public-player-link:hover,
+.match-public-player-link:focus-visible {
+  color: var(--blue);
+  background: rgba(28, 70, 245, 0.15);
+  outline: 2px solid rgba(28, 70, 245, 0.28);
+  outline-offset: 2px;
 }
 
 .photo-upload {
@@ -3311,12 +3339,21 @@ button.action-row {
   padding-top: 0.18rem;
 }
 
-.exact-history-winners span {
+.exact-history-winners span,
+.exact-history-winner-link {
   padding: 0.42rem 0.52rem;
   border-radius: 8px;
   color: var(--text);
   background: var(--blue-soft);
   font-weight: 850;
+  text-decoration: none;
+}
+
+.exact-history-winner-link:hover,
+.exact-history-winner-link:focus-visible {
+  color: var(--blue);
+  outline: 2px solid rgba(28, 70, 245, 0.28);
+  outline-offset: 2px;
 }
 
 .exact-history-empty {
