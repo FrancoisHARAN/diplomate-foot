@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Match, PublicMatchPrediction } from '../types';
+import type { Match, PredictionResultType, PublicMatchPrediction } from '../types';
 import { fetchPublicMatchPredictions, getStoredPredictions } from '../utils/appState';
-import { isMatchFinal } from '../utils/points';
+import { getPredictionResultTypeForMatch, isMatchFinal } from '../utils/points';
 import { isPredictionPublic } from '../utils/predictionVisibility';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -15,9 +15,18 @@ interface PredictionGroup {
   awayScore: number;
   players: PublicMatchPrediction[];
   isExact: boolean;
+  resultRank: number;
 }
 
 const pluralPlayers = (count: number): string => `${count} joueur${count > 1 ? 's' : ''}`;
+
+const resultRankByType: Record<PredictionResultType, number> = {
+  exact: 4,
+  'two-point': 3,
+  winner: 2,
+  lost: 1,
+  pending: 0,
+};
 
 const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionProps) => {
   const [predictions, setPredictions] = useState<PublicMatchPrediction[]>([]);
@@ -66,12 +75,17 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
         return;
       }
 
+      const resultType = hasFinalScore
+        ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match)
+        : 'pending';
+
       groups.set(key, {
         key,
         homeScore: prediction.homeScore,
         awayScore: prediction.awayScore,
         players: [prediction],
         isExact: hasFinalScore && prediction.homeScore === match.homeScore && prediction.awayScore === match.awayScore,
+        resultRank: resultRankByType[resultType],
       });
     });
 
@@ -82,10 +96,11 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
       }))
       .sort((left, right) =>
         right.players.length - left.players.length ||
+        right.resultRank - left.resultRank ||
         left.homeScore - right.homeScore ||
         left.awayScore - right.awayScore,
       );
-  }, [hasFinalScore, match.awayScore, match.homeScore, predictions]);
+  }, [hasFinalScore, match, predictions]);
 
   if (!publicVisible) {
     return (

@@ -5,13 +5,26 @@ import MatchPublicPredictionsSection from '../components/MatchPublicPredictionsS
 import TeamBadge from '../components/TeamBadge';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { Match } from '../types';
+import type { Match, PredictionResultType } from '../types';
 import { getPredictionForMatch, savePrediction } from '../utils/appState';
 import { canEditPrediction, formatKickoffLong, formatLastUpdated, isLiveDisplayMatch } from '../utils/date';
-import { calculatePredictionPointsForMatch, getMatchMultiplier, isMatchFinal } from '../utils/points';
+import { calculatePredictionPointsForMatch, getMatchMultiplier, getPredictionResultTypeForMatch, isMatchFinal } from '../utils/points';
 import { getWorldCupBoostLabel, getWorldCupTeamDisplayName, getWorldCupTeamShortCode, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
 const SWIPE_HINT_KEY = 'diplomate.matchSwipeHintSeen.v1';
+
+const predictionResultLabels: Record<PredictionResultType, string> = {
+  exact: 'score exact',
+  'two-point': 'bon écart',
+  winner: 'bon gagnant',
+  lost: 'perdu',
+  pending: 'en attente',
+};
+
+const formatPredictionPointsLabel = (points: number, resultType: PredictionResultType): string => {
+  const unit = points > 1 ? 'pts' : 'pt';
+  return `${points} ${unit} (${predictionResultLabels[resultType]})`;
+};
 
 const MatchDetailPage = () => {
   const { matchId } = useParams();
@@ -149,6 +162,7 @@ const MatchDetailPage = () => {
   const isFinal = isMatchFinal(match);
   const isLiveDisplay = isLiveDisplayMatch(match, new Date(clock));
   const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
+  const detailStatusLabel = isFinal ? 'Terminé' : isLiveDisplay ? 'Live' : 'Fermé';
   const homeName = getWorldCupTeamDisplayName(match.homeTeam, match);
   const awayName = getWorldCupTeamDisplayName(match.awayTeam, match);
   const homeCode = getWorldCupTeamShortCode(match.homeTeam, match);
@@ -158,6 +172,9 @@ const MatchDetailPage = () => {
     isFinal && prediction && typeof match.homeScore === 'number' && typeof match.awayScore === 'number'
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
+  const predictionResultType =
+    isFinal && prediction ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match) : 'pending';
+  const showLockedSummary = Boolean(player && !editable && !(isFinal && prediction));
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -225,7 +242,7 @@ const MatchDetailPage = () => {
         <div className="match-detail-kickoff">
           <p className="eyebrow">Coup d'envoi</p>
           <h1>{formatKickoffLong(match.kickoff)}</h1>
-          <DeadlineBadge deadline={match.kickoff} closed={!editable} closedLabel="Fermé" label="Ferme dans" />
+          <DeadlineBadge deadline={match.kickoff} closed={!editable} closedLabel={detailStatusLabel} label="Ouvert" />
         </div>
 
         {multiplier > 1 ? (
@@ -260,7 +277,11 @@ const MatchDetailPage = () => {
           <div className="detail-current-prono">
             <span>Ton prono</span>
             <strong>{prediction.homeScore} - {prediction.awayScore}</strong>
-            {points !== null ? <small>{points} pts</small> : <small>{editable ? "Modifiable jusqu'au coup d'envoi" : 'Points en attente'}</small>}
+            {points !== null ? (
+              <small>{formatPredictionPointsLabel(points, predictionResultType)}</small>
+            ) : (
+              <small>{editable ? "Modifiable jusqu'au coup d'envoi" : 'Points en attente'}</small>
+            )}
           </div>
         ) : null}
 
@@ -329,7 +350,7 @@ const MatchDetailPage = () => {
           </form>
         ) : null}
 
-        {player && !editable ? (
+        {showLockedSummary ? (
           <div className="locked-summary">
             <strong>{isFinal ? 'Match terminé' : 'Pronostics verrouillés'}</strong>
             <p>{prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun prono enregistré.'}</p>
