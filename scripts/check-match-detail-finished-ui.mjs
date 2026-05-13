@@ -33,7 +33,8 @@ requireText(
 requireText(matchDetailSource, '{showLockedSummary ? (', 'locked summary conditional rendering');
 
 requireText(publicPredictionsSource, 'resultRank: number;', 'public prediction group result rank');
-requireText(publicPredictionsSource, 'getPredictionResultTypeForMatch', 'public prediction group result type');
+requireText(publicPredictionsSource, 'prediction.resultType', 'public prediction group result type');
+requireText(publicPredictionsSource, "prediction.resultType === 'pending' ? null", 'public prediction group pending scorer');
 requireText(publicPredictionsSource, 'right.players.length - left.players.length', 'public prediction popularity sort');
 requireText(publicPredictionsSource, 'right.resultRank - left.resultRank', 'public prediction result tie-break');
 requireText(publicPredictionsSource, "const resultType = hasFinalScore", 'live groups must stay pending before final score');

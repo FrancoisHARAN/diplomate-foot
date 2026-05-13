@@ -1116,6 +1116,28 @@ const normalizeRpcPublicPrediction = (row: RpcPublicPredictionRow): RpcPredictio
   };
 };
 
+const resolveRpcPredictionResultType = (
+  row: RpcPublicPredictionRow,
+  match: Match,
+  predictedHome: number,
+  predictedAway: number,
+): PredictionResultType => {
+  if (!isMatchFinal(match)) return 'pending';
+  if (row.result_type) return row.result_type;
+  return getPredictionResultTypeForMatch(predictedHome, predictedAway, match);
+};
+
+const resolveRpcPredictionPoints = (
+  row: RpcPublicPredictionRow,
+  match: Match,
+  predictedHome: number,
+  predictedAway: number,
+): number | null => {
+  if (!isMatchFinal(match)) return null;
+  const rowResultType = row.result_type ?? null;
+  return rowResultType === 'pending' ? null : row.points ?? calculatePredictionPointsForMatch(predictedHome, predictedAway, match);
+};
+
 const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): PublicPrediction | null => {
   const normalizedPrediction = normalizeRpcPublicPrediction(row);
   if (!normalizedPrediction) return null;
@@ -1131,16 +1153,12 @@ const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): Publ
   if (!match) return null;
   if (!isPredictionPublic(match)) return null;
 
-  const isFinished = isMatchFinal(match);
-
   return {
     id: row.id ?? row.prediction_id ?? `public-${row.player_id}-${row.match_id}`,
     match,
     prediction: fromRpcPrediction(normalizedPrediction),
-    points: isFinished ? row.points ?? calculatePredictionPointsForMatch(normalizedPrediction.home_score, normalizedPrediction.away_score, match) : null,
-    resultType: isFinished
-      ? row.result_type ?? getPredictionResultTypeForMatch(normalizedPrediction.home_score, normalizedPrediction.away_score, match)
-      : 'pending',
+    points: resolveRpcPredictionPoints(row, match, normalizedPrediction.home_score, normalizedPrediction.away_score),
+    resultType: resolveRpcPredictionResultType(row, match, normalizedPrediction.home_score, normalizedPrediction.away_score),
   };
 };
 

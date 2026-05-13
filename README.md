@@ -137,6 +137,8 @@ Si le profil affiche un joueur avec des points mais aucun prono visible, verifie
 
 Ces requetes aident a comparer les points du classement, les pronostics bruts et les pronostics publics renvoyes par la RPC.
 
+Pour un audit plus complet d'un joueur, voir aussi `docs/debug-scoring.md`.
+
 ```sql
 -- A. Verifier le joueur
 select *

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Match, PredictionResultType, PublicMatchPrediction } from '../types';
 import { fetchPublicMatchPredictions, getStoredPredictions } from '../utils/appState';
-import { calculatePredictionPointsForMatch, getPredictionResultTypeForMatch, isMatchFinal } from '../utils/points';
+import { calculatePredictionPointsForMatch, isMatchFinal } from '../utils/points';
 import { isPredictionPublic } from '../utils/predictionVisibility';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
@@ -90,11 +90,9 @@ const MatchPublicPredictionsSection = ({ match }: MatchPublicPredictionsSectionP
         return;
       }
 
-      const resultType = hasFinalScore
-        ? getPredictionResultTypeForMatch(prediction.homeScore, prediction.awayScore, match)
-        : 'pending';
+      const resultType = hasFinalScore ? prediction.resultType : 'pending';
       const points = hasFinalScore
-        ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
+        ? prediction.resultType === 'pending' ? null : prediction.points ?? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
         : null;
 
       groups.set(key, {

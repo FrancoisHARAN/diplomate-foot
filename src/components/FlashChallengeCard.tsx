@@ -23,7 +23,9 @@ const FlashChallengeCard = ({ challenge, player, prediction, onAnswer, compact =
   const open = canEditFlashPrediction(challenge);
   const selectedOption = getFlashOption(challenge, prediction?.optionId);
   const resultOption = getFlashOption(challenge, challenge.resultOptionId);
-  const flashPoints = calculateFlashPredictionPoints(challenge, prediction);
+  const calculatedFlashPoints = calculateFlashPredictionPoints(challenge, prediction);
+  const hasAuthoritativePoints = Boolean(prediction && Object.prototype.hasOwnProperty.call(prediction, 'points'));
+  const flashPoints = hasAuthoritativePoints ? prediction?.points ?? null : calculatedFlashPoints;
   const [draftOptionId, setDraftOptionId] = useState(prediction?.optionId ?? '');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [saveError, setSaveError] = useState('');

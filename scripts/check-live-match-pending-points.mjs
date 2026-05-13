@@ -123,7 +123,8 @@ const requireRegex = (source, pattern, label) => {
 requireRegex(appStateSource, /matches\.filter\(\(match\) => isMatchFinal\(match\)\)/, 'leaderboard/local stats final filter');
 requireText(appStateSource, 'points: isMatchFinal(match) ? calculatePredictionPointsForMatch', 'local public profile pending points');
 requireText(appStateSource, "resultType: isMatchFinal(match)", 'local public profile pending result type');
-requireText(appStateSource, 'const isFinished = isMatchFinal(match);', 'RPC public profile defensive final check');
+requireText(appStateSource, 'const resolveRpcPredictionPoints', 'RPC public profile defensive points resolver');
+requireText(appStateSource, 'const resolveRpcPredictionResultType', 'RPC public profile defensive result resolver');
 requireText(
   appStateSource,
   "return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };",
