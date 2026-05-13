@@ -201,15 +201,17 @@ Pour tester:
 
 Sans Supabase ou si la RPC est indisponible, l'application affiche un historique de demonstration en fallback local.
 
-## Reinitialiser le classement
+## Reinitialiser la competition visible
 
-Pour repartir a zero avant une nouvelle competition, fixer une nouvelle date de depart du scoring:
+Pour repartir a zero avant une nouvelle competition, fixer une nouvelle date de depart du scoring et de l'historique visible:
 
 ```sql
 select public.app_admin_set_scoring_epoch(now());
 ```
 
-Cette commande ne supprime ni les joueurs, ni les pronostics, ni les avatars, ni le Top 3 Coupe du Monde, ni les matchs. Elle enregistre seulement `scoring_epoch_start`: les matchs termines et les flashs resolus avant cette date ne comptent plus dans le classement, les statistiques et l'historique. Les pronostics deja faits pour les prochains matchs restent en base et compteront normalement apres leur resultat final.
+Cette commande ne supprime ni les joueurs, ni les pronostics, ni les avatars, ni le Top 3 Coupe du Monde, ni les matchs. Elle enregistre seulement `scoring_epoch_start`: les matchs termines et les flashs resolus avant cette date ne comptent plus dans le classement, les statistiques et l'historique.
+
+Elle masque aussi les anciens pronostics de matchs termines dans `Mes pronos`, les profils publics, les pronos parfaits et le graphique. Les pronostics futurs ou live restent valables, meme s'ils ont ete saisis avant le reset, et compteront normalement apres leur resultat final.
 
 La fonction est definie dans `supabase/schema.sql`. Si elle n'existe pas encore dans Supabase, reexecuter le schema complet dans le SQL Editor avant de lancer la commande.
 

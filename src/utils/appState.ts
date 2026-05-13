@@ -417,11 +417,12 @@ const applyCloudPlayerState = (state: RpcPlayerState): void => {
   writeJson(STORAGE_KEYS.cloudPlayerState, state);
   const player = toCurrentPlayer(state.player);
   const current = getCurrentPlayer();
-  writeJson(STORAGE_KEYS.currentPlayer, {
+  const cachePlayer: CurrentPlayer = {
     ...current,
     ...player,
     sessionToken: current?.sessionToken ?? player.sessionToken,
-  });
+  };
+  writeJson(STORAGE_KEYS.currentPlayer, cachePlayer);
 
   if (player.avatarUrl) {
     const images = getPlayerProfileImages();
@@ -434,7 +435,10 @@ const applyCloudPlayerState = (state: RpcPlayerState): void => {
 
   const localPredictions = getStoredPredictions();
   const remotePredictions = state.predictions.map(fromRpcPrediction);
-  writeJson(STORAGE_KEYS.predictions, mergePredictions(localPredictions, remotePredictions));
+  const preservedLocalPredictions = localPredictions.filter(
+    (prediction) => !predictionBelongsToPlayer(prediction, cachePlayer),
+  );
+  writeJson(STORAGE_KEYS.predictions, mergePredictions(preservedLocalPredictions, remotePredictions));
 };
 
 const getCloudPlayerState = (): RpcPlayerState | null => readJson<RpcPlayerState | null>(STORAGE_KEYS.cloudPlayerState, null);
