@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-14T20:47:23.583Z",
-  "lastDataChangedAt": "2026-05-14T20:47:23.583Z",
+  "generatedAt": "2026-05-14T21:54:22.454Z",
+  "lastDataChangedAt": "2026-05-14T21:54:22.454Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-13",
   "dateTo": "2026-06-04",
@@ -1837,7 +1837,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-13T18:59:50Z"
+      "lastUpdated": "2026-05-14T00:20:59Z"
     },
     {
       "id": "fd-544566",
@@ -1930,7 +1930,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-13T21:03:45Z"
+      "lastUpdated": "2026-05-14T00:20:59Z"
     },
     {
       "id": "fd-538091",
@@ -2105,8 +2105,8 @@
         "crest": "https://crests.football-data.org/1048.png"
       },
       "kickoff": "2026-05-14T19:30:00Z",
-      "status": "live",
-      "homeScore": 1,
+      "status": "finished",
+      "homeScore": 2,
       "awayScore": 0,
       "minute": null,
       "matchday": 36,
@@ -2116,7 +2116,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-14T20:47:01Z"
+      "lastUpdated": "2026-05-14T21:28:16Z"
     },
     {
       "id": "fd-538146",
@@ -3566,7 +3566,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-14T00:20:58Z"
     },
     {
       "id": "fd-537327",
