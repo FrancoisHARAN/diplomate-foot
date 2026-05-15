@@ -55,7 +55,7 @@ if (failures.length > 0) {
 }
 
 const requiredRulesText = [
-  'Tu trouves exactement le score final.',
+  'Tu trouves exactement le score retenu pour le jeu.',
   'Tu as le bon gagnant et le bon écart de buts.',
   'Uniquement si une équipe gagne. Un nul non exact vaut 1 pt, pas 2.',
   'Prono 1 - 0, résultat 3 - 2.',

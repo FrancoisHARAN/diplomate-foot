@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildLiveDataPayload } from './lib/football-data-change-utils.mjs';
+import { getPredictionScoreFromApiMatch } from './lib/football-data-score-utils.mjs';
 
 const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
 const WORLD_CUP_2026_SEASON = process.env.WORLD_CUP_2026_SEASON || '2026';
@@ -38,6 +39,8 @@ const statusMap = {
   TIMED: 'upcoming',
   IN_PLAY: 'live',
   PAUSED: 'live',
+  EXTRA_TIME: 'live',
+  PENALTY_SHOOTOUT: 'live',
   FINISHED: 'finished',
 };
 
@@ -192,6 +195,10 @@ const normalizeMatch = (match, competition) => {
   const isWorldCup2026 = Boolean(competition.isWorldCup2026);
   const homeTeam = normalizeTeam(match.homeTeam, knownFixture.homeTeam, `home-${match.id}`, 'Home team', isWorldCup2026);
   const awayTeam = normalizeTeam(match.awayTeam, knownFixture.awayTeam, `away-${match.id}`, 'Away team', isWorldCup2026);
+  const predictionScore = getPredictionScoreFromApiMatch(match);
+  if (predictionScore.warning) {
+    console.warn(`${competition.code} ${match.id}: ${predictionScore.warning}`);
+  }
   const pointsMultiplier =
     isWorldCup2026 && [homeTeam.countryCode, awayTeam.countryCode].includes('FRA')
       ? 2
@@ -206,8 +213,11 @@ const normalizeMatch = (match, competition) => {
     awayTeam,
     kickoff: match.utcDate,
     status: statusMap[match.status] ?? 'upcoming',
-    homeScore: match.score?.fullTime?.home ?? match.score?.halfTime?.home ?? undefined,
-    awayScore: match.score?.fullTime?.away ?? match.score?.halfTime?.away ?? undefined,
+    homeScore: predictionScore.homeScore,
+    awayScore: predictionScore.awayScore,
+    scoreKind: predictionScore.scoreKind,
+    scoreSource: predictionScore.scoreSource,
+    scoreWarning: predictionScore.warning,
     minute: typeof match.minute === 'number' ? match.minute : null,
     venue: match.venue ?? undefined,
     matchday: match.matchday ?? null,

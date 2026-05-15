@@ -128,7 +128,7 @@ La route `/joueurs/:playerId` utilise `app_get_public_player_profile` quand Supa
 
 - les pronostics des matchs encore ouverts restent caches;
 - les pronostics deviennent visibles quand le match est verrouille, en live, termine, ou a moins d'une heure du coup d'envoi;
-- les matchs termines affichent le score final, les points et le type de resultat;
+- les matchs termines affichent le score retenu, les points et le type de resultat;
 - les matchs live/verrouilles affichent le prono avec les points en attente.
 
 Si le profil affiche un joueur avec des points mais aucun prono visible, verifier d'abord que `supabase/schema.sql` a bien ete reexecute dans Supabase SQL Editor. Une erreur `PGRST202` sur `app_get_public_player_profile` signifie que la fonction RPC n'est pas disponible dans le cache PostgREST: relancer le schema complet, puis recharger le site.
@@ -283,6 +283,8 @@ Un simple check API sans changement utile ne modifie pas l'heure affichee et ne 
 Pour forcer une mise a jour manuelle: GitHub -> Actions -> `Update football data` -> `Run workflow`.
 
 Selon le plan API et la competition, `football-data.org` peut renvoyer des scores avec un leger retard.
+
+Les pronostics sont évalués sur le temps réglementaire: 90 minutes + temps additionnel. Les prolongations et tirs au but ne comptent pas. Le fetch utilise `score.regularTime` quand `football-data.org` le fournit; sinon `score.fullTime` seulement quand `score.duration = REGULAR`. Si un match va en prolongation ou aux tirs au but sans `score.regularTime`, le score de scoring reste vide et un warning est affiche.
 
 ## Coupe du Monde 2026
 
@@ -526,6 +528,8 @@ Dans `Settings > Pages`, utiliser **GitHub Actions** comme source. Un push sur `
 - Bon ecart + bon vainqueur, hors match nul: 2 points
 - Bon vainqueur uniquement, ou bon match nul sans score exact: 1 point
 - Mauvais pronostic: 0 point
+
+Les pronostics sont évalués sur le temps réglementaire: 90 minutes + temps additionnel. Les prolongations et tirs au but ne comptent pas.
 
 Un match nul exact vaut toujours 4 points. Un match nul pronostique correctement mais sans score exact vaut 1 point, pas 2.
 

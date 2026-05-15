@@ -21,6 +21,9 @@ export interface Match {
   status: MatchStatus;
   homeScore?: number;
   awayScore?: number;
+  scoreKind?: string | null;
+  scoreSource?: string | null;
+  scoreWarning?: string | null;
   minute?: number | null;
   venue?: string;
   matchday?: number | null;

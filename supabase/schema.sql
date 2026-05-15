@@ -114,6 +114,7 @@ create table if not exists public.app_rpc_matches (
   last_updated timestamptz,
   updated_at timestamptz not null default now()
 );
+-- home_score / away_score represent the regular-time score used for prediction scoring.
 
 alter table public.app_rpc_matches add column if not exists stage text;
 alter table public.app_rpc_matches add column if not exists round text;

@@ -123,6 +123,7 @@ export const calculatePredictionPointsForMatch = (
   predictedAway: number,
   match: Match,
 ): number | null => {
+  // match.homeScore / match.awayScore doivent représenter le score du temps réglementaire.
   if (!isMatchFinal(match) || typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return null;
   return applyMatchMultiplier(calculatePredictionPoints(predictedHome, predictedAway, match.homeScore, match.awayScore), match);
 };

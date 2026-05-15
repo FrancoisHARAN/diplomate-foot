@@ -136,7 +136,7 @@ const HomePage = () => {
       {!player ? (
         <section className="intro-panel">
           <strong>Entre dans la compétition</strong>
-          <p>Connecte-toi avec ton pseudo, pronostique les matchs ouverts et marque des points dès le score final.</p>
+          <p>Connecte-toi avec ton pseudo, pronostique les matchs ouverts et marque des points dès le score retenu.</p>
         </section>
       ) : null}
 

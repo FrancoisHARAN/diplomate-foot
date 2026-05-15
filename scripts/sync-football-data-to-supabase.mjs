@@ -31,6 +31,7 @@ const toRpcMatchPayload = (match) => ({
   away_team: match.awayTeam ?? {},
   kickoff: match.kickoff,
   status: match.status ?? 'upcoming',
+  // home_score / away_score sont le score temps réglementaire retenu pour les pronostics.
   home_score: match.homeScore ?? null,
   away_score: match.awayScore ?? null,
   minute: match.minute ?? null,

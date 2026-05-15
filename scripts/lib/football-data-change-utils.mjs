@@ -14,6 +14,8 @@ const normalizeMatchForComparison = (match = {}) => ({
   status: match.status ?? null,
   homeScore: match.homeScore ?? null,
   awayScore: match.awayScore ?? null,
+  scoreKind: match.scoreKind ?? null,
+  scoreSource: match.scoreSource ?? null,
   minute: match.minute ?? null,
   matchday: match.matchday ?? null,
   stage: match.stage ?? null,

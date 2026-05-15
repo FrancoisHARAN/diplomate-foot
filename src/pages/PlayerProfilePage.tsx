@@ -206,7 +206,7 @@ const PlayerProfilePage = () => {
                     </span>
                     {hasScore ? (
                       <span className="public-detail-item">
-                        <small>{isFinal ? 'Score final' : 'Score en cours'}</small>
+                        <small>{isFinal ? 'Score retenu' : 'Score en cours'}</small>
                         <strong>{match.homeScore} - {match.awayScore}</strong>
                       </span>
                     ) : null}

@@ -8,7 +8,7 @@ const pointRules = [
   {
     points: '4 pts',
     title: 'Score exact',
-    text: 'Tu trouves exactement le score final.',
+    text: 'Tu trouves exactement le score retenu pour le jeu.',
     examples: ['Prono 2 - 1, résultat 2 - 1.', 'Nul exact : prono 1 - 1, résultat 1 - 1.'],
   },
   {
@@ -94,9 +94,23 @@ const ReglementPage = () => (
       </div>
     </section>
 
+    <section className="rules-section">
+      <div className="rules-section-title">
+        <span>03</span>
+        <h2>Temps réglementaire uniquement</h2>
+      </div>
+      <article className="rules-info-card">
+        <p>
+          Comme dans les paris sportifs, les pronostics sont calculés sur le score à la fin du temps réglementaire :
+          90 minutes + temps additionnel. Les prolongations et les tirs au but ne comptent pas.
+        </p>
+        <strong>Si tu pronostiques 2 - 2 et que le match est à 2 - 2 après 90 minutes, ton prono est bon, même si le score change en prolongation.</strong>
+      </article>
+    </section>
+
     <section className="rules-section rules-info-grid">
       <article className="rules-info-card boost-card">
-        <span>03</span>
+        <span>04</span>
         <h2>Boosts</h2>
         <p>Certains matchs multiplient les points.</p>
         <ul>
@@ -108,7 +122,7 @@ const ReglementPage = () => (
       </article>
 
       <article className="rules-info-card">
-        <span>04</span>
+        <span>05</span>
         <h2>Paris flash</h2>
         <p>Des défis flash peuvent apparaître sur certains gros matchs.</p>
         <strong>Ils ferment au coup d’envoi. Points accordés uniquement si ta réponse est correcte.</strong>
@@ -117,14 +131,14 @@ const ReglementPage = () => (
 
     <section className="rules-section rules-info-grid">
       <article className="rules-info-card">
-        <span>05</span>
+        <span>06</span>
         <h2>Prédiction champion du monde</h2>
         <p>Classe tes 3 favoris.</p>
         <strong>Si le champion est dans ton top 3 : 20, 15 ou 10 pts.</strong>
       </article>
 
       <article className="rules-info-card prizes-card">
-        <span>06</span>
+        <span>07</span>
         <h2>Classement et lots</h2>
         <p>Le classement suit les points validés.</p>
         <p>Les lots sont des consommations au bar.</p>

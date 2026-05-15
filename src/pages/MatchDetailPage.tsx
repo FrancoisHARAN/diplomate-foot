@@ -355,7 +355,7 @@ const MatchDetailPage = () => {
           <div className="locked-summary">
             <strong>{isFinal ? 'Match terminé' : 'Pronostics verrouillés'}</strong>
             <p>{prediction ? `Ton prono : ${prediction.homeScore} - ${prediction.awayScore}` : 'Aucun prono enregistré.'}</p>
-            {hasScore ? <p>{isFinal ? 'Score final' : 'Score en cours'} : {match.homeScore} - {match.awayScore}</p> : null}
+            {hasScore ? <p>{isFinal ? 'Score retenu' : 'Score en cours'} : {match.homeScore} - {match.awayScore}</p> : null}
             {points !== null ? <p>Points gagnés : {points} pts</p> : null}
           </div>
         ) : null}
