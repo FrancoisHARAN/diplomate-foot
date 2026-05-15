@@ -21,6 +21,7 @@ const profileFilters: Array<{ id: ProfileFilter; label: string }> = [
   { id: 'exact', label: 'Score exact' },
   { id: 'two-point', label: 'Bon écart' },
   { id: 'winner', label: 'Bon gagnant' },
+  { id: 'draw', label: 'Bon nul' },
   { id: 'lost', label: 'Perdus' },
 ];
 
@@ -28,6 +29,7 @@ const resultLabels: Record<PredictionResultType, string> = {
   exact: 'Score exact',
   'two-point': 'Bon écart',
   winner: 'Bon gagnant',
+  draw: 'Bon nul',
   lost: 'Perdu',
   pending: 'En attente',
 };
@@ -38,6 +40,7 @@ const resultClassName: Record<PredictionResultType, string> = {
   exact: 'exact',
   'two-point': 'two-point',
   winner: 'winner',
+  draw: 'draw',
   lost: 'lost',
   pending: 'pending',
 };
@@ -123,7 +126,7 @@ const PlayerProfilePage = () => {
         <div className="public-profile-stats" aria-label="Statistiques publiques">
           <span><strong>{profile.stats.exactScores}</strong> scores exacts</span>
           <span><strong>{profile.stats.twoPointResults}</strong> bons écarts</span>
-          <span><strong>{profile.stats.onePointResults}</strong> bons vainqueurs</span>
+          <span><strong>{profile.stats.onePointResults}</strong> à 1 pt</span>
           <span><strong>{profile.predictions.length}</strong> pronos visibles</span>
         </div>
       </section>

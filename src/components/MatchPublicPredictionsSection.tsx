@@ -28,6 +28,7 @@ const resultRankByType: Record<PredictionResultType, number> = {
   exact: 4,
   'two-point': 3,
   winner: 2,
+  draw: 2,
   lost: 1,
   pending: 0,
 };
@@ -36,6 +37,7 @@ const resultLabels: Record<PredictionResultType, string> = {
   exact: 'Score exact',
   'two-point': 'Bon écart',
   winner: 'Bon gagnant',
+  draw: 'Bon nul',
   lost: 'Perdu',
   pending: 'En attente',
 };

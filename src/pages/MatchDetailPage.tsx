@@ -17,6 +17,7 @@ const predictionResultLabels: Record<PredictionResultType, string> = {
   exact: 'score exact',
   'two-point': 'bon écart',
   winner: 'bon gagnant',
+  draw: 'bon nul',
   lost: 'perdu',
   pending: 'en attente',
 };

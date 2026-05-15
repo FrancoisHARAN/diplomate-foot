@@ -114,6 +114,7 @@ const scorePrediction = ({ status, predictedHome, predictedAway, finalHome, fina
   const deltaPrediction = predictedHome - predictedAway;
   const deltaFinal = finalHome - finalAway;
   if (predictedHome === finalHome && predictedAway === finalAway) return { points: 3, resultType: 'exact' };
+  if (deltaPrediction === 0 && deltaFinal === 0) return { points: 1, resultType: 'draw' };
   if (Math.sign(deltaPrediction) === Math.sign(deltaFinal) && deltaPrediction === deltaFinal) {
     return { points: 2, resultType: 'two-point' };
   }

@@ -105,7 +105,7 @@ export interface PublicMatchPrediction {
   updatedAt?: string | null;
 }
 
-export type PredictionResultType = 'exact' | 'two-point' | 'winner' | 'lost' | 'pending';
+export type PredictionResultType = 'exact' | 'two-point' | 'winner' | 'draw' | 'lost' | 'pending';
 
 export interface WorldCupWinnerPrediction {
   id: string;

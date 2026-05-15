@@ -48,7 +48,7 @@ const LeaderboardPage = () => {
             <span><strong>{me.points}</strong><small>points</small></span>
             <span><strong>{me.exactScores}</strong><small>scores exacts</small></span>
             <span><strong>{me.twoPointResults ?? 0}</strong><small>bons écarts</small></span>
-            <span><strong>{onePointResults(me.exactScores, me.twoPointResults, me.correctResults)}</strong><small>bons gagnants</small></span>
+            <span><strong>{onePointResults(me.exactScores, me.twoPointResults, me.correctResults)}</strong><small>à 1 pt</small></span>
           </div>
         </section>
       ) : null}

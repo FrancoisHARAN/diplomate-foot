@@ -40,6 +40,8 @@ export const calculatePredictionPoints = (
   const actualOutcome = Math.sign(actualDiff);
   const sameOutcome = predictedOutcome === actualOutcome;
 
+  if (actualOutcome === 0 && predictedOutcome === 0) return 1;
+
   if (sameOutcome && predictedDiff === actualDiff) return 2;
 
   if (sameOutcome) return 1;
@@ -58,7 +60,11 @@ export const getPredictionResultType = (
   const points = calculatePredictionPoints(predictedHome, predictedAway, actualHome, actualAway);
   if (points === 3) return 'exact';
   if (points === 2) return 'two-point';
-  if (points === 1) return 'winner';
+  if (points === 1) {
+    const predictedOutcome = Math.sign(predictedHome - predictedAway);
+    const actualOutcome = Math.sign(actualHome - actualAway);
+    return predictedOutcome === 0 && actualOutcome === 0 ? 'draw' : 'winner';
+  }
   return 'lost';
 };
 

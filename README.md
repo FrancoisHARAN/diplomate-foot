@@ -523,8 +523,10 @@ Dans `Settings > Pages`, utiliser **GitHub Actions** comme source. Un push sur `
 ## Regles de points
 
 - Score exact: 3 points
-- Bon ecart + bon vainqueur, ou bon match nul: 2 points
-- Bon vainqueur uniquement: 1 point
+- Bon ecart + bon vainqueur, hors match nul: 2 points
+- Bon vainqueur uniquement, ou bon match nul sans score exact: 1 point
 - Mauvais pronostic: 0 point
+
+Un match nul exact vaut toujours 3 points. Un match nul pronostique correctement mais sans score exact vaut 1 point, pas 2.
 
 Les multiplicateurs de match booste s'appliquent ensuite au total du match.

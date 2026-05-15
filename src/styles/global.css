@@ -2928,7 +2928,8 @@ button.action-row {
   background: var(--lime);
 }
 
-.match-public-score .match-public-result-badge.winner {
+.match-public-score .match-public-result-badge.winner,
+.match-public-score .match-public-result-badge.draw {
   color: #fff;
   background: var(--blue);
 }
@@ -3183,7 +3184,8 @@ button.action-row {
   border-color: rgba(210, 255, 82, 0.8);
 }
 
-.public-result-badge.winner {
+.public-result-badge.winner,
+.public-result-badge.draw {
   color: #fff;
   background: var(--blue);
   border-color: var(--blue);

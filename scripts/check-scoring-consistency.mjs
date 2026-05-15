@@ -118,11 +118,11 @@ const pointCases = [
     expectedType: 'lost',
   },
   {
-    label: 'draw with same difference',
+    label: 'non-exact draw',
     prediction: [2, 2],
     match: makeMatch({ homeScore: 1, awayScore: 1 }),
-    expectedPoints: 2,
-    expectedType: 'two-point',
+    expectedPoints: 1,
+    expectedType: 'draw',
   },
   {
     label: 'live exact-looking score stays pending',

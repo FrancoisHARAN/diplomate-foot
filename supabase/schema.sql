@@ -381,6 +381,8 @@ as $$
   select case
     when p_home_score is null or p_away_score is null then 0
     when p_home_prediction = p_home_score and p_away_prediction = p_away_score then 3 * greatest(1, coalesce(p_multiplier, 1))
+    when sign(p_home_prediction - p_away_prediction) = 0
+      and sign(p_home_score - p_away_score) = 0 then 1 * greatest(1, coalesce(p_multiplier, 1))
     when sign(p_home_prediction - p_away_prediction) = sign(p_home_score - p_away_score)
       and (p_home_prediction - p_away_prediction) = (p_home_score - p_away_score) then 2 * greatest(1, coalesce(p_multiplier, 1))
     when sign(p_home_prediction - p_away_prediction) = sign(p_home_score - p_away_score) then 1 * greatest(1, coalesce(p_multiplier, 1))
@@ -1005,6 +1007,9 @@ as $$
               or not public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated)) then 'pending'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
+            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1
+              and sign(pr.home_score - pr.away_score) = 0
+              and sign(m.home_score - m.away_score) = 0 then 'draw'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
             else 'lost'
           end,
@@ -1097,6 +1102,9 @@ as $$
         or not public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated)) then 'pending'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
+      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1
+        and sign(pr.home_score - pr.away_score) = 0
+        and sign(m.home_score - m.away_score) = 0 then 'draw'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1 then 'winner'
       else 'lost'
     end::text as result_type,

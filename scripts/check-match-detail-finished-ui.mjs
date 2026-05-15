@@ -22,6 +22,7 @@ requireText(matchDetailSource, 'getPredictionResultTypeForMatch', 'finished pred
 requireText(matchDetailSource, "exact: 'score exact'", 'score exact result label');
 requireText(matchDetailSource, "'two-point': 'bon écart'", 'two-point result label');
 requireText(matchDetailSource, "winner: 'bon gagnant'", 'winner result label');
+requireText(matchDetailSource, "draw: 'bon nul'", 'draw result label');
 requireText(matchDetailSource, "lost: 'perdu'", 'lost result label');
 requireText(matchDetailSource, 'formatPredictionPointsLabel(points, predictionResultType)', 'current prediction points label');
 

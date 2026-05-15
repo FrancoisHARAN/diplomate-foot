@@ -27,7 +27,7 @@ const cases = [
   { label: 'exact', pred: [2, 1], actual: [2, 1], expected: 3 },
   { label: 'bon ecart', pred: [1, 0], actual: [3, 2], expected: 2 },
   { label: 'bon ecart autre', pred: [3, 2], actual: [2, 1], expected: 2 },
-  { label: 'bon nul avec mauvais score exact', pred: [2, 2], actual: [1, 1], expected: 2 },
+  { label: 'bon nul avec mauvais score exact', pred: [2, 2], actual: [1, 1], expected: 1 },
   { label: 'bon gagnant seulement', pred: [2, 0], actual: [3, 2], expected: 1 },
   { label: 'bon gagnant exterieur seulement', pred: [0, 1], actual: [0, 2], expected: 1 },
   { label: 'mauvais resultat', pred: [1, 0], actual: [0, 1], expected: 0 },
@@ -57,11 +57,12 @@ if (failures.length > 0) {
 const requiredRulesText = [
   'Tu trouves exactement le score final.',
   'Tu as le bon gagnant et le bon écart de buts.',
-  'Un bon écart signifie que la différence de buts est la même.',
+  'Uniquement si une équipe gagne. Un nul non exact vaut 1 pt, pas 2.',
   'Prono 1 - 0, résultat 3 - 2.',
-  'Prono 2 - 2, résultat 1 - 1.',
-  'Tu as le bon gagnant, mais pas le bon écart.',
+  'Prono 2 - 1, résultat 1 - 0.',
+  'Tu as le bon gagnant sans le bon écart, ou tu as prévu un nul sans le score exact.',
   'Prono 2 - 0, résultat 3 - 2.',
+  'Prono 0 - 0, résultat 2 - 2.',
 ];
 
 const missingText = requiredRulesText.filter((text) => !rulesSource.includes(text));

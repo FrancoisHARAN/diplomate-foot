@@ -26,6 +26,7 @@ requireText(publicPredictionsSource, 'calculatePredictionPointsForMatch', 'group
 requireText(publicPredictionsSource, "exact: 'Score exact'", 'group exact label');
 requireText(publicPredictionsSource, "'two-point': 'Bon écart'", 'group two-point label');
 requireText(publicPredictionsSource, "winner: 'Bon gagnant'", 'group winner label');
+requireText(publicPredictionsSource, "draw: 'Bon nul'", 'group draw label');
 requireText(publicPredictionsSource, "lost: 'Perdu'", 'group lost label');
 requireText(publicPredictionsSource, 'formatGroupPointsLabel', 'group points label formatter');
 requireText(publicPredictionsSource, 'points !== null ? formatGroupPointsLabel(points, resultType)', 'final-only group points label');
