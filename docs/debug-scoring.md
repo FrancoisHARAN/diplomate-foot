@@ -21,6 +21,14 @@ match_rows as (
     pr.home_score || ' - ' || pr.away_score as prediction,
     coalesce(m.home_score::text, '?') || ' - ' || coalesce(m.away_score::text, '?') as final_score,
     public.app_private_match_is_final(m.status) as is_final,
+    public.app_private_prediction_points(
+      pr.home_score,
+      pr.away_score,
+      m.home_score,
+      m.away_score,
+      1
+    ) as points_de_base,
+    m.points_multiplier as points_multiplier_stocke,
     public.app_private_match_multiplier(
       m.points_multiplier,
       m.competition_code,
@@ -30,7 +38,7 @@ match_rows as (
       m.matchday,
       m.home_team,
       m.away_team
-    ) as boost,
+    ) as boost_reel,
     sp.points,
     sp.id is not null as included_in_current_score
   from public.app_rpc_predictions pr

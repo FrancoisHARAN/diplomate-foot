@@ -533,4 +533,4 @@ Les pronostics sont évalués sur le temps réglementaire: 90 minutes + temps ad
 
 Un match nul exact vaut toujours 4 points. Un match nul pronostique correctement mais sans score exact vaut 1 point, pas 2.
 
-Les multiplicateurs de match booste s'appliquent ensuite au total du match.
+Les multiplicateurs de match booste s'appliquent ensuite au total du match. Le boost PSG actuel vaut x2. Pour la Coupe du Monde, les matchs de la France valent x2 et les boosts de phase finale gardent le plus fort multiplicateur.

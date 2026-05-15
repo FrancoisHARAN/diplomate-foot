@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildLiveDataPayload } from './lib/football-data-change-utils.mjs';
+import { getApiMatchPointsMultiplier } from './lib/football-data-boost-utils.mjs';
 import { getPredictionScoreFromApiMatch } from './lib/football-data-score-utils.mjs';
 
 const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
@@ -199,10 +200,7 @@ const normalizeMatch = (match, competition) => {
   if (predictionScore.warning) {
     console.warn(`${competition.code} ${match.id}: ${predictionScore.warning}`);
   }
-  const pointsMultiplier =
-    isWorldCup2026 && [homeTeam.countryCode, awayTeam.countryCode].includes('FRA')
-      ? 2
-      : 1;
+  const pointsMultiplier = getApiMatchPointsMultiplier({ competition, match, homeTeam, awayTeam });
 
   return {
     id: `fd-${match.id}`,

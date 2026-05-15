@@ -39,6 +39,7 @@ const prizes = [
 ];
 
 const boosts = [
+  'PSG : x2',
   'France : x2',
   'Huitièmes : x2',
   'Quarts : x3',

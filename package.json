@@ -19,6 +19,7 @@
     "check:player-links": "node scripts/check-player-links-and-match-predictions.mjs",
     "check:public-predictions": "node scripts/check-public-prediction-visibility.mjs",
     "check:prizes-copy": "node scripts/check-prizes-copy.mjs",
+    "check:boost-scoring": "node scripts/check-boost-scoring-consistency.mjs",
     "check:draw-scoring": "node scripts/check-draw-scoring-rule.mjs",
     "check:perfect-score": "node scripts/check-perfect-score-four-points.mjs",
     "check:regular-time-scoring": "node scripts/check-regular-time-scoring.mjs",

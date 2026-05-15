@@ -527,6 +527,24 @@ begin
 end;
 $$;
 
+create or replace function public.app_private_team_is_psg(p_team jsonb)
+returns boolean
+language sql
+immutable
+as $$
+  with team_values as (
+    select
+      lower(regexp_replace(coalesce(p_team->>'name', ''), '[^a-zA-Z0-9]+', ' ', 'g')) as name_text,
+      lower(regexp_replace(coalesce(p_team->>'shortName', ''), '[^a-zA-Z0-9]+', ' ', 'g')) as short_text
+  )
+  select p_team->>'id' in ('524', 'club-psg', 'psg')
+    or lower(coalesce(p_team->>'id', '')) in ('524', 'club-psg', 'psg')
+    or short_text = 'psg'
+    or name_text in ('psg', 'paris sg', 'paris saint germain', 'paris saint germain fc')
+    or name_text like '%paris saint germain%'
+  from team_values;
+$$;
+
 create or replace function public.app_private_match_multiplier(
   p_points_multiplier int,
   p_competition_code text,
@@ -571,6 +589,10 @@ as $$
     end,
     case
       when competition_text like '%final%' or competition_text like '%finale%' then 5
+      else 1
+    end,
+    case
+      when public.app_private_team_is_psg(p_home_team) or public.app_private_team_is_psg(p_away_team) then 2
       else 1
     end
   )
@@ -914,7 +936,7 @@ as $$
     m.group_name,
     m.season,
     m.source_competition_id,
-    m.points_multiplier,
+    public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as points_multiplier,
     m.source,
     m.last_updated
   from public.app_rpc_matches m
@@ -1038,7 +1060,7 @@ as $$
             'group_name', m.group_name,
             'season', m.season,
             'source_competition_id', m.source_competition_id,
-            'points_multiplier', m.points_multiplier,
+            'points_multiplier', public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team),
             'source', m.source,
             'last_updated', m.last_updated
           )
@@ -1146,7 +1168,7 @@ as $$
       m.group_name,
       m.season,
       m.source_competition_id,
-      m.points_multiplier,
+      public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as points_multiplier,
       m.source,
       m.last_updated,
       p.id as player_id,
@@ -2129,6 +2151,7 @@ revoke all on function public.app_private_match_scoring_event_at(timestamptz, ti
 revoke all on function public.app_private_match_in_current_season(text, timestamptz, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_private_flash_in_current_season(text, timestamptz, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_admin_set_scoring_epoch(timestamptz) from public, anon, authenticated;
+revoke all on function public.app_private_team_is_psg(jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_match_multiplier(int, text, text, text, text, int, jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;

@@ -1,5 +1,8 @@
-import type { Match, PredictionResultType } from '../types';
+import type { Match, PredictionResultType, Team } from '../types';
 import { isFranceWorldCup2026Match, isWorldCup2026Match } from './worldCupFilters';
+
+const PSG_TEAM_IDS = new Set(['524', 'club-psg', 'psg']);
+const PSG_NAMES = new Set(['psg', 'paris sg', 'paris saint germain', 'paris saint germain fc']);
 
 const FINAL_MATCH_STATUSES = new Set([
   'finished',
@@ -77,10 +80,24 @@ export const getPredictionResultTypeForMatch = (
   return getPredictionResultType(predictedHome, predictedAway, match.homeScore, match.awayScore);
 };
 
-const hasTeam = (match: Match, terms: string[]): boolean => {
-  const haystack = `${match.homeTeam.name} ${match.homeTeam.shortName} ${match.awayTeam.name} ${match.awayTeam.shortName}`.toLowerCase();
-  return terms.some((term) => haystack.includes(term));
+const normalizeTeamLabel = (value?: string | number | null): string =>
+  String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const isPsgTeam = (team: Team): boolean => {
+  const id = String(team.id ?? '').toLowerCase();
+  if (PSG_TEAM_IDS.has(id)) return true;
+  if (normalizeTeamLabel(team.shortName) === 'psg') return true;
+
+  const name = normalizeTeamLabel(team.name);
+  return PSG_NAMES.has(name) || name.includes('paris saint germain');
 };
+
+const isPsgMatch = (match: Match): boolean => isPsgTeam(match.homeTeam) || isPsgTeam(match.awayTeam);
 
 const normalizeStage = (value?: string | number | null): string =>
   String(value ?? '')
@@ -111,7 +128,7 @@ export const getMatchMultiplier = (match: Match): number => {
   const competition = `${match.competitionName ?? ''} ${match.matchday ?? ''}`.toLowerCase();
   if (competition.includes('finale') || competition.includes('final')) candidates.push(5);
 
-  if (hasTeam(match, ['psg', 'paris sg', 'paris saint-germain', 'paris saint germain'])) candidates.push(2);
+  if (isPsgMatch(match)) candidates.push(2);
 
   return Math.max(...candidates);
 };
