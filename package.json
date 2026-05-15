@@ -20,6 +20,7 @@
     "check:public-predictions": "node scripts/check-public-prediction-visibility.mjs",
     "check:prizes-copy": "node scripts/check-prizes-copy.mjs",
     "check:draw-scoring": "node scripts/check-draw-scoring-rule.mjs",
+    "check:perfect-score": "node scripts/check-perfect-score-four-points.mjs",
     "check:scoring-consistency": "node scripts/check-scoring-consistency.mjs",
     "check:supabase-scoring": "node scripts/check-supabase-hashing-and-live-points.mjs",
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",

@@ -24,7 +24,7 @@ vm.runInNewContext(
 const calculatePredictionPoints = context.calculatePredictionPoints;
 
 const cases = [
-  { label: 'exact', pred: [2, 1], actual: [2, 1], expected: 3 },
+  { label: 'exact', pred: [2, 1], actual: [2, 1], expected: 4 },
   { label: 'bon ecart', pred: [1, 0], actual: [3, 2], expected: 2 },
   { label: 'bon ecart autre', pred: [3, 2], actual: [2, 1], expected: 2 },
   { label: 'bon nul avec mauvais score exact', pred: [2, 2], actual: [1, 1], expected: 1 },

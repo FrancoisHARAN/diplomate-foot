@@ -6,7 +6,7 @@ const playSteps = [
 
 const pointRules = [
   {
-    points: '3 pts',
+    points: '4 pts',
     title: 'Score exact',
     text: 'Tu trouves exactement le score final.',
     examples: ['Prono 2 - 1, résultat 2 - 1.', 'Nul exact : prono 1 - 1, résultat 1 - 1.'],

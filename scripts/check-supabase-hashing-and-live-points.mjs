@@ -113,7 +113,7 @@ const scorePrediction = ({ status, predictedHome, predictedAway, finalHome, fina
   if (!isFinal(status)) return { points: null, resultType: 'pending' };
   const deltaPrediction = predictedHome - predictedAway;
   const deltaFinal = finalHome - finalAway;
-  if (predictedHome === finalHome && predictedAway === finalAway) return { points: 3, resultType: 'exact' };
+  if (predictedHome === finalHome && predictedAway === finalAway) return { points: 4, resultType: 'exact' };
   if (deltaPrediction === 0 && deltaFinal === 0) return { points: 1, resultType: 'draw' };
   if (Math.sign(deltaPrediction) === Math.sign(deltaFinal) && deltaPrediction === deltaFinal) {
     return { points: 2, resultType: 'two-point' };
@@ -134,9 +134,9 @@ const cases = [
     expected: { points: null, resultType: 'pending' },
   },
   {
-    label: 'finished exact score gets 3 points',
+    label: 'finished exact score gets 4 points',
     input: { status: 'finished', predictedHome: 1, predictedAway: 0, finalHome: 1, finalAway: 0 },
-    expected: { points: 3, resultType: 'exact' },
+    expected: { points: 4, resultType: 'exact' },
   },
   {
     label: 'finished wrong score is lost',

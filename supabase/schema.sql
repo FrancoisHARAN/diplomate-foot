@@ -380,7 +380,7 @@ immutable
 as $$
   select case
     when p_home_score is null or p_away_score is null then 0
-    when p_home_prediction = p_home_score and p_away_prediction = p_away_score then 3 * greatest(1, coalesce(p_multiplier, 1))
+    when p_home_prediction = p_home_score and p_away_prediction = p_away_score then 4 * greatest(1, coalesce(p_multiplier, 1))
     when sign(p_home_prediction - p_away_prediction) = 0
       and sign(p_home_score - p_away_score) = 0 then 1 * greatest(1, coalesce(p_multiplier, 1))
     when sign(p_home_prediction - p_away_prediction) = sign(p_home_score - p_away_score)
@@ -715,7 +715,7 @@ from (
   left join lateral (
     select
       coalesce(sum(sp.points), 0)::int as points,
-      coalesce(sum(case when sp.points = 3 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as exact_scores,
+      coalesce(sum(case when sp.points = 4 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as exact_scores,
       coalesce(sum(case when sp.points = 2 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as two_point_results,
       coalesce(sum(case when sp.points = 1 * public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) then 1 else 0 end), 0)::int as one_point_results,
       coalesce(sum(case when sp.points > 0 then 1 else 0 end), 0)::int as correct_results,
@@ -1005,7 +1005,7 @@ as $$
               or m.home_score is null
               or m.away_score is null
               or not public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated)) then 'pending'
-            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
+            when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 4 then 'exact'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
             when app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1
               and sign(pr.home_score - pr.away_score) = 0
@@ -1100,7 +1100,7 @@ as $$
         or m.home_score is null
         or m.away_score is null
         or not public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated)) then 'pending'
-      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 3 then 'exact'
+      when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 4 then 'exact'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 2 then 'two-point'
       when public.app_private_prediction_points(pr.home_score, pr.away_score, m.home_score, m.away_score, 1) = 1
         and sign(pr.home_score - pr.away_score) = 0
@@ -1352,7 +1352,7 @@ as $$
       pr.player_id,
       date_trunc('day', public.app_private_match_scoring_event_at(m.kickoff, m.last_updated))::date as event_day,
       coalesce(sp.points, 0)::int as points,
-      case when coalesce(sp.points, 0) = 3 * mult.value then 1 else 0 end::int as exact_scores,
+      case when coalesce(sp.points, 0) = 4 * mult.value then 1 else 0 end::int as exact_scores,
       case when coalesce(sp.points, 0) = 2 * mult.value then 1 else 0 end::int as two_point_results,
       pr.updated_at as first_prediction_at
     from public.app_rpc_predictions pr

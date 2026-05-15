@@ -32,7 +32,7 @@ export const calculatePredictionPoints = (
   actualHome: number,
   actualAway: number,
 ): number => {
-  if (predictedHome === actualHome && predictedAway === actualAway) return 3;
+  if (predictedHome === actualHome && predictedAway === actualAway) return 4;
 
   const predictedDiff = predictedHome - predictedAway;
   const actualDiff = actualHome - actualAway;
@@ -58,7 +58,7 @@ export const getPredictionResultType = (
   if (typeof actualHome !== 'number' || typeof actualAway !== 'number') return 'pending';
 
   const points = calculatePredictionPoints(predictedHome, predictedAway, actualHome, actualAway);
-  if (points === 3) return 'exact';
+  if (points === 4) return 'exact';
   if (points === 2) return 'two-point';
   if (points === 1) {
     const predictedOutcome = Math.sign(predictedHome - predictedAway);

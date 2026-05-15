@@ -75,10 +75,10 @@ const cases = [
     expectedResultType: 'pending',
   },
   {
-    label: 'finished exact score grants 3 points',
+    label: 'finished exact score grants 4 points',
     match: makeMatch('finished', 1, 0),
     prediction: [1, 0],
-    expectedPoints: 3,
+    expectedPoints: 4,
     expectedResultType: 'exact',
   },
   {

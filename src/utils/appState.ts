@@ -872,7 +872,7 @@ const calculateFinishedStats = (playerId: string, predictions: Prediction[], mat
         const basePoints = calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore, match.awayScore);
         return {
           points: stats.points + applyMatchMultiplier(basePoints, match),
-          exactScores: stats.exactScores + (basePoints === 3 ? 1 : 0),
+          exactScores: stats.exactScores + (basePoints === 4 ? 1 : 0),
           twoPointResults: stats.twoPointResults + (basePoints === 2 ? 1 : 0),
           onePointResults: stats.onePointResults + (basePoints === 1 ? 1 : 0),
           correctResults: stats.correctResults + (basePoints > 0 ? 1 : 0),

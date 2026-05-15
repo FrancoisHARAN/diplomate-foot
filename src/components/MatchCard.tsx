@@ -67,7 +67,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
     prediction && isFinal && hasScore
       ? calculatePredictionPointsForMatch(prediction.homeScore, prediction.awayScore, match)
       : null;
-  const exactPrediction = basePoints === 3;
+  const exactPrediction = basePoints === 4;
   const predictionTone = getPredictionTone(prediction, points);
 
   const click = () => {

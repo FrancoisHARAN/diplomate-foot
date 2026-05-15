@@ -32,7 +32,7 @@ export const getRecentExactPredictionHighlights = (
     .map((match): ExactPredictionHighlight | null => {
       const winners = predictions
         .filter((prediction) => prediction.matchId === match.id)
-        .filter((prediction) => calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore ?? 0, match.awayScore ?? 0) === 3)
+        .filter((prediction) => calculatePredictionPoints(prediction.homeScore, prediction.awayScore, match.homeScore ?? 0, match.awayScore ?? 0) === 4)
         .map((prediction) => {
           const player = playerById.get(prediction.playerId);
           return {

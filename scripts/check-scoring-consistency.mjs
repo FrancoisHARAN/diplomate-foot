@@ -93,7 +93,7 @@ const pointCases = [
     label: 'score exact without boost',
     prediction: [1, 2],
     match: makeMatch({ homeScore: 1, awayScore: 2 }),
-    expectedPoints: 3,
+    expectedPoints: 4,
     expectedType: 'exact',
   },
   {
@@ -142,7 +142,7 @@ const pointCases = [
     label: 'explicit x2 boost doubles exact score',
     prediction: [1, 0],
     match: makeMatch({ homeScore: 1, awayScore: 0, pointsMultiplier: 2 }),
-    expectedPoints: 6,
+    expectedPoints: 8,
     expectedType: 'exact',
   },
 ];
@@ -172,8 +172,8 @@ if (franceSemiMultiplier !== 4) {
   failures.push(`France semi-final boost must be x4, got x${franceSemiMultiplier}`);
 }
 const franceSemiPoints = worldCupContext.calculatePredictionPointsForMatch(1, 0, franceSemi);
-if (franceSemiPoints !== 12) {
-  failures.push(`France semi-final exact score must be 12 points, got ${franceSemiPoints}`);
+if (franceSemiPoints !== 16) {
+  failures.push(`France semi-final exact score must be 16 points, got ${franceSemiPoints}`);
 }
 
 const resetEpoch = new Date('2026-05-13T12:00:00.000Z').getTime();
