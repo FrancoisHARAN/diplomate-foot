@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-17T18:10:54.345Z",
-  "lastDataChangedAt": "2026-05-17T18:10:54.345Z",
+  "generatedAt": "2026-05-17T19:34:57.680Z",
+  "lastDataChangedAt": "2026-05-17T19:34:57.680Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-16",
   "dateTo": "2026-06-07",
@@ -2340,10 +2340,10 @@
         "crest": "https://crests.football-data.org/563.png"
       },
       "kickoff": "2026-05-17T16:30:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 3,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2353,7 +2353,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T18:10:21Z"
+      "lastUpdated": "2026-05-17T18:34:01Z"
     },
     {
       "id": "fd-544571",
@@ -2373,10 +2373,10 @@
         "crest": "https://crests.football-data.org/558.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
-      "homeScore": 0,
+      "status": "finished",
+      "homeScore": 1,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2386,7 +2386,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:56:42Z"
+      "lastUpdated": "2026-05-17T19:03:26Z"
     },
     {
       "id": "fd-544572",
@@ -2406,10 +2406,10 @@
         "crest": "https://crests.football-data.org/298.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 1,
       "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2419,7 +2419,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:53:02Z"
+      "lastUpdated": "2026-05-17T19:00:17Z"
     },
     {
       "id": "fd-544574",
@@ -2439,10 +2439,10 @@
         "crest": "https://crests.football-data.org/82.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 1,
       "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2452,7 +2452,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:54:22Z"
+      "lastUpdated": "2026-05-17T19:01:57Z"
     },
     {
       "id": "fd-544575",
@@ -2472,10 +2472,10 @@
         "crest": "https://crests.football-data.org/89.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
-      "homeScore": 1,
+      "status": "finished",
+      "homeScore": 2,
       "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2485,7 +2485,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:52:52Z"
+      "lastUpdated": "2026-05-17T19:05:51Z"
     },
     {
       "id": "fd-544576",
@@ -2505,10 +2505,10 @@
         "crest": "https://crests.football-data.org/94.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
-      "homeScore": 1,
+      "status": "finished",
+      "homeScore": 2,
       "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2518,7 +2518,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:53:03Z"
+      "lastUpdated": "2026-05-17T19:02:42Z"
     },
     {
       "id": "fd-544577",
@@ -2538,10 +2538,10 @@
         "crest": "https://crests.football-data.org/95.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
-      "homeScore": 1,
-      "awayScore": 2,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 4,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2551,7 +2551,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:56:43Z"
+      "lastUpdated": "2026-05-17T19:05:32Z"
     },
     {
       "id": "fd-544578",
@@ -2571,10 +2571,10 @@
         "crest": "https://crests.football-data.org/263.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 0,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2584,7 +2584,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:52:53Z"
+      "lastUpdated": "2026-05-17T19:00:37Z"
     },
     {
       "id": "fd-544579",
@@ -2604,10 +2604,10 @@
         "crest": "https://crests.football-data.org/80.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
-      "homeScore": 0,
-      "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 2,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2617,7 +2617,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:53:48Z"
+      "lastUpdated": "2026-05-17T19:01:57Z"
     },
     {
       "id": "fd-544580",
@@ -2637,10 +2637,10 @@
         "crest": "https://crests.football-data.org/86.png"
       },
       "kickoff": "2026-05-17T17:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 0,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
@@ -2650,7 +2650,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T17:53:23Z"
+      "lastUpdated": "2026-05-17T19:01:57Z"
     },
     {
       "id": "fd-542703",
@@ -2670,9 +2670,11 @@
         "crest": "https://crests.football-data.org/533.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2681,7 +2683,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:52Z"
     },
     {
       "id": "fd-542704",
@@ -2701,9 +2703,11 @@
         "crest": "https://crests.football-data.org/511.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2712,7 +2716,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:12Z"
     },
     {
       "id": "fd-542705",
@@ -2732,9 +2736,11 @@
         "crest": "https://crests.football-data.org/524.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2743,7 +2749,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:52Z"
     },
     {
       "id": "fd-542706",
@@ -2763,9 +2769,11 @@
         "crest": "https://crests.football-data.org/545.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2774,7 +2782,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:37Z"
     },
     {
       "id": "fd-542707",
@@ -2794,9 +2802,11 @@
         "crest": "https://crests.football-data.org/546.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2805,7 +2815,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:52Z"
     },
     {
       "id": "fd-542708",
@@ -2825,9 +2835,11 @@
         "crest": "https://crests.football-data.org/529.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 2,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2836,7 +2848,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:23Z"
     },
     {
       "id": "fd-542709",
@@ -2856,9 +2868,11 @@
         "crest": "https://crests.football-data.org/519.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2867,7 +2881,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:48Z"
     },
     {
       "id": "fd-542710",
@@ -2887,9 +2901,11 @@
         "crest": "https://crests.football-data.org/548.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2898,7 +2914,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:38Z"
     },
     {
       "id": "fd-542711",
@@ -2918,9 +2934,11 @@
         "crest": "https://crests.football-data.org/532.png"
       },
       "kickoff": "2026-05-17T19:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 34,
       "stage": "REGULAR_SEASON",
@@ -2929,7 +2947,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T01:32:03Z"
+      "lastUpdated": "2026-05-17T19:34:48Z"
     },
     {
       "id": "fd-544573",
@@ -2949,9 +2967,11 @@
         "crest": "https://crests.football-data.org/90.png"
       },
       "kickoff": "2026-05-17T19:15:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 37,
       "stage": "REGULAR_SEASON",
@@ -2960,7 +2980,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-15T13:25:22Z"
+      "lastUpdated": "2026-05-17T19:34:48Z"
     },
     {
       "id": "fd-538147",
@@ -3084,7 +3104,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544582",
@@ -3115,7 +3135,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544583",
@@ -3146,7 +3166,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544584",
@@ -3177,7 +3197,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544585",
@@ -3208,7 +3228,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544586",
@@ -3239,7 +3259,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544587",
@@ -3270,7 +3290,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544589",
@@ -3301,7 +3321,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-544590",
@@ -3332,7 +3352,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T22:25:22Z"
+      "lastUpdated": "2026-05-17T01:32:01Z"
     },
     {
       "id": "fd-538155",
@@ -3673,7 +3693,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-14T22:25:22Z"
+      "lastUpdated": "2026-05-15T00:20:57Z"
     },
     {
       "id": "fd-552096",
@@ -3704,7 +3724,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537327",
@@ -3908,7 +3928,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537340",
@@ -4010,7 +4030,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537357",
@@ -4146,7 +4166,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537363",
@@ -4214,7 +4234,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537364",
@@ -4282,7 +4302,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537392",
@@ -4350,7 +4370,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537398",
@@ -4452,7 +4472,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537410",
@@ -4758,7 +4778,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537347",
@@ -4860,7 +4880,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537354",
@@ -4962,7 +4982,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537365",
@@ -5030,7 +5050,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537366",
@@ -5098,7 +5118,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537393",
@@ -5132,7 +5152,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537394",
@@ -5268,7 +5288,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537412",
@@ -5472,7 +5492,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537331",
@@ -5574,7 +5594,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537356",
@@ -5778,7 +5798,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537396",
@@ -5846,7 +5866,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537374",
@@ -5982,7 +6002,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537414",
@@ -6118,7 +6138,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-11T05:21:09Z"
+      "lastUpdated": "2026-05-17T00:20:56Z"
     },
     {
       "id": "fd-537402",
