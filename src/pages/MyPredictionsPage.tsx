@@ -7,11 +7,15 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { FlashChallenge, FlashPrediction, Match, Prediction } from '../types';
 import { fetchPlayerFlashPredictions, getFlashPredictionsForPlayer, getPredictionsForPlayer, getStoredFlashChallenges, getUserPointsMock, saveFlashPrediction, samePlayerId } from '../utils/appState';
 import { canEditPrediction, isLiveDisplayMatch } from '../utils/date';
-import { flashMatchesPredictionFilter, isFlashChallengeOpen } from '../utils/flashChallenges';
+import { flashMatchesPredictionFilter, getFlashChronologicalTime, isFlashChallengeOpen, isFlashPriority } from '../utils/flashChallenges';
 import { calculatePredictionPointsForMatch, isMatchFinal } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type PredictionFilter = 'all' | 'live' | 'finished' | 'upcoming' | 'won' | 'lost';
+type FlashRow = { prediction: FlashPrediction; challenge: FlashChallenge };
+type HistoryItem =
+  | { type: 'match'; id: string; time: number; match: Match }
+  | { type: 'flash'; id: string; time: number; challenge: FlashChallenge; prediction: FlashPrediction };
 
 const predictionFilters: Array<{ id: PredictionFilter; label: string }> = [
   { id: 'all', label: 'Matchs' },
@@ -70,18 +74,22 @@ const MyPredictionsPage = () => {
   const predictionByMatch = new Map(mine.map((prediction) => [prediction.matchId, prediction]));
   const remaining = matches.filter((match) => !isMatchFinal(match) && !predictionByMatch.has(match.id)).length;
   const now = Date.now();
+  const matchById = new Map(matches.map((match) => [match.id, match]));
   const flashChallengeById = new Map(flashChallenges.map((challenge) => [challenge.id, challenge]));
   const myFlashRows = flashPredictions
     .filter((prediction) => prediction.playerId === player.id || getFlashPredictionsForPlayer(player.id).some((item) => item.id === prediction.id))
     .map((prediction) => ({ prediction, challenge: flashChallengeById.get(prediction.flashId) }))
-    .filter((item): item is { prediction: FlashPrediction; challenge: FlashChallenge } => Boolean(item.challenge))
+    .filter((item): item is FlashRow => Boolean(item.challenge))
     .sort((left, right) => {
       const leftOpen = isFlashChallengeOpen(left.challenge);
       const rightOpen = isFlashChallengeOpen(right.challenge);
       if (leftOpen !== rightOpen) return leftOpen ? -1 : 1;
-      return new Date(left.challenge.closesAt).getTime() - new Date(right.challenge.closesAt).getTime();
+      return getFlashChronologicalTime(right.challenge, matchById.get(right.challenge.matchId ?? '')?.kickoff) -
+        getFlashChronologicalTime(left.challenge, matchById.get(left.challenge.matchId ?? '')?.kickoff);
     });
   const filteredFlashRows = myFlashRows.filter(({ challenge, prediction }) => flashMatchesPredictionFilter(filter, challenge, prediction));
+  const priorityFlashRows = filteredFlashRows.filter(({ challenge }) => isFlashPriority(challenge));
+  const historicalFlashRows = filteredFlashRows.filter(({ challenge }) => !isFlashPriority(challenge));
   const predictedMatches = matches
     .filter((match) => predictionByMatch.has(match.id))
     .sort(sortByTemporalProximity(now));
@@ -96,6 +104,16 @@ const MyPredictionsPage = () => {
     if (filter === 'lost') return points !== null && points === 0;
     return true;
   });
+  const historyItems: HistoryItem[] = [
+    ...filteredMatches.map((match) => ({ type: 'match' as const, id: match.id, time: new Date(match.kickoff).getTime(), match })),
+    ...historicalFlashRows.map(({ challenge, prediction }) => ({
+      type: 'flash' as const,
+      id: `${challenge.id}-${prediction.id}`,
+      time: getFlashChronologicalTime(challenge, matchById.get(challenge.matchId ?? '')?.kickoff),
+      challenge,
+      prediction,
+    })),
+  ].sort((left, right) => right.time - left.time);
 
   const handleFlashAnswer = async (challenge: FlashChallenge, optionId: string) => {
     const prediction = await saveFlashPrediction(challenge, optionId);
@@ -122,7 +140,7 @@ const MyPredictionsPage = () => {
         ))}
       </div>
 
-      {filteredFlashRows.length > 0 ? (
+      {priorityFlashRows.length > 0 ? (
         <section className="section-block">
           <div className="section-heading">
             <div>
@@ -131,7 +149,7 @@ const MyPredictionsPage = () => {
             </div>
           </div>
           <div className="flash-history-list">
-            {filteredFlashRows.map(({ challenge, prediction }) => (
+            {priorityFlashRows.map(({ challenge, prediction }) => (
               <FlashChallengeCard
                 key={`${challenge.id}-${prediction.id}`}
                 challenge={challenge}
@@ -183,8 +201,22 @@ const MyPredictionsPage = () => {
           </div>
         </div>
         <div className="prediction-list">
-          {filteredMatches.length > 0 ? (
-            filteredMatches.map((match) => {
+          {historyItems.length > 0 ? (
+            historyItems.map((item) => {
+              if (item.type === 'flash') {
+                return (
+                  <FlashChallengeCard
+                    key={item.id}
+                    challenge={item.challenge}
+                    player={player}
+                    prediction={item.prediction}
+                    onAnswer={handleFlashAnswer}
+                    compact
+                  />
+                );
+              }
+
+              const match = item.match;
               const prediction = predictionByMatch.get(match.id);
               const editable = canEditPrediction(match);
               const isFinal = isMatchFinal(match);

@@ -1,10 +1,47 @@
 import type { FlashChallenge, FlashOption, FlashPrediction } from '../types';
 
+export const FLASH_PRIORITY_DAYS = 3;
+export const FLASH_PRIORITY_WINDOW_MS = FLASH_PRIORITY_DAYS * 24 * 60 * 60 * 1000;
+
 export const isFlashChallengeOpen = (challenge: FlashChallenge, now: Date = new Date()): boolean =>
   challenge.status === 'open' && new Date(challenge.closesAt).getTime() > now.getTime();
 
 export const canEditFlashPrediction = (challenge: FlashChallenge, now: Date = new Date()): boolean =>
   isFlashChallengeOpen(challenge, now);
+
+const dateTime = (value?: string | null): number | null => {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : null;
+};
+
+export const getFlashResolvedTime = (challenge: FlashChallenge): number | null =>
+  challenge.status === 'resolved'
+    ? dateTime(challenge.updatedAt) ?? dateTime(challenge.closesAt) ?? dateTime(challenge.createdAt)
+    : null;
+
+export const isFlashPriority = (challenge: FlashChallenge, now: Date = new Date()): boolean => {
+  if (isFlashChallengeOpen(challenge, now)) return true;
+  if (challenge.status === 'closed') return true;
+  if (challenge.status !== 'resolved') return true;
+
+  const resolvedTime = getFlashResolvedTime(challenge);
+  if (!resolvedTime) return true;
+  return now.getTime() - resolvedTime <= FLASH_PRIORITY_WINDOW_MS;
+};
+
+export const getFlashChronologicalTime = (
+  challenge: FlashChallenge,
+  associatedMatchKickoff?: string | null,
+): number => {
+  const candidates = [
+    dateTime(associatedMatchKickoff),
+    dateTime(challenge.closesAt),
+    dateTime(challenge.updatedAt),
+    dateTime(challenge.createdAt),
+  ];
+  return candidates.find((time): time is number => typeof time === 'number') ?? 0;
+};
 
 export const getFlashOption = (challenge: FlashChallenge, optionId?: string | null): FlashOption | undefined =>
   challenge.options.find((option) => option.id === optionId);

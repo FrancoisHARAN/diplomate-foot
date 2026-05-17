@@ -459,6 +459,15 @@ Le schema contient un seed idempotent pour le flash de test:
 
 Relancer `supabase/schema.sql` ne doit pas creer de doublon de ce flash.
 
+Priorite d'affichage:
+
+- un flash ouvert reste prioritaire;
+- un flash ferme mais pas encore resolu reste prioritaire;
+- un flash resolu reste prioritaire pendant 3 jours;
+- apres 3 jours, il descend dans l'historique chronologique avec les autres pronostics, tout en gardant son badge `Flash`.
+
+La constante frontend est `FLASH_PRIORITY_DAYS` dans `src/utils/flashChallenges.ts`. La date utilisee pour redescendre un flash resolu est `updated_at` quand `status = resolved`; si elle manque, l'application utilise `closes_at`, puis `created_at`. Pour le tri chronologique, l'ordre de preference est: match associe, `closes_at`, `updated_at`, `created_at`.
+
 Exemple SQL pour creer un autre flash:
 
 ```sql

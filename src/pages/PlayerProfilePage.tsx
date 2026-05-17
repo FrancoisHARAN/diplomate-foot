@@ -8,10 +8,14 @@ import { useLiveMatches } from '../hooks/useLiveMatches';
 import type { PredictionResultType, PublicFlashPrediction, PublicPlayerProfile, PublicPrediction } from '../types';
 import { fetchPublicPlayerFlashPredictions, fetchPublicPlayerProfile, getStoredPredictions } from '../utils/appState';
 import { formatKickoff, getMatchStatusLabel } from '../utils/date';
+import { getFlashChronologicalTime } from '../utils/flashChallenges';
 import { isMatchFinal } from '../utils/points';
 import { getWorldCupTeamDisplayName } from '../utils/worldCupFilters';
 
 type ProfileFilter = 'all' | 'finished' | 'locked' | 'won' | PredictionResultType;
+type ProfileHistoryItem =
+  | { type: 'match'; id: string; time: number; prediction: PublicPrediction }
+  | { type: 'flash'; id: string; time: number; item: PublicFlashPrediction };
 
 const profileFilters: Array<{ id: ProfileFilter; label: string }> = [
   { id: 'all', label: 'Tous' },
@@ -61,6 +65,15 @@ const filterPrediction = (item: PublicPrediction, filter: ProfileFilter): boolea
   return isFinal && item.resultType === filter;
 };
 
+const filterFlashPrediction = (item: PublicFlashPrediction, filter: ProfileFilter): boolean => {
+  if (filter === 'all') return true;
+  if (filter === 'finished') return item.challenge.status === 'resolved';
+  if (filter === 'locked') return item.challenge.status !== 'resolved';
+  if (filter === 'won') return item.challenge.status === 'resolved' && (item.points ?? 0) > 0;
+  if (filter === 'lost') return item.challenge.status === 'resolved' && item.resultType === 'lost';
+  return false;
+};
+
 const PlayerProfilePage = () => {
   const { playerId } = useParams();
   const { matches } = useLiveMatches();
@@ -92,6 +105,25 @@ const PlayerProfilePage = () => {
     () => profile?.predictions.filter((item) => filterPrediction(item, filter)) ?? [],
     [filter, profile],
   );
+  const matchById = useMemo(() => new Map(matches.map((match) => [match.id, match])), [matches]);
+  const filteredFlashPredictions = useMemo(
+    () => publicFlashPredictions.filter((item) => filterFlashPrediction(item, filter)),
+    [filter, publicFlashPredictions],
+  );
+  const visibleHistoryItems = useMemo<ProfileHistoryItem[]>(() => [
+    ...filteredPredictions.map((prediction) => ({
+      type: 'match' as const,
+      id: prediction.id,
+      time: new Date(prediction.match.kickoff).getTime(),
+      prediction,
+    })),
+    ...filteredFlashPredictions.map((item) => ({
+      type: 'flash' as const,
+      id: item.id,
+      time: getFlashChronologicalTime(item.challenge, matchById.get(item.challenge.matchId ?? '')?.kickoff),
+      item,
+    })),
+  ].sort((left, right) => right.time - left.time), [filteredFlashPredictions, filteredPredictions, matchById]);
 
   if (loading) {
     return (
@@ -127,7 +159,7 @@ const PlayerProfilePage = () => {
           <span><strong>{profile.stats.exactScores}</strong> scores exacts</span>
           <span><strong>{profile.stats.twoPointResults}</strong> bons écarts</span>
           <span><strong>{profile.stats.onePointResults}</strong> à 1 pt</span>
-          <span><strong>{profile.predictions.length}</strong> pronos visibles</span>
+          <span><strong>{profile.predictions.length + publicFlashPredictions.length}</strong> pronos visibles</span>
         </div>
       </section>
 
@@ -176,8 +208,29 @@ const PlayerProfilePage = () => {
         </div>
 
         <div className="prediction-list">
-          {filteredPredictions.length > 0 ? (
-            filteredPredictions.map(({ id, prediction, match, points, resultType }) => {
+          {visibleHistoryItems.length > 0 ? (
+            visibleHistoryItems.map((historyItem) => {
+              if (historyItem.type === 'flash') {
+                const item = historyItem.item;
+                return (
+                  <FlashChallengeCard
+                    key={item.id}
+                    challenge={item.challenge}
+                    player={{ id: profile.id, nickname: profile.nickname }}
+                    prediction={{
+                      id: item.id,
+                      flashId: item.challenge.id,
+                      optionId: item.selectedOption.id,
+                      playerId: profile.id,
+                      points: item.points,
+                      updatedAt: item.updatedAt,
+                    }}
+                    compact
+                  />
+                );
+              }
+
+              const { id, prediction, match, points, resultType } = historyItem.prediction;
               const isFinal = isMatchFinal(match);
               const hasScore = typeof match.homeScore === 'number' && typeof match.awayScore === 'number';
 
@@ -219,42 +272,12 @@ const PlayerProfilePage = () => {
             })
           ) : (
             <div className="empty-state inline">
-              <strong>{profile.predictions.length > 0 ? 'Aucun prono dans ce filtre.' : 'Ce joueur n’a pas encore de pronostic visible.'}</strong>
+              <strong>{profile.predictions.length + publicFlashPredictions.length > 0 ? 'Aucun prono dans ce filtre.' : 'Ce joueur n’a pas encore de pronostic visible.'}</strong>
               <p>Les pronostics restent cachés tant que les matchs sont encore ouverts.</p>
             </div>
           )}
         </div>
       </section>
-
-      {publicFlashPredictions.length > 0 ? (
-        <section className="section-block public-profile-history">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Bonus publics</p>
-              <h2>Paris flash visibles</h2>
-              <p className="section-subtitle">Les réponses restent cachées tant que le flash est ouvert.</p>
-            </div>
-          </div>
-          <div className="flash-history-list">
-            {publicFlashPredictions.map((item) => (
-              <FlashChallengeCard
-                key={item.id}
-                challenge={item.challenge}
-                player={{ id: profile.id, nickname: profile.nickname }}
-                prediction={{
-                  id: item.id,
-                  flashId: item.challenge.id,
-                  optionId: item.selectedOption.id,
-                  playerId: profile.id,
-                  points: item.points,
-                  updatedAt: item.updatedAt,
-                }}
-                compact
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
     </div>
   );
 };
