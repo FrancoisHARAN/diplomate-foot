@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-17T19:34:57.680Z",
-  "lastDataChangedAt": "2026-05-17T19:34:57.680Z",
+  "generatedAt": "2026-05-17T20:27:24.008Z",
+  "lastDataChangedAt": "2026-05-17T20:27:24.008Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-16",
   "dateTo": "2026-06-07",
@@ -2672,7 +2672,7 @@
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
       "homeScore": 0,
-      "awayScore": 0,
+      "awayScore": 1,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -2683,7 +2683,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:52Z"
+      "lastUpdated": "2026-05-17T20:26:12Z"
     },
     {
       "id": "fd-542704",
@@ -2716,7 +2716,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:12Z"
+      "lastUpdated": "2026-05-17T20:26:52Z"
     },
     {
       "id": "fd-542705",
@@ -2738,7 +2738,7 @@
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
       "homeScore": 0,
-      "awayScore": 0,
+      "awayScore": 1,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -2749,7 +2749,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:52Z"
+      "lastUpdated": "2026-05-17T20:26:52Z"
     },
     {
       "id": "fd-542706",
@@ -2782,7 +2782,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:37Z"
+      "lastUpdated": "2026-05-17T20:26:57Z"
     },
     {
       "id": "fd-542707",
@@ -2804,7 +2804,7 @@
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
       "homeScore": 0,
-      "awayScore": 1,
+      "awayScore": 4,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -2815,7 +2815,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:52Z"
+      "lastUpdated": "2026-05-17T20:27:17Z"
     },
     {
       "id": "fd-542708",
@@ -2836,7 +2836,7 @@
       },
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
-      "homeScore": 2,
+      "homeScore": 3,
       "awayScore": 0,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
@@ -2848,7 +2848,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:23Z"
+      "lastUpdated": "2026-05-17T20:26:22Z"
     },
     {
       "id": "fd-542709",
@@ -2881,7 +2881,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:48Z"
+      "lastUpdated": "2026-05-17T20:27:18Z"
     },
     {
       "id": "fd-542710",
@@ -2902,8 +2902,8 @@
       },
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
-      "homeScore": 0,
-      "awayScore": 1,
+      "homeScore": 1,
+      "awayScore": 4,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -2914,7 +2914,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:38Z"
+      "lastUpdated": "2026-05-17T20:26:13Z"
     },
     {
       "id": "fd-542711",
@@ -2935,7 +2935,7 @@
       },
       "kickoff": "2026-05-17T19:00:00Z",
       "status": "live",
-      "homeScore": 0,
+      "homeScore": 1,
       "awayScore": 1,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
@@ -2947,7 +2947,7 @@
       "sourceCompetitionId": "FL1",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:48Z"
+      "lastUpdated": "2026-05-17T20:26:53Z"
     },
     {
       "id": "fd-544573",
@@ -2968,7 +2968,7 @@
       },
       "kickoff": "2026-05-17T19:15:00Z",
       "status": "live",
-      "homeScore": 0,
+      "homeScore": 1,
       "awayScore": 0,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
@@ -2980,7 +2980,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-17T19:34:48Z"
+      "lastUpdated": "2026-05-17T20:12:58Z"
     },
     {
       "id": "fd-538147",
