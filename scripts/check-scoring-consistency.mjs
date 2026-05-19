@@ -222,8 +222,13 @@ requireText(
 );
 requireText(
   appStateSource,
-  "return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };",
+  "if (!isMatchFinal(match)) return { ...item, points: null, resultType: 'pending' };",
   'public match predictions still neutralize live rows defensively',
+);
+requireText(
+  appStateSource,
+  'calculatePredictionPointsForMatch(item.homeScore, item.awayScore, match)',
+  'public match predictions recompute final rows with current scoring',
 );
 
 requireText(matchPublicSectionSource, 'prediction.resultType', 'match public groups use returned result type');

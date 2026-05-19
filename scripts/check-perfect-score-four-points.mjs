@@ -23,6 +23,11 @@ const forbidText = (source, forbidden, label) => {
   if (source.includes(forbidden)) failures.push(`${label} must not contain: ${forbidden}`);
 };
 
+const forbidRegex = (source, pattern, label) => {
+  const match = source.match(pattern);
+  if (match) failures.push(`${label} must not contain stale exact-score copy near: ${match[0].replace(/\s+/g, ' ')}`);
+};
+
 const compilePointsContext = () => {
   const source = pointsSource
     .replace(/^import .*$/gm, '')
@@ -98,10 +103,25 @@ requireText(schemaSource, 'sp.points = 4 * public.app_private_match_multiplier',
 requireText(schemaSource, 'sp.points, 0) = 4 * mult.value', 'SQL history exact counter uses 4');
 requireText(appStateSource, 'basePoints === 4 ? 1 : 0', 'local stats exact counter uses 4');
 requireText(matchCardSource, 'basePoints === 4', 'match card exact badge uses 4');
+requireText(appStateSource, 'const computedPoints = calculatePredictionPointsForMatch(predictedHome, predictedAway, match);', 'public profile cards recompute final points');
+requireText(appStateSource, "return computedPoints ?? (rowResultType === 'pending' ? null : row.points ?? null);", 'public profile cards do not trust stale RPC exact points first');
+requireText(appStateSource, 'const computedResultType = getPredictionResultTypeForMatch(predictedHome, predictedAway, match);', 'public profile cards recompute final result type');
+requireText(appStateSource, 'calculatePredictionPointsForMatch(item.homeScore, item.awayScore, match)', 'public match groups recompute final points');
 requireText(rulesSource, "points: '4 pts'", 'rules exact score block uses 4');
 requireText(readmeSource, '- Score exact: 4 points', 'README exact score uses 4');
 forbidText(rulesSource, "points: '3 pts'", 'rules exact score old value');
 forbidText(readmeSource, '- Score exact: 3 points', 'README old exact score value');
+forbidText(schemaSource, 'sp.points = 3 *', 'SQL exact score old multiplier');
+forbidText(schemaSource, '= 3 * mult.value', 'SQL history exact score old multiplier');
+
+for (const [label, source] of [
+  ['MatchCard', matchCardSource],
+  ['appState', appStateSource],
+  ['rules', rulesSource],
+  ['README', readmeSource],
+]) {
+  forbidRegex(source, /Score exact[\s\S]{0,100}\+?3\s*pts|(?:\+?3\s*pts|3\s*points)[\s\S]{0,100}Score exact/i, label);
+}
 
 if (failures.length > 0) {
   throw new Error(failures.join('\n'));

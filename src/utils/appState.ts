@@ -1095,7 +1095,12 @@ export const fetchPublicMatchPredictions = async (
     const rows = await supabaseRpc<RpcPublicMatchPredictionRow[]>('app_get_public_match_predictions', { p_match_id: match.id });
     return rows.map((row) => {
       const item = fromRpcPublicMatchPrediction(row);
-      return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };
+      if (!isMatchFinal(match)) return { ...item, points: null, resultType: 'pending' };
+      return {
+        ...item,
+        points: calculatePredictionPointsForMatch(item.homeScore, item.awayScore, match),
+        resultType: getPredictionResultTypeForMatch(item.homeScore, item.awayScore, match),
+      };
     });
   } catch (error) {
     console.warn('Public match predictions unavailable, using local fallback.', error);
@@ -1127,8 +1132,8 @@ const resolveRpcPredictionResultType = (
   predictedAway: number,
 ): PredictionResultType => {
   if (!isMatchFinal(match)) return 'pending';
-  if (row.result_type) return row.result_type;
-  return getPredictionResultTypeForMatch(predictedHome, predictedAway, match);
+  const computedResultType = getPredictionResultTypeForMatch(predictedHome, predictedAway, match);
+  return computedResultType === 'pending' ? row.result_type ?? 'pending' : computedResultType;
 };
 
 const resolveRpcPredictionPoints = (
@@ -1138,8 +1143,9 @@ const resolveRpcPredictionPoints = (
   predictedAway: number,
 ): number | null => {
   if (!isMatchFinal(match)) return null;
+  const computedPoints = calculatePredictionPointsForMatch(predictedHome, predictedAway, match);
   const rowResultType = row.result_type ?? null;
-  return rowResultType === 'pending' ? null : row.points ?? calculatePredictionPointsForMatch(predictedHome, predictedAway, match);
+  return computedPoints ?? (rowResultType === 'pending' ? null : row.points ?? null);
 };
 
 const toPublicPrediction = (row: RpcPublicPredictionRow, matches: Match[]): PublicPrediction | null => {

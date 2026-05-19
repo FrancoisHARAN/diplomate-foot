@@ -127,7 +127,7 @@ requireText(appStateSource, 'const resolveRpcPredictionPoints', 'RPC public prof
 requireText(appStateSource, 'const resolveRpcPredictionResultType', 'RPC public profile defensive result resolver');
 requireText(
   appStateSource,
-  "return isMatchFinal(match) ? item : { ...item, points: null, resultType: 'pending' };",
+  "if (!isMatchFinal(match)) return { ...item, points: null, resultType: 'pending' };",
   'RPC public match predictions defensive final check',
 );
 
