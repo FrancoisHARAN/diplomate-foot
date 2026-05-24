@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-24T08:05:32.478Z",
-  "lastDataChangedAt": "2026-05-24T08:05:32.478Z",
+  "generatedAt": "2026-05-24T15:20:39.249Z",
+  "lastDataChangedAt": "2026-05-24T15:20:39.249Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-23",
   "dateTo": "2026-06-14",
@@ -3363,9 +3363,11 @@
         "crest": "https://crests.football-data.org/61.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3374,7 +3376,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-20T01:32:00Z"
+      "lastUpdated": "2026-05-24T15:19:56Z"
     },
     {
       "id": "fd-538156",
@@ -3394,9 +3396,11 @@
         "crest": "https://crests.football-data.org/66.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3405,7 +3409,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:44Z"
+      "lastUpdated": "2026-05-24T15:20:36Z"
     },
     {
       "id": "fd-538157",
@@ -3425,9 +3429,11 @@
         "crest": "https://crests.football-data.org/57.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3436,7 +3442,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-18T01:32:01Z"
+      "lastUpdated": "2026-05-24T15:20:31Z"
     },
     {
       "id": "fd-538158",
@@ -3456,9 +3462,11 @@
         "crest": "https://crests.football-data.org/76.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3467,7 +3475,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-18T01:32:01Z"
+      "lastUpdated": "2026-05-24T15:20:36Z"
     },
     {
       "id": "fd-538159",
@@ -3487,9 +3495,11 @@
         "crest": "https://crests.football-data.org/67.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3498,7 +3508,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-18T01:32:01Z"
+      "lastUpdated": "2026-05-24T15:20:16Z"
     },
     {
       "id": "fd-538160",
@@ -3518,9 +3528,11 @@
         "crest": "https://crests.football-data.org/402.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3529,7 +3541,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-20T01:32:00Z"
+      "lastUpdated": "2026-05-24T15:20:31Z"
     },
     {
       "id": "fd-538161",
@@ -3549,9 +3561,11 @@
         "crest": "https://crests.football-data.org/58.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3560,7 +3574,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:44Z"
+      "lastUpdated": "2026-05-24T15:19:36Z"
     },
     {
       "id": "fd-538162",
@@ -3580,9 +3594,11 @@
         "crest": "https://crests.football-data.org/bournemouth.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3591,7 +3607,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-18T01:32:01Z"
+      "lastUpdated": "2026-05-24T15:20:32Z"
     },
     {
       "id": "fd-538163",
@@ -3611,9 +3627,11 @@
         "crest": "https://crests.football-data.org/62.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3622,7 +3640,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-18T01:32:01Z"
+      "lastUpdated": "2026-05-24T15:20:12Z"
     },
     {
       "id": "fd-538164",
@@ -3642,9 +3660,11 @@
         "crest": "https://crests.football-data.org/341.png"
       },
       "kickoff": "2026-05-24T15:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 38,
       "stage": "REGULAR_SEASON",
@@ -3653,7 +3673,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:44Z"
+      "lastUpdated": "2026-05-24T15:19:57Z"
     },
     {
       "id": "fd-544588",
@@ -3715,7 +3735,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T01:32:00Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537327",
