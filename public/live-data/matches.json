@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-24T19:40:51.811Z",
-  "lastDataChangedAt": "2026-05-24T19:40:51.811Z",
+  "generatedAt": "2026-05-24T20:35:08.261Z",
+  "lastDataChangedAt": "2026-05-24T20:35:08.261Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-23",
   "dateTo": "2026-06-14",
@@ -3694,8 +3694,8 @@
       },
       "kickoff": "2026-05-24T19:00:00Z",
       "status": "live",
-      "homeScore": 2,
-      "awayScore": 0,
+      "homeScore": 5,
+      "awayScore": 1,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -3706,7 +3706,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T19:39:57Z"
+      "lastUpdated": "2026-05-24T20:34:42Z"
     },
     {
       "id": "fd-552096",
@@ -3737,7 +3737,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T01:32:00Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537327",
