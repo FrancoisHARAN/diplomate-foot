@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-24T23:38:49.927Z",
-  "lastDataChangedAt": "2026-05-24T23:38:49.927Z",
+  "generatedAt": "2026-05-25T01:36:51.141Z",
+  "lastDataChangedAt": "2026-05-25T01:36:51.141Z",
   "source": "football-data.org",
-  "dateFrom": "2026-05-23",
-  "dateTo": "2026-06-14",
+  "dateFrom": "2026-05-24",
+  "dateTo": "2026-06-15",
   "competitions": [
     "FL1",
     "PL",
@@ -3376,7 +3376,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:08:41Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538156",
@@ -3409,7 +3409,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:02:06Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538157",
@@ -3442,7 +3442,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:06:46Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538158",
@@ -3475,7 +3475,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:11:06Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538159",
@@ -3508,7 +3508,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:06:02Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538160",
@@ -3541,7 +3541,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:07:06Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538161",
@@ -3562,7 +3562,7 @@
       },
       "kickoff": "2026-05-24T15:00:00Z",
       "status": "finished",
-      "homeScore": 2,
+      "homeScore": 1,
       "awayScore": 2,
       "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
@@ -3574,7 +3574,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:08:16Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538162",
@@ -3607,7 +3607,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:09:06Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538163",
@@ -3640,7 +3640,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:14:46Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-538164",
@@ -3673,7 +3673,7 @@
       "sourceCompetitionId": "PL",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T17:03:02Z"
+      "lastUpdated": "2026-05-25T00:20:45Z"
     },
     {
       "id": "fd-544588",
@@ -3706,7 +3706,7 @@
       "sourceCompetitionId": "PD",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T20:58:41Z"
+      "lastUpdated": "2026-05-25T00:20:44Z"
     },
     {
       "id": "fd-552096",
@@ -3737,7 +3737,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T01:32:00Z"
+      "lastUpdated": "2026-05-25T00:20:44Z"
     },
     {
       "id": "fd-537327",
@@ -3941,7 +3941,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537340",
@@ -4026,9 +4026,9 @@
       "awayTeam": {
         "id": "9460",
         "name": "Curaçao",
-        "shortName": "CUW",
+        "shortName": "CUR",
         "crest": "https://crests.football-data.org/curacao.svg",
-        "countryCode": "CUW"
+        "countryCode": "CUR"
       },
       "kickoff": "2026-06-14T17:00:00Z",
       "status": "upcoming",
@@ -4043,7 +4043,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537357",
@@ -4179,7 +4179,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537363",
@@ -4247,7 +4247,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537364",
@@ -4315,7 +4315,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537392",
@@ -4383,7 +4383,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537398",
@@ -4485,7 +4485,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537410",
@@ -4791,7 +4791,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537347",
@@ -4893,7 +4893,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537354",
@@ -4910,9 +4910,9 @@
       "awayTeam": {
         "id": "9460",
         "name": "Curaçao",
-        "shortName": "CUW",
+        "shortName": "CUR",
         "crest": "https://crests.football-data.org/curacao.svg",
-        "countryCode": "CUW"
+        "countryCode": "CUR"
       },
       "kickoff": "2026-06-21T00:00:00Z",
       "status": "upcoming",
@@ -4995,7 +4995,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537365",
@@ -5063,7 +5063,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537366",
@@ -5131,7 +5131,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537393",
@@ -5165,7 +5165,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537394",
@@ -5301,7 +5301,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537412",
@@ -5505,7 +5505,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537331",
@@ -5607,7 +5607,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537356",
@@ -5617,9 +5617,9 @@
       "homeTeam": {
         "id": "9460",
         "name": "Curaçao",
-        "shortName": "CUW",
+        "shortName": "CUR",
         "crest": "https://crests.football-data.org/curacao.svg",
-        "countryCode": "CUW"
+        "countryCode": "CUR"
       },
       "awayTeam": {
         "id": "1935",
@@ -5811,7 +5811,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537396",
@@ -5879,7 +5879,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537374",
@@ -6015,7 +6015,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537414",
@@ -6151,7 +6151,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-24T00:20:43Z"
+      "lastUpdated": "2026-05-11T05:21:09Z"
     },
     {
       "id": "fd-537402",
