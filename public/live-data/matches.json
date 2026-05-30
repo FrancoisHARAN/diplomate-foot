@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-30T16:15:49.837Z",
-  "lastDataChangedAt": "2026-05-30T16:15:49.837Z",
+  "generatedAt": "2026-05-30T17:31:40.159Z",
+  "lastDataChangedAt": "2026-05-30T17:31:40.159Z",
   "source": "football-data.org",
   "dateFrom": "2026-05-29",
   "dateTo": "2026-06-20",
@@ -3728,9 +3728,9 @@
       "kickoff": "2026-05-30T16:00:00Z",
       "status": "live",
       "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "regularTime",
-      "scoreSource": "football-data.score.regularTime",
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "FINAL",
@@ -3739,7 +3739,7 @@
       "sourceCompetitionId": "CL",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-05-30T16:13:21Z"
+      "lastUpdated": "2026-05-30T17:31:36Z"
     },
     {
       "id": "fd-537327",
