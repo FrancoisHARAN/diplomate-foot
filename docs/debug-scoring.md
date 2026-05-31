@@ -10,9 +10,6 @@ Remplacer `PLAYER_UUID` par l'id du joueur.
 with target_player as (
   select 'PLAYER_UUID'::uuid as player_id
 ),
-epoch as (
-  select public.app_private_scoring_epoch_start() as reset_at
-),
 match_rows as (
   select
     'match'::text as source,
@@ -54,7 +51,9 @@ flash_rows as (
     fo.label as prediction,
     result.label as final_score,
     ch.status = 'resolved' as is_final,
-    1 as boost,
+    1 as points_de_base,
+    1 as points_multiplier_stocke,
+    1 as boost_reel,
     fsp.points,
     fsp.id is not null as included_in_current_score
   from public.app_rpc_flash_predictions fp

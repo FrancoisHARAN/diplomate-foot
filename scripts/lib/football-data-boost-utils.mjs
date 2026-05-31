@@ -1,6 +1,3 @@
-const PSG_TEAM_IDS = new Set(['524', 'club-psg', 'psg']);
-const PSG_NAMES = new Set(['psg', 'paris sg', 'paris saint germain', 'paris saint germain fc']);
-
 const normalize = (value) =>
   String(value ?? '')
     .normalize('NFD')
@@ -8,17 +5,6 @@ const normalize = (value) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
-
-export const isPsgTeam = (team = {}) => {
-  const id = String(team.id ?? '').toLowerCase();
-  if (PSG_TEAM_IDS.has(id)) return true;
-
-  const shortName = normalize(team.shortName ?? team.tla);
-  if (shortName === 'psg') return true;
-
-  const name = normalize(team.name);
-  return PSG_NAMES.has(name) || name.includes('paris saint germain');
-};
 
 const isFranceTeam = (team = {}) => {
   const candidates = [team.countryCode, team.shortName, team.tla, team.name]
@@ -54,10 +40,7 @@ const worldCupStageMultiplier = (match = {}) => {
 
 export const getApiMatchPointsMultiplier = ({ competition = {}, match = {}, homeTeam = {}, awayTeam = {} }) => {
   const explicit = Number(match.pointsMultiplier ?? match.points_multiplier ?? 1);
-  const candidates = [
-    Number.isFinite(explicit) && explicit > 1 ? explicit : 1,
-    isPsgTeam(homeTeam) || isPsgTeam(awayTeam) ? 2 : 1,
-  ];
+  const candidates = [Number.isFinite(explicit) && explicit > 1 ? explicit : 1];
 
   if (isWorldCup2026Competition(competition)) {
     candidates.push(isFranceTeam(homeTeam) || isFranceTeam(awayTeam) ? 2 : 1);

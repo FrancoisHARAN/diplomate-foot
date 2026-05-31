@@ -23,6 +23,15 @@ const sliceBetween = (source, start, end, label) => {
   return source.slice(startIndex, endIndex);
 };
 
+const functionBody = (name) => {
+  const marker = `create or replace function public.${name}`;
+  const start = schema.indexOf(marker);
+  assert.notEqual(start, -1, `Function not found: ${name}`);
+  const end = schema.indexOf('\n$$;', start);
+  assert.notEqual(end, -1, `Function body not closed: ${name}`);
+  return schema.slice(start, end);
+};
+
 requireText(packageJson, '"check:visible-season-reset"', 'package script');
 
 requireText(schema, 'create or replace function public.app_private_match_scoring_event_at', 'match scoring event helper');
@@ -131,7 +140,7 @@ requireText(playerFlashBody, "'points', case when fsp.id is not null then fsp.po
 const publicFlashBody = sliceBetween(
   schema,
   'create or replace function public.app_get_public_player_flash_predictions',
-  'do $$',
+  'create or replace function public.app_update_player_avatar',
   'app_get_public_player_flash_predictions',
 );
 requireText(
@@ -148,10 +157,11 @@ requireText(readme, 'select public.app_admin_set_scoring_epoch(now());', 'README
 requireText(readme, 'masque aussi les anciens pronostics de matchs termines', 'README explains visible history reset');
 requireText(readme, 'pronostics futurs ou live restent valables', 'README explains preserved useful predictions');
 
-forbidText(schema, 'delete from public.app_rpc_predictions', 'reset must preserve predictions');
-forbidText(schema, 'truncate public.app_rpc_predictions', 'reset must preserve predictions');
-forbidText(schema, 'delete from public.app_rpc_players', 'reset must preserve players');
-forbidText(schema, 'truncate public.app_rpc_players', 'reset must preserve players');
-forbidText(schema, 'delete from public.app_rpc_world_cup_winner_predictions', 'reset must preserve Top 3');
+const scoringEpochResetBody = functionBody('app_admin_set_scoring_epoch');
+forbidText(scoringEpochResetBody, 'delete from public.app_rpc_predictions', 'visible reset must preserve predictions');
+forbidText(scoringEpochResetBody, 'truncate public.app_rpc_predictions', 'visible reset must preserve predictions');
+forbidText(scoringEpochResetBody, 'delete from public.app_rpc_players', 'visible reset must preserve players');
+forbidText(scoringEpochResetBody, 'truncate public.app_rpc_players', 'visible reset must preserve players');
+forbidText(scoringEpochResetBody, 'delete from public.app_rpc_world_cup_winner_predictions', 'visible reset must preserve Top 3');
 
 console.log('check-visible-season-reset: ok');

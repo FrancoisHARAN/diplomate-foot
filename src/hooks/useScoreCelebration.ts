@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Match } from '../types';
 import { canonicalPlayerId, getUserPointsMock, type CurrentPlayer } from '../utils/appState';
 
-const STORAGE_KEY = 'diplomate.scoreSnapshots.v1';
+const STORAGE_KEY = 'diplomate.worldCup2026.scoreSnapshots.v1';
 const CELEBRATION_GIFS = [
   'celebration-01.gif',
   'celebration-02.gif',

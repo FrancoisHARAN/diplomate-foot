@@ -129,7 +129,7 @@ export const shouldShowWorldCup2026Match = (match: Match): boolean => {
 };
 
 export const shouldShowMatchInApp = (match: Match): boolean =>
-  isWorldCup2026Match(match) ? shouldShowWorldCup2026Match(match) : true;
+  isWorldCup2026Match(match) && shouldShowWorldCup2026Match(match);
 
 export const isFranceWorldCup2026Match = (match: Match): boolean =>
   isWorldCup2026Match(match) && (isFranceWorldCupTeam(match.homeTeam) || isFranceWorldCupTeam(match.awayTeam));

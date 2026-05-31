@@ -102,7 +102,7 @@ const MatchCard = ({ match, prediction, variant = 'full', onClick, linkTo }: Mat
       )}
 
       <div className="match-meta">
-        <span>{match.competitionName ?? 'Compétition test'}</span>
+        <span>{match.competitionName ?? 'Coupe du Monde 2026'}</span>
         {!isLiveDisplay ? <strong>{formatKickoffTime(match.kickoff)}</strong> : null}
       </div>
 

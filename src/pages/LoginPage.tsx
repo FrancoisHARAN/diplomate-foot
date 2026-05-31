@@ -52,8 +52,8 @@ const LoginPage = () => {
       </form>
 
       <section className="notice-panel compact">
-        <strong>Compte de test</strong>
-        <p>Les comptes test sont donnés dans le message de livraison, pas affichés aux visiteurs.</p>
+        <strong>Compte joueur</strong>
+        <p>Ton pseudo et ton code sont fournis par l'organisation du jeu.</p>
         <Link className="text-link" to="/reglement">Voir le règlement</Link>
       </section>
     </div>

@@ -289,7 +289,7 @@ const MatchDetailPage = () => {
         {!player ? (
           <div className="empty-state inline">
             <strong>Connecte-toi pour pronostiquer</strong>
-            <p>Ton score sera gardé pour cette version de test.</p>
+            <p>Connecte-toi pour enregistrer ton score Coupe du Monde.</p>
             <button className="btn primary" type="button" onClick={() => navigate('/connexion', { state: { redirectTo: location.pathname } })}>Connexion</button>
           </div>
         ) : null}

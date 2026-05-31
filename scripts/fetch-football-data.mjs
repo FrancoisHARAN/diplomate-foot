@@ -10,10 +10,6 @@ const WORLD_CUP_2026_DATE_FROM = process.env.WORLD_CUP_2026_DATE_FROM || '2026-0
 const WORLD_CUP_2026_DATE_TO = process.env.WORLD_CUP_2026_DATE_TO || '2026-07-19';
 
 const competitions = [
-  { code: 'FL1', apiCode: 'FL1', name: 'Ligue 1' },
-  { code: 'PL', apiCode: 'PL', name: 'Premier League' },
-  { code: 'PD', apiCode: 'PD', name: 'La Liga' },
-  { code: 'CL', apiCode: 'CL', name: 'Champions League' },
   {
     code: 'WC2026',
     apiCode: WORLD_CUP_2026_API_COMPETITION_ID,
@@ -29,10 +25,9 @@ const competitions = [
 const token = process.env.FOOTBALL_DATA_TOKEN;
 const outputPath = join(process.cwd(), 'public', 'live-data', 'matches.json');
 
-const toIsoDate = (date) => date.toISOString().slice(0, 10);
 const today = new Date();
-const dateFrom = toIsoDate(new Date(today.getTime() - 24 * 60 * 60 * 1000));
-const dateTo = toIsoDate(new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000));
+const dateFrom = WORLD_CUP_2026_DATE_FROM;
+const dateTo = WORLD_CUP_2026_DATE_TO;
 const archiveFrom = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
 
 const statusMap = {
@@ -43,25 +38,6 @@ const statusMap = {
   EXTRA_TIME: 'live',
   PENALTY_SHOOTOUT: 'live',
   FINISHED: 'finished',
-};
-
-const knownFixtureTeams = {
-  '552092': {
-    homeTeam: { id: '524', name: 'PSG', shortName: 'PSG', crest: 'https://crests.football-data.org/524.png' },
-    awayTeam: { id: '5', name: 'Bayern', shortName: 'FCB', crest: 'https://crests.football-data.org/5.png' },
-  },
-  '552093': {
-    homeTeam: { id: '78', name: 'Atletico Madrid', shortName: 'ATL', crest: 'https://crests.football-data.org/78.png' },
-    awayTeam: { id: '57', name: 'Arsenal', shortName: 'ARS', crest: 'https://crests.football-data.org/57.png' },
-  },
-  '552095': {
-    homeTeam: { id: '57', name: 'Arsenal', shortName: 'ARS', crest: 'https://crests.football-data.org/57.png' },
-    awayTeam: { id: '78', name: 'Atletico Madrid', shortName: 'ATL', crest: 'https://crests.football-data.org/78.png' },
-  },
-  '552094': {
-    homeTeam: { id: '5', name: 'Bayern', shortName: 'FCB', crest: 'https://crests.football-data.org/5.png' },
-    awayTeam: { id: '524', name: 'PSG', shortName: 'PSG', crest: 'https://crests.football-data.org/524.png' },
-  },
 };
 
 const countryCodeAliases = new Map([
@@ -184,18 +160,39 @@ const readExistingPayload = async () => {
   }
 };
 
+const isWorldCupPayloadMatch = (match) => {
+  const text = [
+    match?.competitionCode,
+    match?.competitionName,
+    match?.sourceCompetitionId,
+    match?.season,
+  ].filter(Boolean).join(' ').toLowerCase();
+  const isWorldCup =
+    match?.competitionCode === 'WC2026' ||
+    String(match?.sourceCompetitionId ?? '').toUpperCase() === 'WC' ||
+    text.includes('world cup') ||
+    text.includes('coupe du monde') ||
+    text.includes('wc2026');
+  const isOtherWorldCup =
+    text.includes('qualif') ||
+    text.includes('qualification') ||
+    text.includes('friendly') ||
+    text.includes('amical');
+  return isWorldCup && !isOtherWorldCup;
+};
+
 const readArchivedFinishedMatches = (existingPayload) =>
   (existingPayload?.matches ?? []).filter((match) => {
+    if (!isWorldCupPayloadMatch(match)) return false;
     if (match.status !== 'finished') return false;
     if (typeof match.homeScore !== 'number' || typeof match.awayScore !== 'number') return false;
     return new Date(match.kickoff).getTime() >= archiveFrom.getTime();
   });
 
 const normalizeMatch = (match, competition) => {
-  const knownFixture = knownFixtureTeams[String(match.id)] ?? {};
   const isWorldCup2026 = Boolean(competition.isWorldCup2026);
-  const homeTeam = normalizeTeam(match.homeTeam, knownFixture.homeTeam, `home-${match.id}`, 'Home team', isWorldCup2026);
-  const awayTeam = normalizeTeam(match.awayTeam, knownFixture.awayTeam, `away-${match.id}`, 'Away team', isWorldCup2026);
+  const homeTeam = normalizeTeam(match.homeTeam, undefined, `home-${match.id}`, 'Home team', isWorldCup2026);
+  const awayTeam = normalizeTeam(match.awayTeam, undefined, `away-${match.id}`, 'Away team', isWorldCup2026);
   const predictionScore = getPredictionScoreFromApiMatch(match);
   if (predictionScore.warning) {
     console.warn(`${competition.code} ${match.id}: ${predictionScore.warning}`);

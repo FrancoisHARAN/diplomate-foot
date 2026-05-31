@@ -449,15 +449,7 @@ Tables/RPC ajoutees par `supabase/schema.sql`:
 - `app_get_player_flash_predictions_by_session`;
 - `app_get_public_player_flash_predictions`.
 
-Le schema contient un seed idempotent pour le flash de test:
-
-- titre: `Dembélé buteur ?`
-- description: `Dembélé marque-t-il contre Lens ?`
-- match lie: `fd-542664` si les donnees live contiennent Lens - PSG
-- fermeture: `2026-05-13T19:00:00Z`
-- options: `Oui, il marque` pour 5 points, `Non, il ne marque pas` pour 2 points.
-
-Relancer `supabase/schema.sql` ne doit pas creer de doublon de ce flash.
+Le schema ne cree plus de flash d'exemple automatiquement. Les flashs doivent etre crees manuellement pour la competition en cours, puis resolus quand le resultat est connu.
 
 Priorite d'affichage:
 
@@ -474,9 +466,9 @@ Exemple SQL pour creer un autre flash:
 with challenge as (
   insert into public.app_rpc_flash_challenges (title, description, match_label, closes_at, status)
   values (
-    'Nouveau flash ?',
-    'Description courte du defi',
-    'Lens - PSG',
+    'Nouveau flash Coupe du Monde ?',
+    'Description courte du defi Coupe du Monde',
+    'France - Senegal',
     '2026-06-12 21:00:00+02',
     'open'
   )
@@ -488,13 +480,13 @@ union all
 select id, 'Non, il ne marque pas', 2, 2 from challenge;
 ```
 
-Exemple SQL pour trouver les options du flash Dembélé:
+Exemple SQL pour trouver les options d'un flash:
 
 ```sql
 select c.id as flash_id, o.id as option_id, o.label, o.points_if_correct
 from public.app_rpc_flash_challenges c
 join public.app_rpc_flash_options o on o.flash_id = c.id
-where c.title = 'Dembélé buteur ?'
+where c.title = 'Nouveau flash Coupe du Monde ?'
 order by o.sort_order;
 ```
 
@@ -519,6 +511,33 @@ where id = '<ID_FLASH>';
 
 Si `supabase/schema.sql` est modifie ou relance, reexecuter le schema complet dans Supabase SQL Editor pour publier les nouvelles tables et RPC.
 
+## Lancer une nouvelle competition Coupe du Monde
+
+Avant de presenter le jeu aux nouveaux joueurs, executer la purge de competition dans Supabase SQL Editor:
+
+```sql
+select public.app_admin_reset_competition_for_world_cup();
+```
+
+Cette commande conserve la structure technique, les RPC, les politiques RLS, le hash du token de synchronisation des matchs et les matchs Coupe du Monde 2026 deja presents. Elle supprime:
+
+- joueurs, codes, sessions et avatars associes;
+- pronostics classiques;
+- reponses Top 3 champion du monde;
+- flashs, options et reponses flash;
+- snapshots d'historique de classement;
+- matchs hors Coupe du Monde 2026;
+- ancien score visible via `scoring_epoch_start`, remis a l'heure du reset.
+
+Apres la purge:
+
+1. recréer les joueurs avec `select public.app_admin_create_player('Nom', '<CODE_6_CHIFFRES>');`;
+2. ne jamais committer les vrais codes joueurs;
+3. relancer **Update football data** pour recuperer les matchs Coupe du Monde;
+4. recharger le site et verifier `/matchs`, `/classement`, `/mon-compte` et `/tournoi`.
+
+Le cache navigateur est versionne avec le namespace `diplomate.worldCup2026.*`, afin que les anciens pronostics et anciennes sessions locales ne puissent pas reapparaitre apres le lancement Coupe du Monde.
+
 ## Deploiement GitHub Pages
 
 Le workflow est dans `.github/workflows/deploy.yml`.
@@ -542,4 +561,4 @@ Les pronostics sont évalués sur le temps réglementaire: 90 minutes + temps ad
 
 Un match nul exact vaut toujours 4 points. Un match nul pronostique correctement mais sans score exact vaut 1 point, pas 2.
 
-Les multiplicateurs de match booste s'appliquent ensuite au total du match. Le boost PSG actuel vaut x2. Pour la Coupe du Monde, les matchs de la France valent x2 et les boosts de phase finale gardent le plus fort multiplicateur.
+Les multiplicateurs de match booste s'appliquent ensuite au total du match. Pour la Coupe du Monde, les matchs de la France valent x2 et les boosts de phase finale gardent toujours le plus fort multiplicateur.

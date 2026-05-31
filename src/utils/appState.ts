@@ -9,17 +9,20 @@ import { calculateFlashPredictionPoints, getFlashOption, getFlashPredictionResul
 import { sortLeaderboardEntries } from './leaderboard';
 import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultTypeForMatch, isMatchFinal } from './points';
 import { isPredictionPublic } from './predictionVisibility';
+import { shouldShowMatchInApp } from './worldCupFilters';
 import { getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
+export const COMPETITION_STORAGE_NAMESPACE = 'diplomate.worldCup2026';
+
 const STORAGE_KEYS = {
-  currentPlayer: 'diplomate.currentPlayer',
-  predictions: 'diplomate.predictions',
-  profileImages: 'diplomate.profileImages',
-  cloudPlayerState: 'diplomate.cloudPlayerState',
-  cloudLeaderboard: 'diplomate.cloudLeaderboard',
-  worldCupWinnerPredictions: 'diplomate.worldCupWinnerPredictions',
-  flashChallenges: 'diplomate.flashChallenges',
-  flashPredictions: 'diplomate.flashPredictions',
+  currentPlayer: `${COMPETITION_STORAGE_NAMESPACE}.currentPlayer`,
+  predictions: `${COMPETITION_STORAGE_NAMESPACE}.predictions`,
+  profileImages: `${COMPETITION_STORAGE_NAMESPACE}.profileImages`,
+  cloudPlayerState: `${COMPETITION_STORAGE_NAMESPACE}.cloudPlayerState`,
+  cloudLeaderboard: `${COMPETITION_STORAGE_NAMESPACE}.cloudLeaderboard`,
+  worldCupWinnerPredictions: `${COMPETITION_STORAGE_NAMESPACE}.worldCupWinnerPredictions`,
+  flashChallenges: `${COMPETITION_STORAGE_NAMESPACE}.flashChallenges`,
+  flashPredictions: `${COMPETITION_STORAGE_NAMESPACE}.flashPredictions`,
 };
 
 export interface CurrentPlayer {
@@ -1034,7 +1037,7 @@ export const fetchCloudMatches = async (): Promise<Match[]> => {
   if (!isSupabaseConfigured) return [];
   try {
     const rows = await supabaseRpc<RpcMatchRow[]>('app_get_matches');
-    return rows.map(fromRpcMatch);
+    return rows.map(fromRpcMatch).filter(shouldShowMatchInApp);
   } catch (error) {
     console.warn('Cloud matches unavailable.', error);
     return [];

@@ -30,6 +30,7 @@
     "check:internal-nav": "node scripts/check-internal-navigation-links.mjs",
     "check:scoring-reset": "node scripts/check-scoring-reset-epoch.mjs",
     "check:visible-season-reset": "node scripts/check-visible-season-reset.mjs",
+    "check:world-cup-clean-start": "node scripts/check-world-cup-clean-start.mjs",
     "preview": "vite preview",
     "lint": "eslint ."
   },

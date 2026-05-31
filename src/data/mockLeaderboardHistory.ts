@@ -7,13 +7,6 @@ interface HistoryMockPlayer {
   points: number;
 }
 
-const demoPlayers: HistoryMockPlayer[] = [
-  { playerId: 'p-francois', nickname: 'Francois', points: 36 },
-  { playerId: 'p-solene', nickname: 'Solene', points: 29 },
-  { playerId: 'p2', nickname: 'Sarah', points: 24 },
-  { playerId: 'p1', nickname: 'Nico', points: 18 },
-];
-
 const toIso = (daysAgo: number): string => new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString();
 
 const dayLabel = (iso: string): string =>
@@ -27,14 +20,14 @@ const pointsForDay = (finalPoints: number, dayIndex: number, totalDays: number, 
 };
 
 export const buildMockLeaderboardHistory = (currentStandings: Standing[]): LeaderboardHistoryPeriod[] => {
-  const sourcePlayers: HistoryMockPlayer[] = currentStandings.length > 0
-    ? currentStandings.slice(0, 8).map((standing) => ({
-        playerId: standing.playerId,
-        nickname: standing.nickname,
-        avatarUrl: standing.avatarUrl,
-        points: standing.points,
-      }))
-    : demoPlayers;
+  const sourcePlayers: HistoryMockPlayer[] = currentStandings.slice(0, 8).map((standing) => ({
+    playerId: standing.playerId,
+    nickname: standing.nickname,
+    avatarUrl: standing.avatarUrl,
+    points: standing.points,
+  }));
+
+  if (sourcePlayers.length === 0) return [];
 
   const days = Array.from({ length: 15 }, (_, index) => {
     const daysAgo = 14 - index;

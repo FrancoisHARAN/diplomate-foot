@@ -111,7 +111,7 @@ assert.equal(shouldShow(wc({ name: 'Japan', shortName: 'JPN' }, { name: 'Canada'
 assert.equal(isWorldCup({ competitionCode: 'TEST', competitionName: 'Friendly France Espagne', homeTeam: {}, awayTeam: {} }), false, 'Friendly must not be treated as World Cup.');
 assert.equal(isWorldCup({ competitionCode: 'WORLD', competitionName: 'World Cup Qualification', homeTeam: {}, awayTeam: {} }), false, 'Qualifier must not be treated as final World Cup.');
 assert.equal(shouldShow(wc({ name: 'Brazil', shortName: 'BRA' }, { name: 'Canada', shortName: 'CAN' })), true, 'Brazil group match must be visible.');
-assert.equal(flag({ id: 'club-om', name: 'Marseille', shortName: 'MAR' }, { competitionCode: 'FL1', competitionName: 'Ligue 1' }), undefined, 'Marseille/MAR must not receive Morocco flag.');
+assert.equal(flag({ id: 'club-om', name: 'Marseille', shortName: 'MAR' }, { competitionCode: 'OLD_LEAGUE', competitionName: 'Club league' }), undefined, 'A club using MAR must not receive Morocco flag.');
 assert.equal(flag({ name: 'Maroc', shortName: 'MAR' }, wc({ name: 'Maroc', shortName: 'MAR' }, { name: 'Canada', shortName: 'CAN' })), 'ma.webp', 'Morocco World Cup match must use Morocco flag.');
 assert.equal(displayName({ name: 'FRA', shortName: 'FRA' }, wc({ name: 'FRA', shortName: 'FRA' }, { name: 'GER', shortName: 'GER' })), 'France');
 assert.equal(displayName({ name: 'GER', shortName: 'GER' }, wc({ name: 'FRA', shortName: 'FRA' }, { name: 'GER', shortName: 'GER' })), 'Allemagne');

@@ -9,20 +9,24 @@ const flashCardSource = readFileSync(new URL('src/components/FlashChallengeCard.
 const homeSource = readFileSync(new URL('src/pages/HomePage.tsx', root), 'utf8');
 const myPredictionsSource = readFileSync(new URL('src/pages/MyPredictionsPage.tsx', root), 'utf8');
 
-for (const expected of [
-  'Dembélé buteur ?',
-  'Dembélé marque-t-il contre Lens ?',
-  'Oui, il marque',
-  'Non, il ne marque pas',
-  'fd-542664',
-]) {
-  if (!schema.includes(expected)) {
-    throw new Error(`Missing seeded Dembélé flash detail in schema: ${expected}`);
+for (const forbidden of [['Dem', 'b'].join(''), ['Le', 'ns - '].join('')]) {
+  if (schema.includes(forbidden)) {
+    throw new Error(`Old flash seed must not remain in schema: ${forbidden}`);
   }
 }
 
-if (!schema.includes('into v_flash_id') || !schema.includes('where title =')) {
-  throw new Error('Dembélé flash seed must stay idempotent and avoid duplicates.');
+for (const expected of [
+  'app_rpc_flash_challenges',
+  'app_rpc_flash_options',
+  'app_rpc_flash_predictions',
+  'app_get_active_flash_challenges',
+  'app_save_flash_prediction_by_session',
+  'app_get_player_flash_predictions_by_session',
+  'app_get_public_player_flash_predictions',
+]) {
+  if (!schema.includes(expected)) {
+    throw new Error(`Missing flash schema/RPC marker: ${expected}`);
+  }
 }
 
 const challenge = {
@@ -74,7 +78,7 @@ for (const expected of [
   'Points accordés uniquement si la prédiction est correcte.',
 ]) {
   if (!flashCardSource.includes(expected)) {
-    throw new Error(`FlashChallengeCard is missing the new confirmation UI: ${expected}`);
+    throw new Error(`FlashChallengeCard is missing the confirmation UI: ${expected}`);
   }
 }
 

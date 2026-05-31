@@ -3,23 +3,19 @@ import { Link } from 'react-router-dom';
 import MatchCard from '../components/MatchCard';
 import { usePlayerSession } from '../context/PlayerSessionContext';
 import { useLiveMatches } from '../hooks/useLiveMatches';
-import type { CompetitionCode, Match } from '../types';
+import type { Match } from '../types';
 import { getPredictionsForPlayer, getStoredPredictions } from '../utils/appState';
 import { isLiveDisplayMatch } from '../utils/date';
 import { isMatchFinal } from '../utils/points';
-import { isWorldCup2026Match, shouldShowMatchInApp, shouldShowWorldCup2026Match } from '../utils/worldCupFilters';
+import { isWorldCup2026Match, shouldShowMatchInApp } from '../utils/worldCupFilters';
 
-type FilterKey = 'all' | CompetitionCode | 'live' | 'done';
+type FilterKey = 'all' | 'WC2026' | 'live' | 'done';
 
 const filters: Array<{ id: FilterKey; label: string }> = [
   { id: 'all', label: 'Tous' },
   { id: 'live', label: 'Live' },
   { id: 'done', label: 'Terminés' },
   { id: 'WC2026', label: 'Coupe du Monde 2026' },
-  { id: 'CL', label: 'Champions League' },
-  { id: 'PD', label: 'Liga' },
-  { id: 'FL1', label: 'Ligue 1' },
-  { id: 'PL', label: 'Premier League' },
 ];
 
 const dayKey = (iso: string) => new Date(iso).toISOString().slice(0, 10);
@@ -70,8 +66,7 @@ const MatchesPage = () => {
       if (!shouldShowMatchInApp(match)) return false;
       if (filter === 'live') return isLiveDisplayMatch(match);
       if (filter === 'done') return isMatchFinal(match);
-      if (filter === 'WC2026') return isWorldCup2026Match(match) && shouldShowWorldCup2026Match(match);
-      if (['CL', 'FL1', 'PL', 'PD', 'WORLD', 'TEST'].includes(filter)) return match.competitionCode === filter && !isMatchFinal(match);
+      if (filter === 'WC2026') return isWorldCup2026Match(match);
       return !isMatchFinal(match);
     });
 
@@ -90,8 +85,8 @@ const MatchesPage = () => {
 
       {isFallback ? (
         <section className="notice-panel compact">
-          <strong>Mode test actif</strong>
-          <p>Ajoute une clé API dans GitHub pour remplacer ces matchs par les données live.</p>
+          <strong>Coupe du Monde en attente</strong>
+          <p>Les matchs seront ajoutés automatiquement dès que la synchronisation Coupe du Monde sera disponible.</p>
         </section>
       ) : null}
 

@@ -117,7 +117,7 @@ Entrées minimales :
 Passer d’une logique “table technique” à une logique “carte actionnable en 1 regard”.
 
 ## Structure d’une MatchCard
-- Compétition (ex: Ligue 1)
+- Compétition (ex: Coupe du Monde)
 - Date/heure locale
 - Équipe A vs Équipe B
 - Statut : `À venir / En cours / Terminé`

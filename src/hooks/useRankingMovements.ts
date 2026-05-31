@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Standing } from '../types';
 
-const SNAPSHOT_KEY = 'diplomate.rankingSnapshot.v1';
-const MOVEMENTS_KEY = 'diplomate.rankingMovements.v1';
+const SNAPSHOT_KEY = 'diplomate.worldCup2026.rankingSnapshot.v1';
+const MOVEMENTS_KEY = 'diplomate.worldCup2026.rankingMovements.v1';
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 export interface RankingMovement {

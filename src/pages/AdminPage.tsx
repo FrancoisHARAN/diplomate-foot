@@ -17,9 +17,9 @@ const AdminPage = () => (
 
     <section className="action-list">
       {actions.map((action) => (
-        <button key={action} type="button" className="action-row" onClick={() => window.alert(`${action} (mock)`)}>
+        <button key={action} type="button" className="action-row" onClick={() => window.alert(`${action} : a lancer via Supabase ou GitHub Actions`)}>
           <span>{action}</span>
-          <strong>Mock</strong>
+          <strong>Manuel</strong>
         </button>
       ))}
     </section>

@@ -527,22 +527,149 @@ begin
 end;
 $$;
 
-create or replace function public.app_private_team_is_psg(p_team jsonb)
-returns boolean
-language sql
-immutable
+create or replace function public.app_admin_reset_competition_for_world_cup()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
 as $$
-  with team_values as (
-    select
-      lower(regexp_replace(coalesce(p_team->>'name', ''), '[^a-zA-Z0-9]+', ' ', 'g')) as name_text,
-      lower(regexp_replace(coalesce(p_team->>'shortName', ''), '[^a-zA-Z0-9]+', ' ', 'g')) as short_text
+declare
+  v_reset_at timestamptz := now();
+  v_players_deleted int := 0;
+  v_player_codes_deleted int := 0;
+  v_sessions_deleted int := 0;
+  v_predictions_deleted int := 0;
+  v_world_cup_predictions_deleted int := 0;
+  v_flash_predictions_deleted int := 0;
+  v_flash_options_deleted int := 0;
+  v_flash_challenges_deleted int := 0;
+  v_snapshots_deleted int := 0;
+  v_matches_deleted int := 0;
+  v_world_cup_matches_kept int := 0;
+begin
+  with deleted as (
+    delete from public.app_rpc_flash_predictions
+    returning 1
   )
-  select p_team->>'id' in ('524', 'club-psg', 'psg')
-    or lower(coalesce(p_team->>'id', '')) in ('524', 'club-psg', 'psg')
-    or short_text = 'psg'
-    or name_text in ('psg', 'paris sg', 'paris saint germain', 'paris saint germain fc')
-    or name_text like '%paris saint germain%'
-  from team_values;
+  select count(*) into v_flash_predictions_deleted from deleted;
+
+  update public.app_rpc_flash_challenges
+  set result_option_id = null
+  where result_option_id is not null;
+
+  with deleted as (
+    delete from public.app_rpc_flash_options
+    returning 1
+  )
+  select count(*) into v_flash_options_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_flash_challenges
+    returning 1
+  )
+  select count(*) into v_flash_challenges_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_leaderboard_snapshots
+    returning 1
+  )
+  select count(*) into v_snapshots_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_world_cup_winner_predictions
+    returning 1
+  )
+  select count(*) into v_world_cup_predictions_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_predictions
+    returning 1
+  )
+  select count(*) into v_predictions_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_sessions
+    returning 1
+  )
+  select count(*) into v_sessions_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_player_codes
+    returning 1
+  )
+  select count(*) into v_player_codes_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_players
+    returning 1
+  )
+  select count(*) into v_players_deleted from deleted;
+
+  with deleted as (
+    delete from public.app_rpc_matches m
+    where not (
+      (
+        coalesce(m.competition_code, '') = 'WC2026'
+        or upper(coalesce(m.source_competition_id, '')) = 'WC'
+        or lower(coalesce(m.competition_name, '')) like '%world cup%'
+        or lower(coalesce(m.competition_name, '')) like '%coupe du monde%'
+      )
+      and coalesce(m.season, extract(year from m.kickoff)::int) = 2026
+      and lower(coalesce(m.competition_name, '')) not like '%qualif%'
+      and lower(coalesce(m.competition_name, '')) not like '%qualification%'
+      and lower(coalesce(m.competition_name, '')) not like '%friendly%'
+      and lower(coalesce(m.competition_name, '')) not like '%amical%'
+      and lower(coalesce(m.competition_name, '')) not like '%preparation%'
+    )
+    returning 1
+  )
+  select count(*) into v_matches_deleted from deleted;
+
+  select count(*)
+  into v_world_cup_matches_kept
+  from public.app_rpc_matches m
+  where (
+    coalesce(m.competition_code, '') = 'WC2026'
+    or upper(coalesce(m.source_competition_id, '')) = 'WC'
+    or lower(coalesce(m.competition_name, '')) like '%world cup%'
+    or lower(coalesce(m.competition_name, '')) like '%coupe du monde%'
+  )
+    and coalesce(m.season, extract(year from m.kickoff)::int) = 2026
+    and lower(coalesce(m.competition_name, '')) not like '%qualif%'
+    and lower(coalesce(m.competition_name, '')) not like '%qualification%'
+    and lower(coalesce(m.competition_name, '')) not like '%friendly%'
+    and lower(coalesce(m.competition_name, '')) not like '%amical%'
+    and lower(coalesce(m.competition_name, '')) not like '%preparation%';
+
+  insert into public.app_rpc_config (key, value_text, value_timestamptz, updated_at)
+  values ('scoring_epoch_start', v_reset_at::text, v_reset_at, now())
+  on conflict (key) do update set
+    value_text = excluded.value_text,
+    value_timestamptz = excluded.value_timestamptz,
+    updated_at = now();
+
+  return jsonb_build_object(
+    'reset_at', v_reset_at,
+    'players_deleted', v_players_deleted,
+    'player_codes_deleted', v_player_codes_deleted,
+    'sessions_deleted', v_sessions_deleted,
+    'predictions_deleted', v_predictions_deleted,
+    'world_cup_winner_predictions_deleted', v_world_cup_predictions_deleted,
+    'flash_predictions_deleted', v_flash_predictions_deleted,
+    'flash_options_deleted', v_flash_options_deleted,
+    'flash_challenges_deleted', v_flash_challenges_deleted,
+    'leaderboard_snapshots_deleted', v_snapshots_deleted,
+    'matches_deleted', v_matches_deleted,
+    'world_cup_matches_kept', v_world_cup_matches_kept,
+    'preserved_data', jsonb_build_array(
+      'schema',
+      'rpc_functions',
+      'rls',
+      'match_sync_token_hash',
+      'world_cup_matches'
+    )
+  );
+end;
 $$;
 
 create or replace function public.app_private_match_multiplier(
@@ -587,14 +714,7 @@ as $$
         and (teams_text like '%fra%' or teams_text like '%france%') then 2
       else 1
     end,
-    case
-      when competition_text like '%final%' or competition_text like '%finale%' then 5
-      else 1
-    end,
-    case
-      when public.app_private_team_is_psg(p_home_team) or public.app_private_team_is_psg(p_away_team) then 2
-      else 1
-    end
+    1
   )
   from match_values;
 $$;
@@ -940,6 +1060,18 @@ as $$
     m.source,
     m.last_updated
   from public.app_rpc_matches m
+  where (
+    coalesce(m.competition_code, '') = 'WC2026'
+    or upper(coalesce(m.source_competition_id, '')) = 'WC'
+    or lower(coalesce(m.competition_name, '')) like '%world cup%'
+    or lower(coalesce(m.competition_name, '')) like '%coupe du monde%'
+  )
+    and coalesce(m.season, extract(year from m.kickoff)::int) = 2026
+    and lower(coalesce(m.competition_name, '')) not like '%qualif%'
+    and lower(coalesce(m.competition_name, '')) not like '%qualification%'
+    and lower(coalesce(m.competition_name, '')) not like '%friendly%'
+    and lower(coalesce(m.competition_name, '')) not like '%amical%'
+    and lower(coalesce(m.competition_name, '')) not like '%preparation%'
   order by m.kickoff asc;
 $$;
 
@@ -1385,6 +1517,8 @@ as $$
       select public.app_private_match_multiplier(m.points_multiplier, m.competition_code, m.competition_name, m.stage, m.round, m.matchday, m.home_team, m.away_team) as value
     ) mult
     where public.app_private_match_is_final(m.status)
+      and m.home_score is not null
+      and m.away_score is not null
       and public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated))
   ),
   flash_events as (
@@ -1531,6 +1665,23 @@ begin
 
   if v_match.id is null then
     raise exception 'Match introuvable dans Supabase';
+  end if;
+
+  if not (
+    (
+      coalesce(v_match.competition_code, '') = 'WC2026'
+      or upper(coalesce(v_match.source_competition_id, '')) = 'WC'
+      or lower(coalesce(v_match.competition_name, '')) like '%world cup%'
+      or lower(coalesce(v_match.competition_name, '')) like '%coupe du monde%'
+    )
+    and coalesce(v_match.season, extract(year from v_match.kickoff)::int) = 2026
+    and lower(coalesce(v_match.competition_name, '')) not like '%qualif%'
+    and lower(coalesce(v_match.competition_name, '')) not like '%qualification%'
+    and lower(coalesce(v_match.competition_name, '')) not like '%friendly%'
+    and lower(coalesce(v_match.competition_name, '')) not like '%amical%'
+    and lower(coalesce(v_match.competition_name, '')) not like '%preparation%'
+  ) then
+    raise exception 'Match hors Coupe du Monde';
   end if;
 
   if v_match.status <> 'upcoming' or v_match.kickoff <= now() then
@@ -1966,55 +2117,6 @@ as $$
     and public.app_private_flash_in_current_season(ch.status, ch.closes_at, coalesce(ch.updated_at, fp.updated_at));
 $$;
 
-do $$
-declare
-  v_flash_id uuid;
-begin
-  select id
-  into v_flash_id
-  from public.app_rpc_flash_challenges
-  where title = 'Dembélé buteur ?'
-  limit 1;
-
-  if v_flash_id is null then
-    insert into public.app_rpc_flash_challenges (title, description, match_id, match_label, closes_at, status)
-    values (
-      'Dembélé buteur ?',
-      'Dembélé marque-t-il contre Lens ?',
-      'fd-542664',
-      'Lens - PSG',
-      '2026-05-13T19:00:00Z'::timestamptz,
-      'open'
-    )
-    returning id into v_flash_id;
-  else
-    update public.app_rpc_flash_challenges
-    set description = 'Dembélé marque-t-il contre Lens ?',
-        match_id = coalesce(match_id, 'fd-542664'),
-        match_label = coalesce(match_label, 'Lens - PSG'),
-        closes_at = coalesce(closes_at, '2026-05-13T19:00:00Z'::timestamptz),
-        updated_at = now()
-    where id = v_flash_id
-      and status = 'open';
-  end if;
-
-  if not exists (
-    select 1 from public.app_rpc_flash_options
-    where flash_id = v_flash_id and label = 'Oui, il marque'
-  ) then
-    insert into public.app_rpc_flash_options (flash_id, label, points_if_correct, sort_order)
-    values (v_flash_id, 'Oui, il marque', 5, 1);
-  end if;
-
-  if not exists (
-    select 1 from public.app_rpc_flash_options
-    where flash_id = v_flash_id and label = 'Non, il ne marque pas'
-  ) then
-    insert into public.app_rpc_flash_options (flash_id, label, points_if_correct, sort_order)
-    values (v_flash_id, 'Non, il ne marque pas', 2, 2);
-  end if;
-end $$;
-
 create or replace function public.app_update_player_avatar(p_session_token uuid, p_avatar_url text)
 returns jsonb
 language plpgsql
@@ -2151,7 +2253,7 @@ revoke all on function public.app_private_match_scoring_event_at(timestamptz, ti
 revoke all on function public.app_private_match_in_current_season(text, timestamptz, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_private_flash_in_current_season(text, timestamptz, timestamptz) from public, anon, authenticated;
 revoke all on function public.app_admin_set_scoring_epoch(timestamptz) from public, anon, authenticated;
-revoke all on function public.app_private_team_is_psg(jsonb) from public, anon, authenticated;
+revoke all on function public.app_admin_reset_competition_for_world_cup() from public, anon, authenticated;
 revoke all on function public.app_private_match_multiplier(int, text, text, text, text, int, jsonb, jsonb) from public, anon, authenticated;
 revoke all on function public.app_private_player_state(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;

@@ -53,6 +53,16 @@ export const getPredictionScoreFromApiMatch = (match) => {
         };
       }
     }
+
+    if (isFinished) {
+      return {
+        homeScore: undefined,
+        awayScore: undefined,
+        scoreKind: 'unavailable',
+        scoreSource: null,
+        warning: 'football-data.org marked this REGULAR match FINISHED without a usable score.fullTime; scoring score left empty.',
+      };
+    }
   }
 
   if (EXTRA_TIME_DURATIONS.has(duration)) {

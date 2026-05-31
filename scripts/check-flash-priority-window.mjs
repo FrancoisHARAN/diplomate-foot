@@ -17,8 +17,8 @@ const chronologicalTime = (challenge, matchKickoff) =>
   new Date(matchKickoff ?? challenge.closesAt ?? challenge.updatedAt ?? challenge.createdAt).getTime();
 
 const base = {
-  id: 'flash-dembele',
-  title: 'Dembélé buteur ?',
+  id: 'flash-world-cup',
+  title: 'Flash Coupe du Monde',
   closesAt: '2026-05-13T19:00:00Z',
   createdAt: '2026-05-10T10:00:00Z',
 };

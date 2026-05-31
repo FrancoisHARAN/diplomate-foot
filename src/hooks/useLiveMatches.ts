@@ -24,8 +24,8 @@ const fallbackState: LiveMatchesState = {
   matches: mockMatches,
   generatedAt: null,
   lastDataChangedAt: null,
-  source: 'fallback-test',
-  message: 'Données de test locales en attendant la clé API foot.',
+  source: 'fallback-world-cup-empty',
+  message: 'Matchs Coupe du Monde en attente de synchronisation.',
   isFallback: true,
 };
 

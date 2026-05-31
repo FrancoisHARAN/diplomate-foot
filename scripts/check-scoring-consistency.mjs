@@ -26,6 +26,21 @@ const forbidText = (source, forbidden, label) => {
   if (source.includes(forbidden)) failures.push(`${label} must not contain: ${forbidden}`);
 };
 
+const functionBody = (name) => {
+  const marker = `create or replace function public.${name}`;
+  const start = schemaSource.indexOf(marker);
+  if (start === -1) {
+    failures.push(`Function not found: ${name}`);
+    return '';
+  }
+  const end = schemaSource.indexOf('\n$$;', start);
+  if (end === -1) {
+    failures.push(`Function body not closed: ${name}`);
+    return schemaSource.slice(start);
+  }
+  return schemaSource.slice(start, end);
+};
+
 const compilePointsContext = (worldCupOverride = {}) => {
   const source = pointsSource
     .replace(/^import .*$/gm, '')
@@ -261,14 +276,17 @@ for (const snippet of [
   'from public.app_rpc_flash_scored_predictions fsp',
   'create or replace function public.app_get_leaderboard_history',
   'select public.app_private_scoring_epoch_start() as start_at',
+  'and m.home_score is not null\n      and m.away_score is not null\n      and public.app_private_is_after_scoring_epoch(public.app_private_match_scoring_event_at(m.kickoff, m.last_updated))',
   'create or replace function public.app_get_recent_exact_predictions',
 ]) {
   requireText(schemaSource, snippet, 'schema scoring chain');
 }
 
 forbidText(schemaSource, 'm.home_score is not null and m.away_score is not null and m.kickoff <= now()', 'SQL live score guard');
-forbidText(schemaSource, 'delete from public.app_rpc_predictions', 'scoring reset must preserve predictions');
-forbidText(schemaSource, 'truncate public.app_rpc_predictions', 'scoring reset must preserve predictions');
+const scoringEpochResetBody = functionBody('app_admin_set_scoring_epoch');
+forbidText(scoringEpochResetBody, 'delete from public.app_rpc_predictions', 'scoring epoch reset must preserve predictions');
+forbidText(scoringEpochResetBody, 'truncate public.app_rpc_predictions', 'scoring epoch reset must preserve predictions');
+requireText(schemaSource, 'create or replace function public.app_admin_reset_competition_for_world_cup()', 'World Cup clean-start reset function');
 
 if (failures.length > 0) {
   throw new Error(failures.join('\n'));

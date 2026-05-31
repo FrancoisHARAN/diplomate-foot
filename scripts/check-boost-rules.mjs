@@ -5,7 +5,6 @@ const schema = readFileSync(new URL('../supabase/schema.sql', import.meta.url), 
 
 for (const expected of [
   'Math.max(...candidates)',
-  'isPsgMatch(match)',
   'isFranceWorldCup2026Match(match)',
   'return 5',
   'return 4',
@@ -18,11 +17,8 @@ for (const expected of [
 }
 
 for (const expected of [
-  'app_private_team_is_psg',
   'app_private_match_multiplier',
   'select greatest(',
-  'public.app_private_team_is_psg(p_home_team)',
-  'public.app_private_team_is_psg(p_away_team)',
   "then 5",
   "then 4",
   "then 3",
