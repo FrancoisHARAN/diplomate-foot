@@ -361,15 +361,18 @@ small {
 
 .bottom-nav {
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 0;
-  z-index: 40;
+  z-index: 60;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.34rem;
-  width: min(520px, 100%);
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
   padding: 0.45rem 0.45rem calc(0.45rem + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  transform: none;
   background: rgba(255, 255, 255, 0.96);
   border-top: 2px solid var(--blue);
   backdrop-filter: blur(16px);

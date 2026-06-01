@@ -28,6 +28,7 @@
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",
     "check:home-exacts": "node scripts/check-home-exact-predictions.mjs",
     "check:internal-nav": "node scripts/check-internal-navigation-links.mjs",
+    "check:bottom-nav-mobile": "node scripts/check-bottom-navigation-mobile-css.mjs",
     "check:scoring-reset": "node scripts/check-scoring-reset-epoch.mjs",
     "check:visible-season-reset": "node scripts/check-visible-season-reset.mjs",
     "check:world-cup-clean-start": "node scripts/check-world-cup-clean-start.mjs",
