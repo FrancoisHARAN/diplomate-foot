@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-17T22:42:08.471Z",
-  "lastDataChangedAt": "2026-06-17T22:42:08.471Z",
+  "generatedAt": "2026-06-18T00:02:57.682Z",
+  "lastDataChangedAt": "2026-06-18T00:02:57.682Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -821,9 +821,11 @@
         "countryCode": "PAN"
       },
       "kickoff": "2026-06-17T23:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 1,
       "stage": "GROUP_STAGE",
@@ -833,7 +835,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-16T15:20:15Z"
+      "lastUpdated": "2026-06-17T23:58:07Z"
     },
     {
       "id": "fd-537404",
