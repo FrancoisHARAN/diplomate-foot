@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-19T21:19:11.822Z",
-  "lastDataChangedAt": "2026-06-19T21:19:11.822Z",
+  "generatedAt": "2026-06-19T22:15:37.720Z",
+  "lastDataChangedAt": "2026-06-19T22:15:37.720Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -1073,9 +1073,11 @@
         "countryCode": "MAR"
       },
       "kickoff": "2026-06-19T22:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 2,
       "stage": "GROUP_STAGE",
@@ -1085,7 +1087,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-13T15:20:17Z"
+      "lastUpdated": "2026-06-19T22:15:19Z"
     },
     {
       "id": "fd-537341",
