@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-20T18:03:37.610Z",
-  "lastDataChangedAt": "2026-06-20T18:03:37.610Z",
+  "generatedAt": "2026-06-20T19:43:10.999Z",
+  "lastDataChangedAt": "2026-06-20T19:43:10.999Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -43,7 +43,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537328",
@@ -79,7 +79,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537333",
@@ -102,9 +102,10 @@
       },
       "kickoff": "2026-06-12T19:00:00Z",
       "status": "finished",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
-      "scoreWarning": "football-data.org marked this REGULAR match FINISHED without a usable score.fullTime; scoring score left empty.",
+      "homeScore": 1,
+      "awayScore": 1,
+      "scoreKind": "fullTimeRegular",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 1,
       "stage": "GROUP_STAGE",
@@ -114,7 +115,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T22:25:00Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537345",
@@ -150,7 +151,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-13T03:25:00Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537334",
@@ -1180,10 +1181,10 @@
         "countryCode": "SWE"
       },
       "kickoff": "2026-06-20T17:00:00Z",
-      "status": "live",
-      "homeScore": 2,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 5,
+      "awayScore": 1,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 2,
@@ -1194,7 +1195,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-20T17:57:46Z"
+      "lastUpdated": "2026-06-20T19:02:08Z"
     },
     {
       "id": "fd-537353",
@@ -1228,7 +1229,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537354",
@@ -1262,7 +1263,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537360",
@@ -1296,7 +1297,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537371",
@@ -1330,7 +1331,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537365",
@@ -1364,7 +1365,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537372",
@@ -1398,7 +1399,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537366",
@@ -1432,7 +1433,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537399",
@@ -1466,7 +1467,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537393",
@@ -1500,7 +1501,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537394",
@@ -1534,7 +1535,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537400",
@@ -1568,7 +1569,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537405",
@@ -1602,7 +1603,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537411",
@@ -1636,7 +1637,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537412",
@@ -1670,7 +1671,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537406",
@@ -1704,7 +1705,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537337",
@@ -1738,7 +1739,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537338",
@@ -1772,7 +1773,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537344",
@@ -1806,7 +1807,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537343",
@@ -1840,7 +1841,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537331",
@@ -1874,7 +1875,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537332",
@@ -1908,7 +1909,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537355",
@@ -1942,7 +1943,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537356",
@@ -1976,7 +1977,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537361",
@@ -2010,7 +2011,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537362",
@@ -2044,7 +2045,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537349",
@@ -2078,7 +2079,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537350",
@@ -2112,7 +2113,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537395",
@@ -2146,7 +2147,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537396",
@@ -2180,7 +2181,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537373",
@@ -2214,7 +2215,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537374",
@@ -2248,7 +2249,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537367",
@@ -2282,7 +2283,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537368",
@@ -2316,7 +2317,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537413",
@@ -2350,7 +2351,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537414",
@@ -2384,7 +2385,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537407",
@@ -2418,7 +2419,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537408",
@@ -2452,7 +2453,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537401",
@@ -2486,7 +2487,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     },
     {
       "id": "fd-537402",
@@ -2520,7 +2521,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-12T15:20:17Z"
+      "lastUpdated": "2026-06-13T15:20:17Z"
     }
   ]
 }
