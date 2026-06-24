@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-24T20:56:43.522Z",
-  "lastDataChangedAt": "2026-06-24T20:56:43.522Z",
+  "generatedAt": "2026-06-24T22:13:39.864Z",
+  "lastDataChangedAt": "2026-06-24T22:13:39.864Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -1757,10 +1757,10 @@
         "countryCode": "CAN"
       },
       "kickoff": "2026-06-24T19:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 2,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
@@ -1771,7 +1771,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-24T20:56:22Z"
+      "lastUpdated": "2026-06-24T21:05:55Z"
     },
     {
       "id": "fd-537338",
@@ -1793,10 +1793,10 @@
         "countryCode": "QAT"
       },
       "kickoff": "2026-06-24T19:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 3,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
@@ -1807,7 +1807,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-24T20:56:32Z"
+      "lastUpdated": "2026-06-24T21:08:54Z"
     },
     {
       "id": "fd-537344",
@@ -1830,8 +1830,10 @@
       },
       "kickoff": "2026-06-24T22:00:00Z",
       "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
       "stage": "GROUP_STAGE",
@@ -1841,7 +1843,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-11T15:20:18Z"
+      "lastUpdated": "2026-06-24T22:13:00Z"
     },
     {
       "id": "fd-537343",
@@ -1864,8 +1866,10 @@
       },
       "kickoff": "2026-06-24T22:00:00Z",
       "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "homeScore": 0,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
       "stage": "GROUP_STAGE",
@@ -1875,7 +1879,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-11T15:20:18Z"
+      "lastUpdated": "2026-06-24T22:13:17Z"
     },
     {
       "id": "fd-537331",
