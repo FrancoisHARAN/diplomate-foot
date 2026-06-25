@@ -33,7 +33,6 @@ const worldCupStageMultiplier = (match = {}) => {
   if (stage.includes('third place') || stage.includes('3e place') || stage.includes('troisieme')) return 3;
   if (stage.includes('quarter') || stage.includes('quart')) return 3;
   if (stage.includes('round of 16') || stage.includes('last 16') || stage.includes('huitieme')) return 2;
-  if (stage.includes('round of 32') || stage.includes('last 32') || stage.includes('seizieme')) return 2;
   if (stage.includes('final') || stage.includes('finale')) return 5;
   return 1;
 };

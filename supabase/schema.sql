@@ -703,7 +703,6 @@ as $$
           when stage_text like '%third place%' or stage_text like '%3e place%' or stage_text like '%troisieme%' then 3
           when stage_text like '%quarter%' or stage_text like '%quart%' then 3
           when stage_text like '%round of 16%' or stage_text like '%last 16%' or stage_text like '%huitieme%' then 2
-          when stage_text like '%round of 32%' or stage_text like '%last 32%' or stage_text like '%seizieme%' then 2
           when stage_text like '%final%' or stage_text like '%finale%' then 5
           else 1
         end

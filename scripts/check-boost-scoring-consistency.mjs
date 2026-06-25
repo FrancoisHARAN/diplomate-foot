@@ -97,6 +97,39 @@ if (worldCupContext.getMatchMultiplier(franceGroup) !== 2) {
   failures.push(`France World Cup group match must be x2, got x${worldCupContext.getMatchMultiplier(franceGroup)}`);
 }
 
+const worldCupRound32 = makeMatch({
+  homeTeam: { id: 'rsa', name: 'Afrique du Sud', shortName: 'RSA', countryCode: 'RSA' },
+  awayTeam: { id: 'can', name: 'Canada', shortName: 'CAN', countryCode: 'CAN' },
+  stage: 'LAST_32',
+  round: 'LAST_32',
+  matchday: 4,
+});
+if (worldCupContext.getMatchMultiplier(worldCupRound32) !== 1) {
+  failures.push(`World Cup Round of 32 must stay x1 without France, got x${worldCupContext.getMatchMultiplier(worldCupRound32)}`);
+}
+
+const franceRound32 = makeMatch({
+  homeTeam: { id: 'fra', name: 'France', shortName: 'FRA', countryCode: 'FRA' },
+  awayTeam: { id: 'can', name: 'Canada', shortName: 'CAN', countryCode: 'CAN' },
+  stage: 'LAST_32',
+  round: 'LAST_32',
+  matchday: 4,
+});
+if (worldCupContext.getMatchMultiplier(franceRound32) !== 2) {
+  failures.push(`France Round of 32 must be x2 from France boost only, got x${worldCupContext.getMatchMultiplier(franceRound32)}`);
+}
+
+const worldCupRound16 = makeMatch({
+  homeTeam: { id: 'rsa', name: 'Afrique du Sud', shortName: 'RSA', countryCode: 'RSA' },
+  awayTeam: { id: 'can', name: 'Canada', shortName: 'CAN', countryCode: 'CAN' },
+  stage: 'LAST_16',
+  round: 'LAST_16',
+  matchday: 5,
+});
+if (worldCupContext.getMatchMultiplier(worldCupRound16) !== 2) {
+  failures.push(`World Cup Round of 16 must be x2, got x${worldCupContext.getMatchMultiplier(worldCupRound16)}`);
+}
+
 const franceSemi = { ...franceGroup, stage: 'Semi-finals' };
 if (worldCupContext.getMatchMultiplier(franceSemi) !== 4) {
   failures.push(`France semi-final must use strongest x4, got x${worldCupContext.getMatchMultiplier(franceSemi)}`);
@@ -138,10 +171,19 @@ const apiFranceSemiMultiplier = getApiMatchPointsMultiplier({
 });
 if (apiFranceSemiMultiplier !== 4) failures.push(`football fetch France semi-final multiplier expected x4, got x${apiFranceSemiMultiplier}`);
 
+const apiRound32Multiplier = getApiMatchPointsMultiplier({
+  competition: { code: 'WC2026', name: 'Coupe du Monde 2026', isWorldCup2026: true },
+  match: { stage: 'LAST_32', round: 'LAST_32', matchday: 4 },
+  homeTeam: { id: 'rsa', name: 'Afrique du Sud', shortName: 'RSA', countryCode: 'RSA' },
+  awayTeam: { id: 'can', name: 'Canada', shortName: 'CAN', countryCode: 'CAN' },
+});
+if (apiRound32Multiplier !== 1) failures.push(`football fetch Round of 32 multiplier expected x1, got x${apiRound32Multiplier}`);
+
 requireText(packageJson, '"check:boost-scoring"', 'package script');
 requireText(fetchSource, 'getApiMatchPointsMultiplier', 'football fetch central boost helper');
 forbidText(schemaSource, ['app_private_team_is_', 'psg'].join(''), 'SQL old club helper');
 forbidText(schemaSource, ['Dem', 'b'].join(''), 'SQL old flash seed');
+forbidText(schemaSource, "when stage_text like '%round of 32%' or stage_text like '%last 32%' or stage_text like '%seizieme%' then 2", 'SQL Round of 32 phase boost');
 requireText(schemaSource, 'as points_multiplier', 'SQL public match RPC effective multiplier');
 requireText(debugScoringSource, 'points_multiplier_stocke', 'debug scoring stored multiplier');
 requireText(debugScoringSource, 'boost_reel', 'debug scoring effective multiplier');
