@@ -3,6 +3,7 @@ import { dirname, join } from 'node:path';
 import { buildLiveDataPayload } from './lib/football-data-change-utils.mjs';
 import { getApiMatchPointsMultiplier } from './lib/football-data-boost-utils.mjs';
 import { getPredictionScoreFromApiMatch } from './lib/football-data-score-utils.mjs';
+import { cleanTeamName, isDisplayableMatch, normalizeTeam, shortNameFor } from './lib/football-data-team-utils.mjs';
 
 const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
 const WORLD_CUP_2026_SEASON = process.env.WORLD_CUP_2026_SEASON || '2026';
@@ -53,17 +54,10 @@ const countryCodeAliases = new Map([
   ['MEX', 'MEX'], ['MEXICO', 'MEX'], ['MEXIQUE', 'MEX'],
   ['NED', 'NED'], ['NETHERLANDS', 'NED'], ['PAYS-BAS', 'NED'],
   ['POR', 'POR'], ['PORTUGAL', 'POR'],
+  ['RSA', 'RSA'], ['SOUTH AFRICA', 'RSA'], ['AFRIQUE DU SUD', 'RSA'], ['ZA', 'RSA'],
   ['SEN', 'SEN'], ['SENEGAL', 'SEN'], ['SÉNÉGAL', 'SEN'],
   ['USA', 'USA'], ['UNITED STATES', 'USA'], ['ÉTATS-UNIS', 'USA'],
 ]);
-
-const cleanTeamName = (name) =>
-  name
-    .replace(/\bFC\b/g, '')
-    .replace(/\bCF\b/g, '')
-    .replace(/\bAFC\b/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
 
 const normalizeLabel = (value) =>
   String(value ?? '')
@@ -113,45 +107,6 @@ const throttleFromHeaders = async (headers) => {
   }
 };
 
-const shortNameFor = (team) => {
-  if (team.tla) return team.tla;
-  if (team.shortName) return team.shortName.slice(0, 4).toUpperCase();
-  return cleanTeamName(team.name ?? 'Team')
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 4)
-    .toUpperCase();
-};
-
-const hasUsefulTeam = (team) => {
-  if (!team) return false;
-  const label = cleanTeamName(team.shortName ?? team.name ?? '');
-  return Boolean(team.id || team.crest || (label && label !== 'T'));
-};
-
-const normalizeTeam = (team, knownTeam, fallbackId, fallbackName, isNationalTeam = false) => {
-  const apiTeamIsUseful = hasUsefulTeam(team);
-  const sourceTeam = apiTeamIsUseful ? team : knownTeam;
-  const displayName = apiTeamIsUseful ? sourceTeam?.shortName ?? sourceTeam?.name : knownTeam?.name;
-
-  const normalized = {
-    id: String(sourceTeam?.id ?? fallbackId),
-    name: cleanTeamName(displayName ?? fallbackName),
-    shortName: shortNameFor(sourceTeam ?? {}),
-    crest: sourceTeam?.crest ?? undefined,
-  };
-
-  if (isNationalTeam) {
-    normalized.countryCode = countryCodeFor(sourceTeam ?? { name: fallbackName });
-  }
-
-  return normalized;
-};
-
-const isPlaceholderTeam = (team) => team.id.startsWith('home-') || team.id.startsWith('away-');
-const isDisplayableMatch = (match) => !isPlaceholderTeam(match.homeTeam) && !isPlaceholderTeam(match.awayTeam);
-
 const readExistingPayload = async () => {
   try {
     return JSON.parse(await readFile(outputPath, 'utf8'));
@@ -191,8 +146,8 @@ const readArchivedFinishedMatches = (existingPayload) =>
 
 const normalizeMatch = (match, competition) => {
   const isWorldCup2026 = Boolean(competition.isWorldCup2026);
-  const homeTeam = normalizeTeam(match.homeTeam, undefined, `home-${match.id}`, 'Home team', isWorldCup2026);
-  const awayTeam = normalizeTeam(match.awayTeam, undefined, `away-${match.id}`, 'Away team', isWorldCup2026);
+  const homeTeam = normalizeTeam(match.homeTeam, undefined, `home-${match.id}`, 'Home team', isWorldCup2026, countryCodeFor);
+  const awayTeam = normalizeTeam(match.awayTeam, undefined, `away-${match.id}`, 'Away team', isWorldCup2026, countryCodeFor);
   const predictionScore = getPredictionScoreFromApiMatch(match);
   if (predictionScore.warning) {
     console.warn(`${competition.code} ${match.id}: ${predictionScore.warning}`);

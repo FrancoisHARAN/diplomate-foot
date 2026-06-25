@@ -26,6 +26,7 @@
     "check:scoring-consistency": "node scripts/check-scoring-consistency.mjs",
     "check:supabase-scoring": "node scripts/check-supabase-hashing-and-live-points.mjs",
     "check:world-cup": "node scripts/check-world-cup-2026-filters.mjs",
+    "check:football-displayable": "node scripts/check-football-data-displayable-teams.mjs",
     "check:home-exacts": "node scripts/check-home-exact-predictions.mjs",
     "check:internal-nav": "node scripts/check-internal-navigation-links.mjs",
     "check:bottom-nav-mobile": "node scripts/check-bottom-navigation-mobile-css.mjs",
