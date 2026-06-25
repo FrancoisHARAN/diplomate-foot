@@ -3,7 +3,13 @@ import { dirname, join } from 'node:path';
 import { buildLiveDataPayload } from './lib/football-data-change-utils.mjs';
 import { getApiMatchPointsMultiplier } from './lib/football-data-boost-utils.mjs';
 import { getPredictionScoreFromApiMatch } from './lib/football-data-score-utils.mjs';
-import { cleanTeamName, isDisplayableMatch, normalizeTeam, shortNameFor } from './lib/football-data-team-utils.mjs';
+import {
+  cleanTeamName,
+  isDisplayableMatch,
+  isPlaceholderTeam,
+  normalizeTeam,
+  shortNameFor,
+} from './lib/football-data-team-utils.mjs';
 
 const WORLD_CUP_2026_API_COMPETITION_ID = process.env.WORLD_CUP_2026_COMPETITION_ID || 'WC';
 const WORLD_CUP_2026_SEASON = process.env.WORLD_CUP_2026_SEASON || '2026';
@@ -144,6 +150,50 @@ const readArchivedFinishedMatches = (existingPayload) =>
     return new Date(match.kickoff).getTime() >= archiveFrom.getTime();
   });
 
+const diagnosticTeam = (team) => ({
+  name: team?.name ?? null,
+  id: team?.id ?? null,
+  shortName: team?.shortName ?? null,
+  tla: team?.tla ?? null,
+});
+
+const getHiddenTeamReason = (sourceTeam, normalizedTeam, side) => {
+  if (!isPlaceholderTeam(normalizedTeam)) return null;
+  if (!sourceTeam) return `${side}: missing team object`;
+
+  const rawName = cleanTeamName(sourceTeam.name ?? sourceTeam.shortName ?? '');
+  const normalizedName = cleanTeamName(normalizedTeam?.name ?? normalizedTeam?.shortName ?? '');
+
+  if (!rawName) {
+    return `${side}: empty source team name (normalized as "${normalizedName}")`;
+  }
+
+  return `${side}: placeholder or non-real team name "${rawName}"`;
+};
+
+const getHiddenMatchReason = (sourceMatch, normalizedMatch) =>
+  [
+    getHiddenTeamReason(sourceMatch?.homeTeam, normalizedMatch.homeTeam, 'homeTeam'),
+    getHiddenTeamReason(sourceMatch?.awayTeam, normalizedMatch.awayTeam, 'awayTeam'),
+  ].filter(Boolean).join('; ') || 'unknown displayability failure';
+
+const logHiddenMatchDetails = (competitionCode, hiddenMatches) => {
+  console.log(`${competitionCode} hidden match details:`);
+  hiddenMatches.forEach(({ sourceMatch, normalizedMatch }) => {
+    console.log(`${competitionCode} hidden match: ${JSON.stringify({
+      id: sourceMatch?.id ?? null,
+      utcDate: sourceMatch?.utcDate ?? null,
+      status: sourceMatch?.status ?? null,
+      stage: sourceMatch?.stage ?? null,
+      group: sourceMatch?.group ?? null,
+      matchday: sourceMatch?.matchday ?? null,
+      homeTeam: diagnosticTeam(sourceMatch?.homeTeam),
+      awayTeam: diagnosticTeam(sourceMatch?.awayTeam),
+      reason: getHiddenMatchReason(sourceMatch, normalizedMatch),
+    })}`);
+  });
+};
+
 const normalizeMatch = (match, competition) => {
   const isWorldCup2026 = Boolean(competition.isWorldCup2026);
   const homeTeam = normalizeTeam(match.homeTeam, undefined, `home-${match.id}`, 'Home team', isWorldCup2026, countryCodeFor);
@@ -200,11 +250,18 @@ const fetchCompetition = async (competition) => {
   }
 
   const data = await response.json();
-  const normalizedMatches = (data.matches ?? []).map((match) => normalizeMatch(match, competition));
-  const displayableMatches = normalizedMatches.filter(isDisplayableMatch);
-  const hiddenCount = normalizedMatches.length - displayableMatches.length;
+  const normalizedMatchEntries = (data.matches ?? []).map((sourceMatch) => ({
+    sourceMatch,
+    normalizedMatch: normalizeMatch(sourceMatch, competition),
+  }));
+  const displayableMatches = normalizedMatchEntries
+    .map(({ normalizedMatch }) => normalizedMatch)
+    .filter(isDisplayableMatch);
+  const hiddenMatches = normalizedMatchEntries.filter(({ normalizedMatch }) => !isDisplayableMatch(normalizedMatch));
+  const hiddenCount = hiddenMatches.length;
   if (hiddenCount > 0) {
     console.log(`${competition.code}: hidden ${hiddenCount} match(es) without complete teams`);
+    logHiddenMatchDetails(competition.code, hiddenMatches);
   }
   return displayableMatches;
 };
