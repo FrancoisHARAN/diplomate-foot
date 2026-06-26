@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-25T23:18:29.019Z",
-  "lastDataChangedAt": "2026-06-25T23:18:29.019Z",
+  "generatedAt": "2026-06-26T01:32:33.022Z",
+  "lastDataChangedAt": "2026-06-26T01:32:33.022Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2045,10 +2045,10 @@
         "countryCode": "NED"
       },
       "kickoff": "2026-06-25T23:00:00Z",
-      "status": "live",
-      "homeScore": 0,
-      "awayScore": 2,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 3,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
@@ -2059,7 +2059,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-25T23:18:06Z"
+      "lastUpdated": "2026-06-26T01:00:44Z"
     },
     {
       "id": "fd-537362",
@@ -2081,10 +2081,10 @@
         "countryCode": "SWE"
       },
       "kickoff": "2026-06-25T23:00:00Z",
-      "status": "live",
-      "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 1,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": 3,
@@ -2095,7 +2095,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-25T23:18:07Z"
+      "lastUpdated": "2026-06-26T01:04:59Z"
     },
     {
       "id": "fd-537349",
