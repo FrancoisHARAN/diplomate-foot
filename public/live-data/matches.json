@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-27T21:16:53.899Z",
-  "lastDataChangedAt": "2026-06-27T21:16:53.899Z",
+  "generatedAt": "2026-06-27T22:18:16.371Z",
+  "lastDataChangedAt": "2026-06-27T22:18:16.371Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2419,7 +2419,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-27T21:16:52Z"
+      "lastUpdated": "2026-06-27T22:18:02Z"
     },
     {
       "id": "fd-537414",
@@ -2441,8 +2441,8 @@
         "countryCode": "GHA"
       },
       "kickoff": "2026-06-27T21:00:00Z",
-      "status": "upcoming",
-      "homeScore": 0,
+      "status": "live",
+      "homeScore": 1,
       "awayScore": 0,
       "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
@@ -2455,7 +2455,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-27T21:16:18Z"
+      "lastUpdated": "2026-06-27T22:17:33Z"
     },
     {
       "id": "fd-537407",
