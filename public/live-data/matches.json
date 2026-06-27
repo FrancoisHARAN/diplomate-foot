@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-26T22:14:03.577Z",
-  "lastDataChangedAt": "2026-06-26T22:14:03.577Z",
+  "generatedAt": "2026-06-27T01:30:44.672Z",
+  "lastDataChangedAt": "2026-06-27T01:30:44.672Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2189,11 +2189,9 @@
         "countryCode": "FRA"
       },
       "kickoff": "2026-06-26T19:00:00Z",
-      "status": "finished",
-      "homeScore": 1,
-      "awayScore": 4,
-      "scoreKind": "fullTimeRegular",
-      "scoreSource": "football-data.score.fullTime",
+      "status": "upcoming",
+      "scoreKind": "unavailable",
+      "scoreSource": null,
       "minute": null,
       "matchday": 3,
       "stage": "GROUP_STAGE",
@@ -2203,7 +2201,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-26T21:05:47Z"
+      "lastUpdated": "2026-06-26T07:48:25Z"
     },
     {
       "id": "fd-537396",
@@ -2225,11 +2223,9 @@
         "countryCode": "IRQ"
       },
       "kickoff": "2026-06-26T19:00:00Z",
-      "status": "finished",
-      "homeScore": 5,
-      "awayScore": 0,
-      "scoreKind": "fullTimeRegular",
-      "scoreSource": "football-data.score.fullTime",
+      "status": "upcoming",
+      "scoreKind": "unavailable",
+      "scoreSource": null,
       "minute": null,
       "matchday": 3,
       "stage": "GROUP_STAGE",
@@ -2239,7 +2235,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-26T21:10:58Z"
+      "lastUpdated": "2026-06-26T07:48:25Z"
     },
     {
       "id": "fd-537373",
@@ -2273,7 +2269,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-26T07:48:25Z"
+      "lastUpdated": "2026-06-27T01:30:35Z"
     },
     {
       "id": "fd-537374",
@@ -2307,7 +2303,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-26T07:48:25Z"
+      "lastUpdated": "2026-06-27T01:30:34Z"
     },
     {
       "id": "fd-537367",
