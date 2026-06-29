@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-29T19:23:23.327Z",
-  "lastDataChangedAt": "2026-06-29T19:23:23.327Z",
+  "generatedAt": "2026-06-29T21:00:54.108Z",
+  "lastDataChangedAt": "2026-06-29T21:00:54.108Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2693,9 +2693,11 @@
         "countryCode": "PAR"
       },
       "kickoff": "2026-06-29T20:30:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -2705,7 +2707,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-29T05:20:12Z"
+      "lastUpdated": "2026-06-29T21:00:45Z"
     },
     {
       "id": "fd-537418",
