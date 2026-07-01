@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-01T18:17:16.193Z",
-  "lastDataChangedAt": "2026-07-01T18:17:16.193Z",
+  "generatedAt": "2026-07-01T20:16:50.794Z",
+  "lastDataChangedAt": "2026-07-01T20:16:50.794Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2909,9 +2909,11 @@
         "countryCode": "SEN"
       },
       "kickoff": "2026-07-01T20:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -2921,7 +2923,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-30T15:20:13Z"
+      "lastUpdated": "2026-07-01T20:16:29Z"
     },
     {
       "id": "fd-537421",
