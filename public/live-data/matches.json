@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-01T00:04:13.249Z",
-  "lastDataChangedAt": "2026-07-01T00:04:13.249Z",
+  "generatedAt": "2026-07-01T04:48:17.238Z",
+  "lastDataChangedAt": "2026-07-01T04:48:17.238Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -2765,9 +2765,11 @@
         "countryCode": "NOR"
       },
       "kickoff": "2026-06-30T17:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "finished",
+      "homeScore": 1,
+      "awayScore": 2,
+      "scoreKind": "fullTimeRegular",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -2777,7 +2779,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-30T19:12:59Z"
+      "lastUpdated": "2026-06-30T19:04:39Z"
     },
     {
       "id": "fd-537416",
@@ -2835,9 +2837,11 @@
         "countryCode": "ECU"
       },
       "kickoff": "2026-07-01T01:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "scoreKind": "fullTimeRegular",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -2847,7 +2851,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-06-29T15:20:12Z"
+      "lastUpdated": "2026-07-01T04:07:36Z"
     },
     {
       "id": "fd-537426",
