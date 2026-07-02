@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-02T21:50:14.312Z",
-  "lastDataChangedAt": "2026-07-02T21:50:14.312Z",
+  "generatedAt": "2026-07-02T23:49:53.561Z",
+  "lastDataChangedAt": "2026-07-02T23:49:53.561Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3017,9 +3017,11 @@
         "countryCode": "CRO"
       },
       "kickoff": "2026-07-02T23:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -3029,7 +3031,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-02T05:20:12Z"
+      "lastUpdated": "2026-07-02T23:49:39Z"
     },
     {
       "id": "fd-537429",
