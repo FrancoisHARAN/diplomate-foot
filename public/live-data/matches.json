@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-03T01:14:16.446Z",
-  "lastDataChangedAt": "2026-07-03T01:14:16.446Z",
+  "generatedAt": "2026-07-03T05:02:42.165Z",
+  "lastDataChangedAt": "2026-07-03T05:02:42.165Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3019,7 +3019,7 @@
       "kickoff": "2026-07-02T23:00:00Z",
       "status": "finished",
       "homeScore": 2,
-      "awayScore": 2,
+      "awayScore": 1,
       "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
@@ -3031,7 +3031,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-03T01:14:14Z"
+      "lastUpdated": "2026-07-03T01:22:34Z"
     },
     {
       "id": "fd-537429",
@@ -3053,9 +3053,11 @@
         "countryCode": "ALG"
       },
       "kickoff": "2026-07-03T03:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 0,
+      "scoreKind": "fullTimeRegular",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_32",
@@ -3065,7 +3067,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 1,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-02T05:20:12Z"
+      "lastUpdated": "2026-07-03T05:02:12Z"
     },
     {
       "id": "fd-537428",
