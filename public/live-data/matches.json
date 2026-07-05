@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T22:36:56.427Z",
-  "lastDataChangedAt": "2026-07-05T22:36:56.427Z",
+  "generatedAt": "2026-07-05T23:40:19.520Z",
+  "lastDataChangedAt": "2026-07-05T23:40:19.520Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3304,7 +3304,7 @@
         "crest": "https://crests.football-data.org/770.svg",
         "countryCode": "ENG"
       },
-      "kickoff": "2026-07-06T00:00:00Z",
+      "kickoff": "2026-07-06T01:00:00Z",
       "status": "upcoming",
       "scoreKind": "unavailable",
       "scoreSource": null,
@@ -3317,7 +3317,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-05T05:20:12Z"
+      "lastUpdated": "2026-07-05T23:31:12Z"
     },
     {
       "id": "fd-537379",
