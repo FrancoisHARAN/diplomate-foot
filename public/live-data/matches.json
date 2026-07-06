@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-06T01:21:57.134Z",
-  "lastDataChangedAt": "2026-07-06T01:21:57.134Z",
+  "generatedAt": "2026-07-06T03:10:13.835Z",
+  "lastDataChangedAt": "2026-07-06T03:10:13.835Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3305,10 +3305,10 @@
         "countryCode": "ENG"
       },
       "kickoff": "2026-07-06T01:00:00Z",
-      "status": "live",
-      "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 2,
+      "awayScore": 3,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
@@ -3319,7 +3319,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-06T01:21:36Z"
+      "lastUpdated": "2026-07-06T03:10:12Z"
     },
     {
       "id": "fd-537379",
