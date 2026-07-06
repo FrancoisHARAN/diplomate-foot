@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-06T20:23:56.366Z",
-  "lastDataChangedAt": "2026-07-06T20:23:56.366Z",
+  "generatedAt": "2026-07-06T21:44:27.697Z",
+  "lastDataChangedAt": "2026-07-06T21:44:27.697Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3341,10 +3341,10 @@
         "countryCode": "ESP"
       },
       "kickoff": "2026-07-06T19:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "awayScore": 1,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
@@ -3355,7 +3355,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-06T20:23:42Z"
+      "lastUpdated": "2026-07-06T21:06:44Z"
     },
     {
       "id": "fd-537380",
