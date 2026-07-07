@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-07T16:13:34.927Z",
-  "lastDataChangedAt": "2026-07-07T16:13:34.927Z",
+  "generatedAt": "2026-07-07T18:10:36.714Z",
+  "lastDataChangedAt": "2026-07-07T18:10:36.714Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3413,10 +3413,10 @@
         "countryCode": "EGY"
       },
       "kickoff": "2026-07-07T16:00:00Z",
-      "status": "upcoming",
-      "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
+      "status": "finished",
+      "homeScore": 3,
+      "awayScore": 2,
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
@@ -3427,7 +3427,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-07T16:13:12Z"
+      "lastUpdated": "2026-07-07T18:10:33Z"
     },
     {
       "id": "fd-537382",
