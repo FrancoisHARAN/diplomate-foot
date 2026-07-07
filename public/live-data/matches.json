@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-07T18:10:36.714Z",
-  "lastDataChangedAt": "2026-07-07T18:10:36.714Z",
+  "generatedAt": "2026-07-07T20:18:12.065Z",
+  "lastDataChangedAt": "2026-07-07T20:18:12.065Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3427,7 +3427,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-07T18:10:33Z"
+      "lastUpdated": "2026-07-07T18:15:15Z"
     },
     {
       "id": "fd-537382",
@@ -3449,9 +3449,11 @@
         "countryCode": "COL"
       },
       "kickoff": "2026-07-07T20:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 0,
+      "awayScore": 0,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "LAST_16",
@@ -3461,7 +3463,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-07T05:20:11Z"
+      "lastUpdated": "2026-07-07T20:17:48Z"
     },
     {
       "id": "fd-537383",
