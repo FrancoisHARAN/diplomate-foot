@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-10T21:01:13.901Z",
-  "lastDataChangedAt": "2026-07-10T21:01:13.901Z",
+  "generatedAt": "2026-07-10T21:39:57.368Z",
+  "lastDataChangedAt": "2026-07-10T21:39:57.368Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3521,10 +3521,10 @@
         "countryCode": "BEL"
       },
       "kickoff": "2026-07-10T19:00:00Z",
-      "status": "live",
+      "status": "finished",
       "homeScore": 2,
       "awayScore": 1,
-      "scoreKind": "liveRegularRunning",
+      "scoreKind": "fullTimeRegular",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
@@ -3535,7 +3535,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 3,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-10T21:01:04Z"
+      "lastUpdated": "2026-07-10T21:05:15Z"
     },
     {
       "id": "fd-537385",
