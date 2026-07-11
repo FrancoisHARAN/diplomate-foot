@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-11T06:29:57.063Z",
-  "lastDataChangedAt": "2026-07-11T06:29:57.063Z",
+  "generatedAt": "2026-07-11T22:01:19.126Z",
+  "lastDataChangedAt": "2026-07-11T22:01:19.126Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3305,10 +3305,10 @@
         "countryCode": "ENG"
       },
       "kickoff": "2026-07-06T01:00:00Z",
-      "status": "finished",
+      "status": "upcoming",
       "homeScore": 2,
       "awayScore": 3,
-      "scoreKind": "fullTimeRegular",
+      "scoreKind": "liveRegularRunning",
       "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
@@ -3319,7 +3319,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 2,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-11T05:20:09Z"
+      "lastUpdated": "2026-07-11T21:11:56Z"
     },
     {
       "id": "fd-537379",
@@ -3557,9 +3557,11 @@
         "countryCode": "ENG"
       },
       "kickoff": "2026-07-11T21:00:00Z",
-      "status": "upcoming",
-      "scoreKind": "unavailable",
-      "scoreSource": null,
+      "status": "live",
+      "homeScore": 1,
+      "awayScore": 1,
+      "scoreKind": "liveRegularRunning",
+      "scoreSource": "football-data.score.fullTime",
       "minute": null,
       "matchday": null,
       "stage": "QUARTER_FINALS",
@@ -3569,7 +3571,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 3,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-11T05:20:09Z"
+      "lastUpdated": "2026-07-11T21:58:07Z"
     },
     {
       "id": "fd-537386",
