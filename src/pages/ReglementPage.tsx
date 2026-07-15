@@ -40,9 +40,11 @@ const prizes = [
 
 const boosts = [
   'France : x2',
+  'Seizièmes : aucun boost de phase (x1)',
   'Huitièmes : x2',
   'Quarts : x3',
   'Demies : x4',
+  'Petite finale : x4',
   'Finale : x5',
 ];
 

@@ -700,7 +700,7 @@ as $$
       when competition_text like '%wc2026%' or competition_text like '%world cup%' or competition_text like '%coupe du monde%' then
         case
           when stage_text like '%semi%' or stage_text like '%demi%' then 4
-          when stage_text like '%third place%' or stage_text like '%3e place%' or stage_text like '%troisieme%' then 3
+          when stage_text like '%third place%' or stage_text like '%3e place%' or stage_text like '%troisieme%' then 4
           when stage_text like '%quarter%' or stage_text like '%quart%' then 3
           when stage_text like '%round of 16%' or stage_text like '%last 16%' or stage_text like '%huitieme%' then 2
           when stage_text like '%final%' or stage_text like '%finale%' then 5

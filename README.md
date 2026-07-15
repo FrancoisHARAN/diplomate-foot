@@ -409,9 +409,10 @@ Le calcul utilitaire est dans `src/utils/worldCupWinnerPredictions.ts`. Les choi
 Les boosts ne se cumulent pas. Le boost final est toujours le plus fort multiplicateur applicable au match.
 
 - Matchs de la France: x2
-- Seiziemes / huitiemes: x2
+- Seiziemes / Round of 32: x1 (aucun boost de phase)
+- Huitiemes: x2
 - Quarts de finale: x3
-- Match pour la 3e place: x3
+- Match pour la 3e place: x4
 - Demi-finales: x4
 - Finale: x5
 

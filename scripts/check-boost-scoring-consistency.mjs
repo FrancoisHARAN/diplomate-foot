@@ -135,6 +135,36 @@ if (worldCupContext.getMatchMultiplier(franceSemi) !== 4) {
   failures.push(`France semi-final must use strongest x4, got x${worldCupContext.getMatchMultiplier(franceSemi)}`);
 }
 
+const worldCupSemi = makeMatch({
+  homeTeam: { id: 'eng', name: 'Angleterre', shortName: 'ENG', countryCode: 'ENG' },
+  awayTeam: { id: 'arg', name: 'Argentine', shortName: 'ARG', countryCode: 'ARG' },
+  stage: 'SEMI_FINALS',
+  round: 'SEMI_FINALS',
+});
+if (worldCupContext.getMatchMultiplier(worldCupSemi) !== 4) {
+  failures.push(`World Cup semi-final must be x4, got x${worldCupContext.getMatchMultiplier(worldCupSemi)}`);
+}
+
+const worldCupThirdPlace = makeMatch({
+  homeTeam: { id: 'bra', name: 'Bresil', shortName: 'BRA', countryCode: 'BRA' },
+  awayTeam: { id: 'esp', name: 'Espagne', shortName: 'ESP', countryCode: 'ESP' },
+  stage: 'THIRD_PLACE',
+  round: 'THIRD_PLACE',
+});
+if (worldCupContext.getMatchMultiplier(worldCupThirdPlace) !== 4) {
+  failures.push(`World Cup third-place match must be x4, got x${worldCupContext.getMatchMultiplier(worldCupThirdPlace)}`);
+}
+
+const franceThirdPlace = makeMatch({
+  homeTeam: { id: 'fra', name: 'France', shortName: 'FRA', countryCode: 'FRA' },
+  awayTeam: { id: 'esp', name: 'Espagne', shortName: 'ESP', countryCode: 'ESP' },
+  stage: 'THIRD_PLACE',
+  round: 'THIRD_PLACE',
+});
+if (worldCupContext.getMatchMultiplier(franceThirdPlace) !== 4) {
+  failures.push(`France third-place match must use strongest x4, got x${worldCupContext.getMatchMultiplier(franceThirdPlace)}`);
+}
+
 const worldCupQuarter = makeMatch({
   homeTeam: { id: 'bra', name: 'Bresil', shortName: 'BRA', countryCode: 'BRA' },
   awayTeam: { id: 'arg', name: 'Argentine', shortName: 'ARG', countryCode: 'ARG' },
@@ -151,6 +181,16 @@ const worldCupFinal = makeMatch({
 });
 if (worldCupContext.getMatchMultiplier(worldCupFinal) !== 5) {
   failures.push(`World Cup final must be x5, got x${worldCupContext.getMatchMultiplier(worldCupFinal)}`);
+}
+
+const franceFinal = makeMatch({
+  homeTeam: { id: 'fra', name: 'France', shortName: 'FRA', countryCode: 'FRA' },
+  awayTeam: { id: 'arg', name: 'Argentine', shortName: 'ARG', countryCode: 'ARG' },
+  stage: 'FINAL',
+  round: 'FINAL',
+});
+if (worldCupContext.getMatchMultiplier(franceFinal) !== 5) {
+  failures.push(`France World Cup final must use strongest x5, got x${worldCupContext.getMatchMultiplier(franceFinal)}`);
 }
 
 const { getApiMatchPointsMultiplier } = await import('./lib/football-data-boost-utils.mjs');
@@ -171,6 +211,30 @@ const apiFranceSemiMultiplier = getApiMatchPointsMultiplier({
 });
 if (apiFranceSemiMultiplier !== 4) failures.push(`football fetch France semi-final multiplier expected x4, got x${apiFranceSemiMultiplier}`);
 
+const apiThirdPlaceMultiplier = getApiMatchPointsMultiplier({
+  competition: { code: 'WC2026', name: 'Coupe du Monde 2026', isWorldCup2026: true },
+  match: { stage: 'THIRD_PLACE', round: 'THIRD_PLACE' },
+  homeTeam: { id: 'bra', name: 'Bresil', shortName: 'BRA', countryCode: 'BRA' },
+  awayTeam: { id: 'esp', name: 'Espagne', shortName: 'ESP', countryCode: 'ESP' },
+});
+if (apiThirdPlaceMultiplier !== 4) failures.push(`football fetch third-place multiplier expected x4, got x${apiThirdPlaceMultiplier}`);
+
+const apiFranceThirdPlaceMultiplier = getApiMatchPointsMultiplier({
+  competition: { code: 'WC2026', name: 'Coupe du Monde 2026', isWorldCup2026: true },
+  match: { stage: 'THIRD_PLACE', round: 'THIRD_PLACE' },
+  homeTeam: { id: 'fra', name: 'France', shortName: 'FRA', countryCode: 'FRA' },
+  awayTeam: { id: 'esp', name: 'Espagne', shortName: 'ESP', countryCode: 'ESP' },
+});
+if (apiFranceThirdPlaceMultiplier !== 4) failures.push(`football fetch France third-place multiplier expected x4, got x${apiFranceThirdPlaceMultiplier}`);
+
+const apiFranceFinalMultiplier = getApiMatchPointsMultiplier({
+  competition: { code: 'WC2026', name: 'Coupe du Monde 2026', isWorldCup2026: true },
+  match: { stage: 'FINAL', round: 'FINAL' },
+  homeTeam: { id: 'fra', name: 'France', shortName: 'FRA', countryCode: 'FRA' },
+  awayTeam: { id: 'arg', name: 'Argentine', shortName: 'ARG', countryCode: 'ARG' },
+});
+if (apiFranceFinalMultiplier !== 5) failures.push(`football fetch France final multiplier expected x5, got x${apiFranceFinalMultiplier}`);
+
 const apiRound32Multiplier = getApiMatchPointsMultiplier({
   competition: { code: 'WC2026', name: 'Coupe du Monde 2026', isWorldCup2026: true },
   match: { stage: 'LAST_32', round: 'LAST_32', matchday: 4 },
@@ -184,6 +248,7 @@ requireText(fetchSource, 'getApiMatchPointsMultiplier', 'football fetch central 
 forbidText(schemaSource, ['app_private_team_is_', 'psg'].join(''), 'SQL old club helper');
 forbidText(schemaSource, ['Dem', 'b'].join(''), 'SQL old flash seed');
 forbidText(schemaSource, "when stage_text like '%round of 32%' or stage_text like '%last 32%' or stage_text like '%seizieme%' then 2", 'SQL Round of 32 phase boost');
+requireText(schemaSource, "when stage_text like '%third place%' or stage_text like '%3e place%' or stage_text like '%troisieme%' then 4", 'SQL third-place boost');
 requireText(schemaSource, 'as points_multiplier', 'SQL public match RPC effective multiplier');
 requireText(debugScoringSource, 'points_multiplier_stocke', 'debug scoring stored multiplier');
 requireText(debugScoringSource, 'boost_reel', 'debug scoring effective multiplier');

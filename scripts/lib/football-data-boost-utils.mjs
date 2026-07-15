@@ -30,7 +30,7 @@ const isWorldCup2026Competition = (competition = {}) => {
 const worldCupStageMultiplier = (match = {}) => {
   const stage = normalize([match.stage, match.round, match.group, match.matchday].filter(Boolean).join(' '));
   if (stage.includes('semi') || stage.includes('demi')) return 4;
-  if (stage.includes('third place') || stage.includes('3e place') || stage.includes('troisieme')) return 3;
+  if (stage.includes('third place') || stage.includes('3e place') || stage.includes('troisieme')) return 4;
   if (stage.includes('quarter') || stage.includes('quart')) return 3;
   if (stage.includes('round of 16') || stage.includes('last 16') || stage.includes('huitieme')) return 2;
   if (stage.includes('final') || stage.includes('finale')) return 5;
