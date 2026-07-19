@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-19T20:29:38.324Z",
-  "lastDataChangedAt": "2026-07-19T20:29:38.324Z",
+  "generatedAt": "2026-07-19T22:08:01.299Z",
+  "lastDataChangedAt": "2026-07-19T22:08:01.299Z",
   "source": "football-data.org",
   "dateFrom": "2026-06-11",
   "dateTo": "2026-07-19",
@@ -3737,11 +3737,10 @@
         "countryCode": "ARG"
       },
       "kickoff": "2026-07-19T19:00:00Z",
-      "status": "live",
-      "homeScore": 0,
-      "awayScore": 0,
-      "scoreKind": "liveRegularRunning",
-      "scoreSource": "football-data.score.fullTime",
+      "status": "finished",
+      "scoreKind": "ambiguousAfterRegularTime",
+      "scoreSource": null,
+      "scoreWarning": "football-data.org did not provide score.regularTime for a EXTRA_TIME match; scoring score left empty.",
       "minute": null,
       "matchday": null,
       "stage": "FINAL",
@@ -3751,7 +3750,7 @@
       "sourceCompetitionId": "WC",
       "pointsMultiplier": 5,
       "source": "football-data.org",
-      "lastUpdated": "2026-07-19T20:29:25Z"
+      "lastUpdated": "2026-07-19T22:07:40Z"
     }
   ]
 }
