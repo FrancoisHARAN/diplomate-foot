@@ -1,6 +1,7 @@
 import { mockMatches } from '../data/mockMatches';
 import { mockPlayers } from '../data/mockPlayers';
 import { mockPredictions } from '../data/mockPredictions';
+import { WORLD_CUP_CHAMPION_CODE } from '../config/worldCupWinnerPredictions';
 import { isSupabaseConfigured, supabaseRpc } from '../lib/supabaseClient';
 import type { ExactPredictionHighlight, FlashChallenge, FlashOption, FlashPrediction, Match, Player, Prediction, PredictionResultType, PublicFlashPrediction, PublicMatchPrediction, PublicPlayerProfile, PublicPrediction, Standing, Team, WorldCupWinnerPrediction } from '../types';
 import { canEditPrediction } from './date';
@@ -10,7 +11,7 @@ import { sortLeaderboardEntries } from './leaderboard';
 import { applyMatchMultiplier, calculatePredictionPoints, calculatePredictionPointsForMatch, getPredictionResultTypeForMatch, isMatchFinal } from './points';
 import { isPredictionPublic } from './predictionVisibility';
 import { shouldShowMatchInApp } from './worldCupFilters';
-import { getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
+import { calculateWorldCupWinnerPredictionPoints, getWorldCupWinnerCountryName, isWorldCupTopThreeLocked, validateWorldCupWinnerPredictionCodes } from './worldCupWinnerPredictions';
 
 export const COMPETITION_STORAGE_NAMESPACE = 'diplomate.worldCup2026';
 
@@ -895,7 +896,11 @@ export const getUserPointsMock = (matches: Match[] = mockMatches): number => {
   const base = mockPlayers.find((entry) => samePlayerId(entry.id, player.id))?.points ?? 0;
   const dynamic = calculateFinishedStats(player.id, getStoredPredictions(), matches).points;
   const flash = calculateResolvedFlashStats(player.id).points;
-  return Math.max(base, dynamic) + flash;
+  const winnerPoints = calculateWorldCupWinnerPredictionPoints(
+    getWorldCupWinnerPredictionForPlayer(player.id),
+    WORLD_CUP_CHAMPION_CODE,
+  );
+  return Math.max(base, dynamic) + flash + winnerPoints;
 };
 
 export const getUserRankMock = (matches: Match[] = mockMatches): number | null => {
@@ -990,6 +995,10 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
     .map((player) => {
       const computed = calculateFinishedStats(player.id, predictions, matches);
       const flash = calculateResolvedFlashStats(player.id);
+      const winnerPoints = calculateWorldCupWinnerPredictionPoints(
+        getWorldCupWinnerPredictionForPlayer(player.id),
+        WORLD_CUP_CHAMPION_CODE,
+      );
       const firstPredictionAt = [computed.firstPredictionAt, flash.firstPredictionAt, player.firstPredictionAt]
         .filter(Boolean)
         .sort((a, b) => new Date(a as string).getTime() - new Date(b as string).getTime())[0] ?? null;
@@ -998,7 +1007,7 @@ export const buildStandings = (players: Player[], predictions: Prediction[], mat
         playerId: player.id,
         nickname: player.nickname,
         avatarUrl: getPlayerAvatarUrl(player.id) ?? player.avatarUrl,
-        points: Math.max(player.points, computed.points) + flash.points,
+        points: Math.max(player.points, computed.points) + flash.points + winnerPoints,
         exactScores: Math.max(player.exactScores, computed.exactScores),
         twoPointResults: Math.max(player.twoPointResults ?? 0, computed.twoPointResults),
         correctResults: Math.max(player.correctResults, computed.correctResults),

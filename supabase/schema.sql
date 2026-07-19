@@ -800,6 +800,89 @@ as $$
   end;
 $$;
 
+create or replace function public.app_private_world_cup_winner_prediction_points(
+  p_first_choice_code text,
+  p_second_choice_code text,
+  p_third_choice_code text,
+  p_champion_code text
+)
+returns int
+language sql
+immutable
+as $$
+  select case
+    when upper(trim(coalesce(p_champion_code, ''))) = '' then 0
+    when upper(trim(coalesce(p_first_choice_code, ''))) = upper(trim(coalesce(p_champion_code, ''))) then 20
+    when upper(trim(coalesce(p_second_choice_code, ''))) = upper(trim(coalesce(p_champion_code, ''))) then 15
+    when upper(trim(coalesce(p_third_choice_code, ''))) = upper(trim(coalesce(p_champion_code, ''))) then 10
+    else 0
+  end;
+$$;
+
+create or replace function public.app_admin_set_world_cup_champion(p_champion_code text)
+returns jsonb
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_champion text := upper(trim(coalesce(p_champion_code, '')));
+  v_existing text;
+  v_resolved_at timestamptz;
+begin
+  if v_champion = '' or public.app_private_world_cup_country_name(v_champion) = v_champion then
+    raise exception 'Code champion Coupe du Monde invalide';
+  end if;
+
+  select upper(trim(value_text)), coalesce(value_timestamptz, updated_at)
+  into v_existing, v_resolved_at
+  from public.app_rpc_config
+  where key = 'world_cup_champion_code';
+
+  if v_existing is not null and v_existing <> v_champion then
+    raise exception 'Champion deja defini sur %. Effectuer le rollback explicite avant de le remplacer.', v_existing;
+  end if;
+
+  if v_existing = v_champion then
+    return jsonb_build_object(
+      'champion_code', v_champion,
+      'champion_name', public.app_private_world_cup_country_name(v_champion),
+      'resolved_at', v_resolved_at,
+      'changed', false
+    );
+  end if;
+
+  insert into public.app_rpc_config (key, value_text, value_timestamptz, updated_at)
+  values ('world_cup_champion_code', v_champion, now(), now())
+  returning value_timestamptz into v_resolved_at;
+
+  return jsonb_build_object(
+    'champion_code', v_champion,
+    'champion_name', public.app_private_world_cup_country_name(v_champion),
+    'resolved_at', v_resolved_at,
+    'changed', true
+  );
+end;
+$$;
+
+create or replace view public.app_rpc_world_cup_winner_scored_predictions as
+select
+  wp.id,
+  wp.player_id,
+  upper(trim(c.value_text)) as champion_code,
+  coalesce(c.value_timestamptz, c.updated_at) as resolved_at,
+  public.app_private_world_cup_winner_prediction_points(
+    wp.first_choice_code,
+    wp.second_choice_code,
+    wp.third_choice_code,
+    c.value_text
+  ) as points
+from public.app_rpc_world_cup_winner_predictions wp
+join public.app_rpc_config c
+  on c.key = 'world_cup_champion_code'
+ and nullif(trim(c.value_text), '') is not null
+where public.app_private_is_after_scoring_epoch(coalesce(c.value_timestamptz, c.updated_at));
+
 create or replace view public.app_rpc_flash_scored_predictions as
 select
   fp.id,
@@ -843,7 +926,7 @@ from (
     p.nickname,
     p.display_name,
     p.avatar_url,
-    (coalesce(match_stats.points, 0) + coalesce(flash_stats.points, 0))::int as points,
+    (coalesce(match_stats.points, 0) + coalesce(flash_stats.points, 0) + coalesce(winner_stats.points, 0))::int as points,
     coalesce(match_stats.exact_scores, 0)::int as exact_scores,
     coalesce(match_stats.two_point_results, 0)::int as two_point_results,
     coalesce(match_stats.one_point_results, 0)::int as one_point_results,
@@ -873,6 +956,11 @@ from (
     from public.app_rpc_flash_scored_predictions fsp
     where fsp.player_id = p.id
   ) flash_stats on true
+  left join lateral (
+    select coalesce(sum(wsp.points), 0)::int as points
+    from public.app_rpc_world_cup_winner_scored_predictions wsp
+    where wsp.player_id = p.id
+  ) winner_stats on true
 ) ranked
 order by rank asc, ranked.display_name asc;
 
@@ -1533,10 +1621,22 @@ as $$
     where ch.status = 'resolved'
       and public.app_private_is_after_scoring_epoch(coalesce(ch.updated_at, fsp.updated_at))
   ),
+  winner_events as (
+    select
+      wsp.player_id,
+      date_trunc('day', wsp.resolved_at)::date as event_day,
+      coalesce(wsp.points, 0)::int as points,
+      0::int as exact_scores,
+      0::int as two_point_results,
+      null::timestamptz as first_prediction_at
+    from public.app_rpc_world_cup_winner_scored_predictions wsp
+  ),
   scoring_events as (
     select * from match_events
     union all
     select * from flash_events
+    union all
+    select * from winner_events
   ),
   first_scoring as (
     select min(event_day) as first_day
@@ -2258,9 +2358,12 @@ revoke all on function public.app_private_player_state(uuid, uuid) from public, 
 revoke all on function public.app_private_save_prediction(uuid, text, int, int) from public, anon, authenticated;
 revoke all on function public.app_create_weekly_leaderboard_snapshot() from public, anon, authenticated;
 revoke all on function public.app_private_world_cup_country_name(text) from public, anon, authenticated;
+revoke all on function public.app_private_world_cup_winner_prediction_points(text, text, text, text) from public, anon, authenticated;
+revoke all on function public.app_admin_set_world_cup_champion(text) from public, anon, authenticated;
 revoke all on function public.app_private_flash_options_json(uuid) from public, anon, authenticated;
 revoke all on function public.app_private_flash_challenge_json(uuid) from public, anon, authenticated;
 revoke all on function public.app_save_prediction(uuid, text, int, int, text) from public, anon, authenticated;
+revoke all on public.app_rpc_world_cup_winner_scored_predictions from public, anon, authenticated;
 
 grant execute on function public.app_login_player(text, text) to anon;
 grant execute on function public.app_get_player_state(uuid) to anon;

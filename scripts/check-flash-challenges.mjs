@@ -96,10 +96,10 @@ globalThis.flashMatchesPredictionFilter = flashMatchesPredictionFilter;`,
   flashContext,
 );
 
-const openFlash = { ...challenge, status: 'open', closesAt: '2026-06-01T12:00:00.000Z' };
-const closedFlash = { ...challenge, status: 'closed', closesAt: '2026-05-31T12:00:00.000Z' };
-const resolvedWonFlash = { ...challenge, status: 'resolved', closesAt: '2026-05-31T12:00:00.000Z', resultOptionId: 'yes' };
-const resolvedLostFlash = { ...challenge, status: 'resolved', closesAt: '2026-05-31T12:00:00.000Z', resultOptionId: 'no' };
+const openFlash = { ...challenge, status: 'open', closesAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() };
+const closedFlash = { ...challenge, status: 'closed', closesAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() };
+const resolvedWonFlash = { ...closedFlash, status: 'resolved', resultOptionId: 'yes' };
+const resolvedLostFlash = { ...closedFlash, status: 'resolved', resultOptionId: 'no' };
 const yesPrediction = { optionId: 'yes' };
 
 if (flashContext.getShortFlashOptionLabel({ label: 'Oui, il marque', pointsIfCorrect: 5 }) !== 'Oui — +5 pts') {

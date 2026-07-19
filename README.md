@@ -377,6 +377,16 @@ Regle de points prevue pour la fin de competition:
 - champion place en 3e choix: 10 points;
 - champion absent du top 3: 0 point.
 
+Le champion est enregistre une seule fois dans `app_rpc_config`. Le classement additionne dynamiquement les points des matchs, des flashs et du Top 3, sans modifier les statistiques de scores exacts, bons ecarts ou bons gagnants.
+
+Pour declarer l'Espagne championne depuis Supabase SQL Editor:
+
+```sql
+select public.app_admin_set_world_cup_champion('ESP');
+```
+
+La commande est idempotente: la relancer avec `ESP` ne double pas les points et ne change pas la date de resolution.
+
 La date limite est centralisee dans `WORLD_CUP_TOP_THREE_LOCKS_AT`, dans `src/config/worldCupWinnerPredictions.ts`. La valeur temporaire actuelle est:
 
 ```txt

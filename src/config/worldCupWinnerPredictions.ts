@@ -8,6 +8,7 @@ export interface WorldCupWinnerCountry {
 }
 
 export const WORLD_CUP_TOP_THREE_LOCKS_AT = '2026-06-17T00:00:00Z';
+export const WORLD_CUP_CHAMPION_CODE = 'ESP';
 
 export const WORLD_CUP_WINNER_QUALIFIED_COUNTRIES: Array<{ code: string; group: string }> = [
   { code: 'MEX', group: 'A' },
